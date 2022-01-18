@@ -107,38 +107,73 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                 itemCount: itemlist.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ClipRect(
-                    child: Banner(
-                      location: BannerLocation.topStart,
-                      message: '10% Extra',
-                      child: InkWell(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    "You've selected ₹ ${itemlist[index]}.")),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: const Color(0xFFfeecd4),
-                            border: Border.all(color: Colors.black87, width: 1),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Center(
-                            child: Text(
-                              " ₹ ${itemlist[index].toString()}",
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w400),
+                    child: itemlist[index] > 200
+                        ? Banner(
+                            location: BannerLocation.topStart,
+                            message: itemlist[index] <= 500
+                                ? '5% Extra'
+                                : itemlist[index] <= 4000
+                                    ? '10% Extra'
+                                    : '15% Extra',
+                            child: InkWell(
+                              onTap: () {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "You've selected ₹ ${itemlist[index]}.")),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.rectangle,
+                                  color: const Color(0xFFfeecd4),
+                                  border: Border.all(
+                                      color: Colors.black87, width: 1),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    " ₹ ${itemlist[index].toString()}",
+                                    style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : InkWell(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        "You've selected ₹ ${itemlist[index]}.")),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: const Color(0xFFfeecd4),
+                                border:
+                                    Border.all(color: Colors.black87, width: 1),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  " ₹ ${itemlist[index].toString()}",
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
                   );
                 }),
           ),

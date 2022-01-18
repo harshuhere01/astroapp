@@ -1,6 +1,5 @@
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Widgets/user_listtile_design.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -50,7 +49,6 @@ class ChatPage extends StatelessWidget {
     showDialog<bool>(
       context: context,
       barrierDismissible: true,
-      // user must tap button!
       builder: (
         BuildContext context,
       ) {
@@ -138,108 +136,6 @@ class ChatPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  void showUserDetailsDialogue(
-    context,
-    String photourl,
-    String username,
-    String usernamedetails,
-    String email,
-    String emailid,
-    String number,
-    String contactnumber,
-    String location,
-    String locationdetails,
-    String gender,
-    String gendertype,
-    String lusername,
-    String lusernamedetails,
-    String lpsd,
-    String lpsddetail,
-  ) {
-    showCupertinoDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (_) => AlertDialog(
-        contentPadding: const EdgeInsets.only(),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Center(
-          child: Text(
-            "User detail",
-          ),
-        ),
-        titleTextStyle: const TextStyle(
-            color: Colors.black, fontSize: 20, fontWeight: FontWeight.w300),
-        content: Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-          decoration: const BoxDecoration(
-            color: Colors.white70,
-            borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20)),
-          ),
-          height: 350,
-          // width: MediaQuery.of(context).size.width,
-          child: Stack(
-            children: [
-              Positioned(
-                  right: 0,
-                  top: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  )),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage: NetworkImage(photourl),
-                    backgroundColor: Colors.transparent,
-                  ),
-                  const Divider(
-                    height: 5,
-                    color: Colors.black,
-                  ),
-                  build_user_details(username, usernamedetails),
-                  build_user_details(email, emailid),
-                  build_user_details(number, contactnumber),
-                  build_user_details(location, locationdetails),
-                  build_user_details(gender, gendertype),
-                  build_user_details(lusername, lusernamedetails),
-                  build_user_details(lpsd, lpsddetail),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Row build_user_details(String fieldname, String fielddetails) {
-    return Row(
-      children: [
-        Text(
-          fieldname,
-          style: const TextStyle(
-              color: Colors.black, fontSize: 15, fontWeight: FontWeight.w400),
-        ),
-        Flexible(
-          child: Text(
-            fielddetails,
-            style: const TextStyle(
-                // overflow: TextOverflow.visible,
-                color: Colors.black87,
-                fontSize: 12,
-                fontWeight: FontWeight.w300),
-          ),
-        ),
-      ],
     );
   }
 }

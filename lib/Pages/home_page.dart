@@ -52,13 +52,21 @@ class _HomePageState extends State<HomePage>
       appBar: AppBar(
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Tepped Search")));
+              },
               icon: const Icon(
                 Icons.search,
                 color: Colors.black,
               )),
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Tepped Settings")));
+              },
               icon: const Icon(
                 Icons.settings,
                 color: Colors.black,
