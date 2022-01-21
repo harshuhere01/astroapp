@@ -16,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // loginUser();
     navigatetoDashBoard();
   }
 
@@ -65,4 +66,6 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false);
     });
   }
+
+  // void loginUser() {}
 }
