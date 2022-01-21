@@ -48,7 +48,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("asset/background.jpg"),
+            image: AssetImage("asset/placeholder.png"),
             fit: BoxFit.cover,
           ),
         ),

@@ -172,19 +172,29 @@ void setrazorpayamount(){
 
   Future<void> handlePaymentSuccess(PaymentSuccessResponse response) async {
               if(response.paymentId != null || response.paymentId != ""){
-                addCashtoAPI();
+                await createOrder().whenComplete(() => addCashtoAPI());
+
               }
+
+              // if(response.signature != null || response.signature != ""){
+              //
+              //   var sing=response.orderId;
+              //   var sing=response.orderId;
+              //
+              // }
+
+
   }
 
     Future<void> addCashtoAPI() async {
 
-      var key = "http://192.168.1.40:3000/payments/add_money";
+      var key = "http://192.168.1.2:3000/payments/add_money";
       final uri = Uri.parse(key);
-      final headers = {'Content-Type': 'application/json'};
+      final headers = {'Content-Type': 'application/json',};
       Map<String, dynamic> body = {
         "u_name":"naresh Kumar",
         "u_mobile":"9940471372",
-        "amount":"100"
+        "amount":razorpayAmount,
       };
       String jsonBody = json.encode(body);
       final encoding = Encoding.getByName('utf-8');
@@ -199,7 +209,7 @@ void setrazorpayamount(){
 
       int statusCode = response.statusCode;
       String responseBody = response.body;
-      var res = jsonDecode(responseBody);
+      // var res = jsonDecode(responseBody);
       if (statusCode == 200) {
         print(responseBody);
 
@@ -209,6 +219,8 @@ void setrazorpayamount(){
         Fluttertoast.showToast(msg: response.statusCode.toString());
       }
     }
+
+
 
 
   void handlePaymentError(PaymentFailureResponse response) {
@@ -224,25 +236,19 @@ void setrazorpayamount(){
 
   }
 
-  void paymoney(Map data) async{
-    final String addmoneyAPI = "http://localhost:3000/payments/add_money";
 
-    var result = await http.post(Uri.parse(addmoneyAPI));
-    var data = json.decode(result.body)['results'];
-
-  }
   void openCheckout() async {
 
 
     var options = {
       "key": "rzp_test_He4GbelHZ5l3RD",
-      "amount": "$razorpayAmount", // Convert Paisa to Rupees
+      "amount": "50000", // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
       "timeout": "180",
       "theme.color": "#1B4670",
       "currency": "INR",
-      "prefill": {"contact": "", "email": ""},
+      "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
       "external": {
         "wallets": ["paytm"]
       }
@@ -253,8 +259,46 @@ void setrazorpayamount(){
     try {
       razorpay.open(options);
 
+
     } catch (e) {
       debugPrint('Error: e');
     }
+  }
+
+  Future<void> createOrder() async{
+    // String key = "https://api.razorpay.com/v1/orders";
+
+    var key = "https://api.razorpay.com/v1/orders";
+    final uri = Uri.parse(key);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "amount":50000,
+      "currency":"INR",
+      "receipt":"order_rcptid_11"
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    // var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      print(responseBody);
+
+      Fluttertoast.showToast(msg: "got Succesfully");
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+
+
   }
 }
