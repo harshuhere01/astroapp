@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:astro/Constant/api_constant.dart';
+import 'package:astro/Constant/payment_variables.dart';
 import 'package:astro/Widgets/simple_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,7 +16,6 @@ class PaymentInfo extends StatefulWidget {
 
    String? selectedAmount;
 
-
   @override
   _PaymentInfoState createState() => _PaymentInfoState();
 }
@@ -25,11 +26,14 @@ class _PaymentInfoState extends State<PaymentInfo> {
   double? gstamount;
   double? totalpayableamount;
   String? razorpayAmount;
+  int? apiAmount;
 
   addGSTtoAmount(){
 
     var cgstamount = double.parse("${widget.selectedAmount}")/18;
-    var ctotalpayableamount = double.parse("${widget.selectedAmount}")+ cgstamount;
+    var ctotalpayableamount = double.parse("${widget.selectedAmount}");
+
+    // var ctotalpayableamount = double.parse("${widget.selectedAmount}")+ cgstamount;
 
 setState(() {
   gstamount = double.parse("$cgstamount");
@@ -37,14 +41,16 @@ setState(() {
 });
 setrazorpayamount();
   }
-void setrazorpayamount(){
+  void setrazorpayamount(){
     var tempvalue = totalpayableamount?.toStringAsFixed(2);
     var razorpayconvert = double.parse("$tempvalue") * 100 ;
+    apiAmount = razorpayconvert.toInt();
     setState(() {
       razorpayAmount = razorpayconvert.toString();
+
     });
 }
-@override
+  @override
   void initState() {
   super.initState();
   addGSTtoAmount();
@@ -144,8 +150,9 @@ void setrazorpayamount(){
                 ),
               ),
             ),
-            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: (){
-              openCheckout();
+            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: ()async{
+              await addCashtoAPI();
+
             },)
           ],
         ));
@@ -170,31 +177,17 @@ void setrazorpayamount(){
     );
   }
 
-  Future<void> handlePaymentSuccess(PaymentSuccessResponse response) async {
-              if(response.paymentId != null || response.paymentId != ""){
-                await createOrder().whenComplete(() => addCashtoAPI());
-
-              }
-
-              // if(response.signature != null || response.signature != ""){
-              //
-              //   var sing=response.orderId;
-              //   var sing=response.orderId;
-              //
-              // }
 
 
-  }
+  Future<void> addCashtoAPI() async {
 
-    Future<void> addCashtoAPI() async {
 
-      var key = "http://192.168.1.2:3000/payments/add_money";
-      final uri = Uri.parse(key);
+      final uri = Uri.parse(APIConstants.BaseURL + APIConstants.AddMoneyURL  );
       final headers = {'Content-Type': 'application/json',};
       Map<String, dynamic> body = {
         "u_name":"naresh Kumar",
         "u_mobile":"9940471372",
-        "amount":razorpayAmount,
+        "amount":"$apiAmount"
       };
       String jsonBody = json.encode(body);
       final encoding = Encoding.getByName('utf-8');
@@ -209,19 +202,62 @@ void setrazorpayamount(){
 
       int statusCode = response.statusCode;
       String responseBody = response.body;
-      // var res = jsonDecode(responseBody);
+      var res = jsonDecode(responseBody);
       if (statusCode == 200) {
-        print(responseBody);
-
-        Fluttertoast.showToast(msg: "Sended Succesfully");
+        Fluttertoast.showToast(msg: "Order Id = ${res["order_ID"]}");
+        setState(() {
+          PaymentVariables.order_id = res["order_ID"];
+        });
+        openCheckout("${res["order_ID"]}");
       }
       else{
         Fluttertoast.showToast(msg: response.statusCode.toString());
       }
     }
 
+  Future<void> verifyPayment(String paymentID) async {
 
 
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.VerifyPaymentURL  );
+    final headers = {'Content-Type': 'application/json',};
+    Map<String, dynamic> body = {
+      "u_name":"naresh Kumar",
+      "u_mobile":"9940471372",
+      "amount":"$apiAmount",
+      "order_id":"order_IlDcxFB4EMmFmZ",
+      "razorpay_payment_id":paymentID,
+      "razorpay_signature":"5db7a9ded10af686c2553318b06fc891e30bf0889bc6f02b500d3b10a05b5d27"
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    // var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      Fluttertoast.showToast(msg: responseBody);
+
+
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
+
+  Future<void> handlePaymentSuccess(PaymentSuccessResponse response) async {
+    if(response.paymentId != null || response.paymentId != ""){
+      PaymentVariables.payment_id = response.paymentId;
+      verifyPayment("${response.paymentId}");
+    }
+  }
 
   void handlePaymentError(PaymentFailureResponse response) {
     Fluttertoast.showToast(
@@ -229,20 +265,17 @@ void setrazorpayamount(){
         toastLength: Toast.LENGTH_SHORT);
     print("------------>>>>>>>..error"+"${response.message}");
 
-
   }
 
   void handleExternalWallet(ExternalWalletResponse response) {
 
   }
 
-
-  void openCheckout() async {
-
+  void openCheckout(String orderID) async {
 
     var options = {
       "key": "rzp_test_He4GbelHZ5l3RD",
-      "amount": "50000", // Convert Paisa to Rupees
+      "amount": "$razorpayAmount", // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
       "timeout": "180",
@@ -256,12 +289,11 @@ void setrazorpayamount(){
 
 
 
+
     try {
       razorpay.open(options);
-
-
     } catch (e) {
-      debugPrint('Error: e');
+      debugPrint('Error: $e');
     }
   }
 

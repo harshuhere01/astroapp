@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -17,6 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // loginUser();
+
     navigatetoDashBoard();
   }
 
@@ -34,6 +36,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    CommonConstants.device_width= MediaQuery.of(context).size.width;
+    CommonConstants.device_height= MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -1,3 +1,4 @@
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Widgets/rating_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -52,8 +53,8 @@ class UserListTile extends StatelessWidget {
                     child: ClipOval(
                       child: FadeInImage(
                         fit: BoxFit.cover,
-                        width: 75,
-                        height: 75,
+                        width: CommonConstants.device_width/5.5,
+                        height: CommonConstants.device_height/9.2,
                         placeholder: const AssetImage("asset/placeholder.png"),
                         image: NetworkImage("$imageURL"),
                       ),
@@ -137,8 +138,8 @@ class UserListTile extends StatelessWidget {
                       Column(
                         children: [
                           SizedBox(
-                            height: 40,
-                            width: 90,
+                            height: CommonConstants.device_height/20,
+                            width: CommonConstants.device_width/5,
                             child: TextButton(
                               child: const Text("Call",
                                   style: TextStyle(fontSize: 14)),
