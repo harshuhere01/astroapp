@@ -58,7 +58,7 @@ setrazorpayamount();
   razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
   razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
   razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
-generateOrderID();
+
   }
 
   @override
@@ -68,8 +68,7 @@ generateOrderID();
     razorpay.clear();
   }
 
-  void generateOrderID() {
-  }
+  // for generate orderID From Frontend
   Future<String> generateOrderId(String key, String secret,int amount) async{
     var authn = 'Basic ' + base64Encode(utf8.encode('$key:$secret'));
 
@@ -169,9 +168,9 @@ generateOrderID();
                 ),
               ),
             ),
-            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: (){
-              // await addCashtoAPI();
-               openCheckout();
+            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: ()async{
+              await addMoneyAPI();
+               // openCheckout();
 
             },)
           ],
@@ -197,7 +196,36 @@ generateOrderID();
     );
   }
 
+  Future<void> addMoneyAPI() async {
 
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.AddMoneyURL  );
+    final headers = {'Content-Type': 'application/json',};
+    Map<String, dynamic> body = {
+      "u_name":"naresh Kumar",
+      "u_mobile":"9940471372",
+      "amount":apiAmount
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      Fluttertoast.showToast(msg: responseBody);
+      openCheckout("${res['order_ID']}");
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
 
   Future<void> verifyPayment(String orderID,String paymentID,String signature) async {
 
@@ -251,15 +279,15 @@ generateOrderID();
 
   }
 
-  void openCheckout( ) async {
-    var id = await generateOrderId("rzp_test_Feaa1lopTSehMR","8zCaOyWVVpXmvSueI10woby6",apiAmount!);
+  void openCheckout( String OrderID) async {
+    // var id = await generateOrderId("rzp_test_Feaa1lopTSehMR","8zCaOyWVVpXmvSueI10woby6",apiAmount!);
     var options = {
       "key": "rzp_test_Feaa1lopTSehMR",
       "amount": "$razorpayAmount", // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
       "timeout": "180",
-      'order_id': id,
+      'order_id': OrderID,
       "theme.color": "#1B4670",
       "currency": "INR",
       "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
