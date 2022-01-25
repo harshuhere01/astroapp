@@ -31,9 +31,9 @@ class _PaymentInfoState extends State<PaymentInfo> {
   addGSTtoAmount(){
 
     var cgstamount = double.parse("${widget.selectedAmount}")/18;
-    var ctotalpayableamount = double.parse("${widget.selectedAmount}");
+    // var ctotalpayableamount = double.parse("${widget.selectedAmount}");
 
-    // var ctotalpayableamount = double.parse("${widget.selectedAmount}")+ cgstamount;
+    var ctotalpayableamount = double.parse("${widget.selectedAmount}")+ cgstamount;
 
 setState(() {
   gstamount = double.parse("$cgstamount");
@@ -58,7 +58,7 @@ setrazorpayamount();
   razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
   razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
   razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
-
+generateOrderID();
   }
 
   @override
@@ -66,6 +66,25 @@ setrazorpayamount();
     // TODO: implement dispose
     super.dispose();
     razorpay.clear();
+  }
+
+  void generateOrderID() {
+  }
+  Future<String> generateOrderId(String key, String secret,int amount) async{
+    var authn = 'Basic ' + base64Encode(utf8.encode('$key:$secret'));
+
+    var headers = {
+      'content-type': 'application/json',
+      'Authorization': authn,
+    };
+
+    var data = '{ "amount": $amount, "currency": "INR", "receipt": "receipt#R1", "payment_capture": 1 }'; // as per my experience the receipt doesn't play any role in helping you generate a certain pattern in your Order ID!!
+
+    var res = await http.post(Uri.parse('https://api.razorpay.com/v1/orders'), headers: headers, body: data);
+    if (res.statusCode != 200) throw Exception('http.post error: statusCode= ${res.statusCode}');
+    print('ORDER ID response => ${res.body}');
+
+    return json.decode(res.body)['id'].toString();
   }
 
   @override
@@ -150,8 +169,9 @@ setrazorpayamount();
                 ),
               ),
             ),
-            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: ()async{
-              await addCashtoAPI();
+            BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: (){
+              // await addCashtoAPI();
+               openCheckout();
 
             },)
           ],
@@ -179,44 +199,7 @@ setrazorpayamount();
 
 
 
-  Future<void> addCashtoAPI() async {
-
-
-      final uri = Uri.parse(APIConstants.BaseURL + APIConstants.AddMoneyURL  );
-      final headers = {'Content-Type': 'application/json',};
-      Map<String, dynamic> body = {
-        "u_name":"naresh Kumar",
-        "u_mobile":"9940471372",
-        "amount":"$apiAmount"
-      };
-      String jsonBody = json.encode(body);
-      final encoding = Encoding.getByName('utf-8');
-
-      Response response = await post(
-        uri,
-        headers: headers,
-        body: jsonBody,
-        encoding: encoding,
-
-      );
-
-      int statusCode = response.statusCode;
-      String responseBody = response.body;
-      var res = jsonDecode(responseBody);
-      if (statusCode == 200) {
-        Fluttertoast.showToast(msg: "Order Id = ${res["order_ID"]}");
-        setState(() {
-          PaymentVariables.order_id = res["order_ID"];
-        });
-        openCheckout("${res["order_ID"]}");
-      }
-      else{
-        Fluttertoast.showToast(msg: response.statusCode.toString());
-      }
-    }
-
-  Future<void> verifyPayment(String paymentID) async {
-
+  Future<void> verifyPayment(String orderID,String paymentID,String signature) async {
 
     final uri = Uri.parse(APIConstants.BaseURL + APIConstants.VerifyPaymentURL  );
     final headers = {'Content-Type': 'application/json',};
@@ -224,9 +207,9 @@ setrazorpayamount();
       "u_name":"naresh Kumar",
       "u_mobile":"9940471372",
       "amount":"$apiAmount",
-      "order_id":"order_IlDcxFB4EMmFmZ",
+      "order_id":orderID,
       "razorpay_payment_id":paymentID,
-      "razorpay_signature":"5db7a9ded10af686c2553318b06fc891e30bf0889bc6f02b500d3b10a05b5d27"
+      "razorpay_signature":signature,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -236,7 +219,6 @@ setrazorpayamount();
       headers: headers,
       body: jsonBody,
       encoding: encoding,
-
     );
 
     int statusCode = response.statusCode;
@@ -244,8 +226,6 @@ setrazorpayamount();
     // var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       Fluttertoast.showToast(msg: responseBody);
-
-
     }
     else{
       Fluttertoast.showToast(msg: response.statusCode.toString());
@@ -255,7 +235,7 @@ setrazorpayamount();
   Future<void> handlePaymentSuccess(PaymentSuccessResponse response) async {
     if(response.paymentId != null || response.paymentId != ""){
       PaymentVariables.payment_id = response.paymentId;
-      verifyPayment("${response.paymentId}");
+      verifyPayment("${response.orderId}","${response.paymentId}","${response.signature}");
     }
   }
 
@@ -271,14 +251,15 @@ setrazorpayamount();
 
   }
 
-  void openCheckout(String orderID) async {
-
+  void openCheckout( ) async {
+    var id = await generateOrderId("rzp_test_Feaa1lopTSehMR","8zCaOyWVVpXmvSueI10woby6",apiAmount!);
     var options = {
-      "key": "rzp_test_He4GbelHZ5l3RD",
+      "key": "rzp_test_Feaa1lopTSehMR",
       "amount": "$razorpayAmount", // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
       "timeout": "180",
+      'order_id': id,
       "theme.color": "#1B4670",
       "currency": "INR",
       "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
@@ -286,6 +267,19 @@ setrazorpayamount();
         "wallets": ["paytm"]
       }
     };
+
+    // var option = {
+    //   'key': 'rzp_test_He4GbelHZ5l3RD',
+    //   'amount': "$razorpayAmount", //in the smallest currency sub-unit.
+    //   'name': 'Astro Talk.',
+    //   'order_id': orderID, // Generate order_id using Orders API
+    //   'description': 'Fine T-Shirt',
+    //   'timeout': 60, // in seconds
+    //   'prefill': {
+    //     'contact': '9601603600',
+    //     'email': 'test@example.com'
+    //   }
+    // };
 
 
 
@@ -333,4 +327,6 @@ setrazorpayamount();
 
 
   }
+
+
 }
