@@ -20,6 +20,7 @@ class ChatPage extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           itemCount: itemlist.length,
           itemBuilder: (BuildContext context, int index) {
+            int age = itemlist[index]['dob']['age'];
             return Card(
               elevation: 5,
               child: UserListTile(
@@ -30,12 +31,21 @@ class ChatPage extends StatelessWidget {
                 experience: "Exp: 15 Years",
                 charge: "₹ 60/min",
                 totalnum: "12456",
-                waitingtime: "wait time ~ 10m",
+                age :itemlist[index]['dob']['age'],
+                waitingstatus: age > 60 ? "" : age < 40 ? "wait time - 4m" : "",
+                btncolor:age > 60 ? MaterialStateProperty.all<Color>(
+                    Colors.grey) :age < 40 ? MaterialStateProperty.all<Color>(
+                    Colors.red) : MaterialStateProperty.all<Color>(
+                    Colors.green),
+                btnbordercolor: age > 60 ?
+                    Colors.grey :age < 40 ?
+                    Colors.red :
+                    Colors.green,
                 onTapImage: () {},
                 onTapOfTile: () {},
                 callbtnclick: () {
-                  _showCallClickDialog(context,
-                      "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${itemlist[index]['name']['first']}");
+                    _showCallClickDialog(context,
+                        "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${itemlist[index]['name']['first']}");
                 },
               ),
             );

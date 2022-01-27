@@ -31,7 +31,12 @@ class CallPage extends StatelessWidget {
                   experience: "Exp: 15 Years",
                   charge: "₹ 60/min",
                   totalnum: "12456",
-                  waitingtime: "wait time ~ 10m",
+                  btncolor: MaterialStateProperty.all<Color>(
+                      Colors.grey),
+                  btnbordercolor: itemlist[index]['gender'] == "male"?
+                  Colors.grey :
+                  Colors.green,
+                  waitingstatus: "Available",
                   onTapImage: () {},
                   onTapOfTile: () {},
                   callbtnclick: () {},

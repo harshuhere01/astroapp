@@ -12,8 +12,9 @@ class UserListTile extends StatelessWidget {
       this.languages,
       this.onTapImage,
       this.experience,
-      this.charge,
-      this.waitingtime,
+        this.age,
+      this.charge,this.btncolor,
+      this.waitingstatus,required this.btnbordercolor,
       this.callbtnclick,
       this.onTapOfTile})
       : super(key: key);
@@ -24,7 +25,10 @@ class UserListTile extends StatelessWidget {
   String? charge;
   String? languages;
   String? experience;
-  String? waitingtime;
+  String? waitingstatus;
+  MaterialStateProperty<Color>? btncolor;
+  Color btnbordercolor;
+  int? age;
   Function? onTapImage;
   Function? onTapOfTile;
   Function? callbtnclick;
@@ -148,22 +152,21 @@ class UserListTile extends StatelessWidget {
                                       MaterialStateProperty.all<EdgeInsets>(
                                           const EdgeInsets.all(10)),
                                   foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.red),
+                                      btncolor,
                                   shape: MaterialStateProperty.all<
                                           RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
-                                          side: const BorderSide(
-                                              color: Colors.red)))),
-                              onPressed: () {
+                                          side:  BorderSide(
+                                              color: btnbordercolor)))),
+                              onPressed:age! > 60 ? null : age! < 40 ? null : () {
                                 callbtnclick!();
                               },
                             ),
                           ),
                           Text(
-                            "$waitingtime",
+                            "$waitingstatus",
                             style: const TextStyle(
                                 color: Colors.red, fontSize: 10),
                           )

@@ -282,7 +282,7 @@ setrazorpayamount();
   void openCheckout( String OrderID) async {
     // var id = await generateOrderId("rzp_test_Feaa1lopTSehMR","8zCaOyWVVpXmvSueI10woby6",apiAmount!);
     var options = {
-      "key": "rzp_test_Feaa1lopTSehMR",
+      "key": PaymentVariables.api_key,
       "amount": "$razorpayAmount", // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
