@@ -40,6 +40,10 @@ dependencies:
   flutter_spinkit: ^5.1.0
   # for payment integration
   razorpay_flutter: ^1.2.9
+  # for agora integration
+  agora_rtc_engine:
+  permission_handler:
+  provider:
 
 dev_dependencies:
   flutter_test:
