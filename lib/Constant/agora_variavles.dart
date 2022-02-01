@@ -1,5 +1,5 @@
 class Agora{
-   static String APP_ID = "a13acf33f91445c7a5b9bba985bcf373";
-   static String Token = "006a13acf33f91445c7a5b9bba985bcf373IAAeG8WyEwfHrJXyWLfbIAintZ6VHL/1o9IHEbKuffE+u/9TQsIAAAAAEADbqsx0RdX4YQEAAQB61fhh";
-
+   static String APP_ID = "1c83168993ee4fce8c179d902889cc41";
+   static String Token = "0061c83168993ee4fce8c179d902889cc41IADe5Dc1e5F/GgZC11t9A286fbTD/XuTDTGCD7cvvOv3KbuiVPAAAAAAEADbqsx0Li76YQEAAQBBLvph";
+   static String Channel_name = "test123";
 }

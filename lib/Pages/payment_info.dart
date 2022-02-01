@@ -171,7 +171,6 @@ setrazorpayamount();
             BtnWidget(height: 45,width: 200,lable: "Pay now",ontap: ()async{
               await addMoneyAPI();
                // openCheckout();
-
             },)
           ],
         ));
@@ -201,8 +200,8 @@ setrazorpayamount();
     final uri = Uri.parse(APIConstants.BaseURL + APIConstants.AddMoneyURL  );
     final headers = {'Content-Type': 'application/json',};
     Map<String, dynamic> body = {
-      "u_name":"naresh Kumar",
-      "u_mobile":"9940471372",
+      "u_name":"test",
+      "u_mobile":"9601603600",
       "amount":apiAmount
     };
     String jsonBody = json.encode(body);
@@ -232,8 +231,8 @@ setrazorpayamount();
     final uri = Uri.parse(APIConstants.BaseURL + APIConstants.VerifyPaymentURL  );
     final headers = {'Content-Type': 'application/json',};
     Map<String, dynamic> body = {
-      "u_name":"naresh Kumar",
-      "u_mobile":"9940471372",
+      "u_name":"test",
+      "u_mobile":"9601603600",
       "amount":"$apiAmount",
       "order_id":orderID,
       "razorpay_payment_id":paymentID,
@@ -254,6 +253,38 @@ setrazorpayamount();
     // var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       Fluttertoast.showToast(msg: responseBody);
+      getWalletBalance();
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
+
+  Future<void> getWalletBalance() async {
+
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetWalletAmountURL);
+    final headers = {'Content-Type': 'application/json',};
+    Map<String, dynamic> body = {
+      "u_mobile":"9601603600"
+    };
+    String jsonBody = json.encode(body);
+    // final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      // encoding: encoding,
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      // Fluttertoast.showToast(msg: responseBody);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Wallet Amount is :- ${res["wallet_amount"]}")));
+
     }
     else{
       Fluttertoast.showToast(msg: response.statusCode.toString());
@@ -355,6 +386,8 @@ setrazorpayamount();
 
 
   }
+
+
 
 
 }

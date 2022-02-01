@@ -1,4 +1,5 @@
-import 'package:astro/Agora%20Functions/screens/home/home_model.dart';
+import 'package:astro/Agora%20Functions/Video%20Call/screens/home/home_model.dart';
+import 'package:astro/Constant/agora_variavles.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Widgets/user_listtile_design.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class ChatPage extends StatelessWidget {
                   MaterialPageRoute(builder: (builder) => AddMoneyPage()));
             }),
             _build_btn_of_dialogue("Video Call", const Color(0xFFFdd835), () {
-              homeNotifier.onJoin(context,"dinesh99799");
+              homeNotifier.onJoin(context,Agora.Channel_name);
             }),
           ],
           actionsPadding: const EdgeInsets.all(15),

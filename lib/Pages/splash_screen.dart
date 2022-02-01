@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
     var initSetting = InitializationSettings(android: androiInit, iOS: iosInit);
     fltNotification = FlutterLocalNotificationsPlugin();
     fltNotification.initialize(initSetting);
-    var androidDetails = AndroidNotificationDetails("1", "channelName",importance: Importance.max,priority: Priority.max);
+    var androidDetails = AndroidNotificationDetails("1", "channelName",importance: Importance.high,priority: Priority.high);
     var iosDetails = IOSNotificationDetails();
     var generalNotificationDetails =
     NotificationDetails(android: androidDetails, iOS: iosDetails);
