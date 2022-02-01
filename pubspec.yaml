@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.4
   fluttertoast: ^8.0.8
+  firebase_core:
   # for splashscreen
   flutter_spinkit: ^5.1.0
   # for payment integration
@@ -44,6 +45,9 @@ dependencies:
   agora_rtc_engine:
   permission_handler:
   provider:
+  # for notification
+  firebase_messaging:
+  flutter_local_notifications:
 
 dev_dependencies:
   flutter_test:

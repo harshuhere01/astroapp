@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Pages/home_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,12 +16,43 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  late FlutterLocalNotificationsPlugin fltNotification;
+
+
   @override
   void initState() {
     super.initState();
     // loginUser();
+    pushFCMtoken();
+    initMessaging();
 
     navigatetoDashBoard();
+  }
+  void pushFCMtoken() async {
+    String? token = await messaging.getToken();
+    print("The Token Is:--"+token!);
+  }
+  void initMessaging() {
+    var androiInit =
+    AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
+    var iosInit = IOSInitializationSettings();
+    var initSetting = InitializationSettings(android: androiInit, iOS: iosInit);
+    fltNotification = FlutterLocalNotificationsPlugin();
+    fltNotification.initialize(initSetting);
+    var androidDetails = AndroidNotificationDetails("1", "channelName",importance: Importance.max,priority: Priority.max);
+    var iosDetails = IOSNotificationDetails();
+    var generalNotificationDetails =
+    NotificationDetails(android: androidDetails, iOS: iosDetails);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        fltNotification.show(notification.hashCode, notification.title,
+            notification.body, generalNotificationDetails);
+      }
+    });
   }
 
   List<dynamic>? userList;
