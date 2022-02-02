@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Constant/payment_variables.dart';
+import 'package:astro/Pages/add_money_to_wallet.dart';
+import 'package:astro/Pages/home_page.dart';
 import 'package:astro/Widgets/simple_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -253,43 +255,15 @@ setrazorpayamount();
     // var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       Fluttertoast.showToast(msg: responseBody);
-      getWalletBalance();
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
     else{
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }
   }
 
-  Future<void> getWalletBalance() async {
 
-    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetWalletAmountURL);
-    final headers = {'Content-Type': 'application/json',};
-    Map<String, dynamic> body = {
-      "u_mobile":"9601603600"
-    };
-    String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      // encoding: encoding,
-    );
-
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      // Fluttertoast.showToast(msg: responseBody);
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Wallet Amount is :- ${res["wallet_amount"]}")));
-
-    }
-    else{
-      Fluttertoast.showToast(msg: response.statusCode.toString());
-    }
-  }
 
   Future<void> handlePaymentSuccess(PaymentSuccessResponse response) async {
     if(response.paymentId != null || response.paymentId != ""){

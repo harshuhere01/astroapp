@@ -5,4 +5,5 @@ class APIConstants{
   static String AddMoneyURL = 'payments/add_money';
   static String VerifyPaymentURL = 'payments/verify_payment';
   static String GetWalletAmountURL = 'wallet/get_balance';
+  static String CreateToken = 'video_chat/join_call';
 }

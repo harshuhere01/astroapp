@@ -1,7 +1,13 @@
+import 'dart:convert';
+
+import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
+import 'package:astro/Widgets/simple_button.dart';
 import 'package:astro/Widgets/tab_button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key, this.userList}) : super(key: key);
@@ -36,6 +42,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     _pageController = PageController();
+    walletBalance="";
     super.initState();
   }
 
@@ -44,6 +51,8 @@ class _HomePageState extends State<HomePage>
     _pageController.dispose();
     super.dispose();
   }
+  String? walletBalance;
+  String buttonName = "Check wallet balance";
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +90,27 @@ class _HomePageState extends State<HomePage>
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          
+          Column(
+            children: [
+              Container(
+                margin: EdgeInsets.all(10),
+                width: 200,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[600],
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    border: Border.all(color: Colors.black87.withOpacity(0.1)),
+                  ),
+
+                  padding: const EdgeInsets.all(2),
+                  child: TextButton(onPressed: ()async{
+                    await getWalletBalance();
+                  }, child: Text(buttonName,style: TextStyle(fontSize: 15,color: Colors.black,fontWeight: FontWeight.w300),),),),
+              walletBalance==null|| walletBalance==""? Container(): Text("Your wallet Balance is : ₹ $walletBalance",style: TextStyle(fontSize: 15,color: Colors.black,fontWeight: FontWeight.w300),),
+            ],
+          ),
           Container(
             height: 80,
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40),
@@ -110,26 +140,33 @@ class _HomePageState extends State<HomePage>
               ],
             ),
           ),
+
           Expanded(
             child: PageView(
               onPageChanged: (int page) {
                 setState(() {
                   _selectedPage = page;
+                  buttonName = "Check wallet balance";
+                  walletBalance="";
                 });
               },
               controller: _pageController,
               children: [
                 widget.userList!.isEmpty
-                    ? const CircularProgressIndicator(
-                        color: Colors.black,
-                      )
+                    ? const Center(
+                      child:  CircularProgressIndicator(
+                          color: Colors.black,
+                        ),
+                    )
                     : ChatPage(
                         itemlist: widget.userList,
                       ),
                 widget.userList!.isEmpty
-                    ? const CircularProgressIndicator(
-                        color: Colors.black,
-                      )
+                    ? const Center(
+                      child:  CircularProgressIndicator(
+                          color: Colors.black,
+                        ),
+                    )
                     : CallPage(
                         itemlist: widget.userList,
                       ),
@@ -139,5 +176,40 @@ class _HomePageState extends State<HomePage>
         ],
       ),
     );
+  }
+  Future<void> getWalletBalance() async {
+
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetWalletAmountURL);
+    final headers = {'Content-Type': 'application/json',};
+    Map<String, dynamic> body = {
+      "u_mobile":"9601603600"
+    };
+    String jsonBody = json.encode(body);
+    // final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      // encoding: encoding,
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      setState(() {
+        walletBalance = res["wallet_amount"];
+        buttonName = "Check balance again";
+      });
+      // Fluttertoast.showToast(msg: responseBody);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Wallet Amount is :- ${res["wallet_amount"]}")));
+
+
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
   }
 }

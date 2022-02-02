@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
+import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Pages/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -27,9 +29,18 @@ class _SplashScreenState extends State<SplashScreen> {
     // loginUser();
     pushFCMtoken();
     initMessaging();
-
+    generateRandomUIDforVideoCall();
     navigatetoDashBoard();
   }
+  Future<void> generateRandomUIDforVideoCall() async {
+    var uuid = Uuid();
+    var v4 = uuid.v4();
+    print("Random UUID is :- $v4");
+    setState(() {
+      Agora.UUID = v4;
+    });
+  }
+
   void pushFCMtoken() async {
     String? token = await messaging.getToken();
     print("The Token Is:--"+token!);
@@ -100,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(
               builder: (builder) => HomePage(
                     userList: userList,
-                  )),
+                  ),),
           (route) => false);
     });
   }

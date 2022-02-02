@@ -3,7 +3,7 @@ import 'package:astro/Widgets/custom_gridview.dart';
 import 'package:flutter/material.dart';
 
 class AddMoneyPage extends StatefulWidget {
-  AddMoneyPage({Key? key, this.balance = "90"}) : super(key: key);
+  AddMoneyPage({Key? key, this.balance }) : super(key: key);
 
   String? balance;
 
@@ -59,10 +59,10 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
               padding: const EdgeInsets.all(25),
               child: Text(
                 "Available Balance: ₹ ${widget.balance}",
-                style: const TextStyle(
+                style:  TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.white),
+                    color: widget.balance != null? Colors.black : Colors.white),
               ),
             ),
             Container(
