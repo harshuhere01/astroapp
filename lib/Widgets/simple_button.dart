@@ -32,7 +32,7 @@ class _BtnWidgetState extends State<BtnWidget> {
           padding: EdgeInsets.only(left: 5),
           child: Text(
             "${widget.lable}",
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
           ),
         ),

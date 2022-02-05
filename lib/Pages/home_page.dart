@@ -182,7 +182,7 @@ class _HomePageState extends State<HomePage>
     final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetWalletAmountURL);
     final headers = {'Content-Type': 'application/json',};
     Map<String, dynamic> body = {
-      "u_mobile":"9601603600"
+      "u_mobile":"9601603611"
     };
     String jsonBody = json.encode(body);
     // final encoding = Encoding.getByName('utf-8');

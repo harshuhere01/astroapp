@@ -1,3 +1,4 @@
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:flutter/material.dart';
 
 class StarRating extends StatelessWidget {
@@ -12,19 +13,19 @@ class StarRating extends StatelessWidget {
     if (index >= rating) {
       icon = Icon(
         Icons.star_border,
-        size: 17,
+        size: CommonConstants.device_width*0.043,
         color: Theme.of(context).buttonColor,
       );
     } else if (index > rating - 1 && index < rating) {
       icon = Icon(
         Icons.star_half,
-        size: 17,
+        size: CommonConstants.device_width*0.043,
         color: color,
       );
     } else {
       icon = Icon(
         Icons.star,
-        size: 17,
+        size: CommonConstants.device_width*0.043,
         color: color,
       );
     }

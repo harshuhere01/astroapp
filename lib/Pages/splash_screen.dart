@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
@@ -7,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
@@ -29,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // loginUser();
     pushFCMtoken();
     initMessaging();
-    generateRandomUIDforVideoCall();
+    // generateRandomUIDforVideoCall();
     navigatetoDashBoard();
   }
   Future<void> generateRandomUIDforVideoCall() async {
@@ -71,11 +73,22 @@ class _SplashScreenState extends State<SplashScreen> {
   final String apiUrl = "https://randomuser.me/api/?results=50";
 
   Future<void> fetchUsers() async {
-    var result = await http.get(Uri.parse(apiUrl));
-    var data = json.decode(result.body)['results'];
-    setState(() {
-      userList = data;
-    });
+    try {
+      final result =
+      await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty &&
+          result[0].rawAddress.isNotEmpty) {
+        print('Internet connected');
+        var result = await http.get(Uri.parse(apiUrl));
+        var data = json.decode(result.body)['results'];
+        setState(() {
+          userList = data;
+        });
+      }
+    } on SocketException catch (_) {
+      Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+    }
+
   }
 
   @override
@@ -115,6 +128,4 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false);
     });
   }
-
-  // void loginUser() {}
 }

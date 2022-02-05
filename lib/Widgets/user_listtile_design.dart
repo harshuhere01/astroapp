@@ -57,7 +57,7 @@ class UserListTile extends StatelessWidget {
                     child: ClipOval(
                       child: FadeInImage(
                         fit: BoxFit.cover,
-                        width: CommonConstants.device_width/5.2,
+                        width: CommonConstants.device_width/4.9,
                         height: CommonConstants.device_height/10.5,
                         placeholder: const AssetImage("asset/placeholder.png"),
                         image: NetworkImage("$imageURL"),

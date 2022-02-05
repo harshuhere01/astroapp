@@ -1,6 +1,7 @@
 import 'package:astro/Pages/payment_info.dart';
 import 'package:astro/Widgets/custom_gridview.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AddMoneyPage extends StatefulWidget {
   AddMoneyPage({Key? key, this.balance }) : super(key: key);
@@ -13,6 +14,8 @@ class AddMoneyPage extends StatefulWidget {
 
 class _AddMoneyPageState extends State<AddMoneyPage> {
   final _balancefieldcontroller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   String? amount;
   List<int> itemlist = [
     25,
@@ -65,42 +68,45 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                     color: widget.balance != null? Colors.black : Colors.white),
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width / 1.1,
-              child: TextFormField(
-                onChanged: (value){
-
-                  amount=_balancefieldcontroller.text;
-                },
-                controller: _balancefieldcontroller,
-                keyboardType: TextInputType.number,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
-                validator: (valuee) {
-                  if (valuee == null || valuee.isEmpty) {
-                    return "*Enter money";
-                  }
-                },
-                decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.all(10),
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    suffixIcon: InkWell(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("data")),);
-                      },
-                      child: InkWell(
+            Form(
+              key: _formKey,
+              child: Container(
+                width: MediaQuery.of(context).size.width / 1.1,
+                child: TextFormField(
+                  onChanged: (value){
+                    amount=_balancefieldcontroller.text;
+                  },
+                  controller: _balancefieldcontroller,
+                  keyboardType: TextInputType.number,
+                  style:
+                      const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
+                  validator: (valuee) {
+                    if (valuee == null || valuee.isEmpty) {
+                      return "*Enter money";
+                    }
+                  },
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.all(10),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                      suffixIcon: InkWell(
                         onTap: () {
-                          Navigator.push(
+                          if (_formKey.currentState?.validate() == true) {
+                            int val = int.parse(_balancefieldcontroller.text);
+                            if(val > 25 ){
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (builder) =>  PaymentInfo(selectedAmount: amount,)));
-                        },
+                            }
+                            else{
+                              Fluttertoast.showToast(msg: "Minimum recharge value is ₹25");
+                            }
+                          }
+    },
                         child: Container(
                           margin: const EdgeInsets.all(5),
                           width: MediaQuery.of(context).size.width / 4.5,
@@ -119,8 +125,8 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                           ),
                         ),
                       ),
-                    ),
-                    hintText: 'Enter money'),
+                      hintText: 'Enter money'),
+                ),
               ),
             ),
             Expanded(
@@ -156,13 +162,13 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                                   // var convertedamount = int.parse(_balancefieldcontroller.text) * 100;
 
                                   print("!!!!!!!!!!!!!!!!!$amount");
-                                  ScaffoldMessenger.of(context)
-                                      .clearSnackBars();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            "You've selected ₹ ${itemlist[index]}.")),
-                                  );
+                                  // ScaffoldMessenger.of(context)
+                                  //     .clearSnackBars();
+                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                  //   SnackBar(
+                                  //       content: Text(
+                                  //           "You've selected ₹ ${itemlist[index]}.")),
+                                  // );
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -192,12 +198,12 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                                   amount=_balancefieldcontroller.text;
                                 });
                                 print(amount);
-                                ScaffoldMessenger.of(context).clearSnackBars();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          "You've selected ₹ ${itemlist[index]}.")),
-                                );
+                                // ScaffoldMessenger.of(context).clearSnackBars();
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   SnackBar(
+                                //       content: Text(
+                                //           "You've selected ₹ ${itemlist[index]}.")),
+                                // );
                               },
                               child: Container(
                                 decoration: BoxDecoration(

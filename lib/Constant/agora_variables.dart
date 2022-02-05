@@ -4,13 +4,15 @@ class Agora{
    // static String Channel_name = "test123";
    // static String UUID = "";
 
-   // static String APP_ID = "03ae3cde77704437a2fa2e6975a059c6";
-   // static String Token = "00603ae3cde77704437a2fa2e6975a059c6IADlC9Pq5RXp+aXm2IjkhtXlqLP8fUvVNMecMKF3COuqb8hgqZMAAAAAEADbqsx0N6j7YQEAAQBMqPth";
-   // static String Channel_name = "test12345";
+   // static String APP_ID = "f1d7f07f794e4cd7b73410889a0ec6a7";
+   // static String Token = "006f1d7f07f794e4cd7b73410889a0ec6a7IAACIdkEY7p1y6B6AkgLOpqIPZrYbzefWx+lOZ4wjk0qB0OQEggh39v0EAD1Ne4Ka3L+YQEAAQBrcv5h";
+   // static String Channel_name = "myChannel";
    // static String UUID = "";
 
    static String APP_ID = "";
    static String Token = "";
    static String Channel_name = "";
-   static String UUID = "";
+   static String UUID = "0";
+   static int CallDisconnectSeconds = 60;
+   static String TokenExpireTime = "null";
 }
