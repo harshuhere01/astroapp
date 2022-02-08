@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
@@ -50,6 +51,11 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  checksocketConnection(){
+    var connection = CommonConstants.socket.connected;
+    print("Checked Socket Connection :- $connection");
   }
   String? walletBalance;
   String buttonName = "Check wallet balance";
@@ -107,6 +113,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.all(2),
                   child: TextButton(onPressed: ()async{
                     await getWalletBalance();
+                    checksocketConnection();
                   }, child: Text(buttonName,style: TextStyle(fontSize: 15,color: Colors.black,fontWeight: FontWeight.w300),),),),
               walletBalance==null|| walletBalance==""? Container(): Text("Your wallet Balance is : ₹ $walletBalance",style: TextStyle(fontSize: 15,color: Colors.black,fontWeight: FontWeight.w300),),
             ],

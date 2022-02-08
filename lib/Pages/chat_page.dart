@@ -11,11 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as Io;
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
-
-
 
 class ChatPage extends StatefulWidget {
   ChatPage({Key? key, this.itemlist}) : super(key: key);
@@ -25,49 +23,62 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Socket socket;
+class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
-    // TODO: implement initState
+    socketConnectToServer();
     super.initState();
-    connectToServer();
   }
 
-  // void connectToServer() {
-  //   IO.Socket socket = IO.io('http://aim.inawebtech.com/socket_chat');
-  //   socket.onConnect((_) {
-  //     Fluttertoast.showToast(msg: "socket is connected");
-  //     print('==========socket connect');
-  //     socket.emit('event', 'test');
-  //   });
-  //   socket.on('event', (data) => print(data));
-  //   socket.onDisconnect((_) => print('disconnect'));
-  //   socket.on('fromServer', (_) => print(_));
-  // }
-  void connectToServer() {
-
+  Future<void> socketConnectToServer() async {
     try {
-      // socket = io('http://34.205.139.16:8085');
-      // Configure socket transports must be sepecified
-      socket = io('http://34.205.139.16:8085', <String, dynamic>{
-        'transports': ['websocket'],
-        'autoConnect': true,
+      print("socket connection process started");
+      CommonConstants.socket.connect();
+      CommonConstants.socket.onConnect((data) => {
+            print("Socket Connection :-:" +
+                CommonConstants.socket.connected.toString())
+          });
+      CommonConstants.socket.on("socket_connected_backend", (data) {
+        print(
+            "on socket connection socket_connected_backend event emitted ...$data ");
       });
-      // Connect to websocket
-      socket.connect();
-      // Handle socket events
-      socket.on('connect', (_) => print('connect: ${socket.id}'));
-      socket.on('disconnect', (_) => print('disconnect'));
-      socket.on('fromServer', (_) => print(_));
-
+    } catch (e) {
+      print("socket_error:" + e.toString());
     }
-    catch (e) {
-      print(e.toString());
+  }
+
+  static Future<bool> sendFcmMessage(
+      String title, String message, String fcmToken) async {
+    try {
+      var url = 'https://fcm.googleapis.com/fcm/send';
+      var header = {
+        "Content-Type": "application/json",
+        // "Authorization": "key=your_server_key",
+      };
+      var request = {
+        "notification": {
+          "title": title,
+          "text": message,
+          "sound": "default",
+          "color": "#990000",
+        },
+        "priority": "high",
+        "to": fcmToken,
+      };
+
+      var client = new Client();
+      var response = await client.post(
+          Uri.parse(APIConstants.FirebaseNotificationAPI),
+          headers: header,
+          body: json.encode(request));
+      return true;
+    } catch (e, s) {
+      print(e);
+      print(s);
+      return false;
     }
-
-
   }
 
   @override
@@ -78,53 +89,60 @@ class _ChatPageState extends State<ChatPage> {
         return false;
       },
       child: Consumer(
-        builder: (context, HomeNotifier homeNotifier, child)
-        {
-        return Scaffold(
-          backgroundColor: Colors.grey[200],
-          body: ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: widget.itemlist.length,
-            itemBuilder: (BuildContext context, int index) {
-              int age = widget.itemlist[index]['dob']['age'];
-              return Card(
-                elevation: 5,
-                child: UserListTile(
-                  userName: "${widget.itemlist[index]['name']['first']}",
-                  imageURL: widget.itemlist[index]['picture']['large'],
-                  designation: "Numerology, Face Reading",
-                  languages: "English, Hindi, Gujarati",
-                  experience: "Exp: 15 Years",
-                  charge: "₹ 60/min",
-                  totalnum: "12456",
-                  age :widget.itemlist[index]['dob']['age'],
-                  waitingstatus: age > 60 ? "" : age < 40 ? "wait time - 4m" : "",
-                  btncolor:age > 60 ? MaterialStateProperty.all<Color>(
-                      Colors.grey) :age < 40 ? MaterialStateProperty.all<Color>(
-                      Colors.red) : MaterialStateProperty.all<Color>(
-                      Colors.green),
-                  btnbordercolor: age > 60 ?
-                      Colors.grey :age < 40 ?
-                      Colors.red :
-                      Colors.green,
-                  onTapImage: () {},
-                  onTapOfTile: () {},
-                  callbtnclick: () {
-                      _showCallClickDialog(context,
-                          "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['name']['first']}",homeNotifier);
-                  },
-                ),
-              );
-            },
-          ),
-
-        );
+        builder: (context, HomeNotifier homeNotifier, child) {
+          return Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: Colors.grey[200],
+            body: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: widget.itemlist.length,
+              itemBuilder: (BuildContext context, int index) {
+                int age = widget.itemlist[index]['dob']['age'];
+                return Card(
+                  elevation: 5,
+                  child: UserListTile(
+                    userName: "${widget.itemlist[index]['name']['first']}",
+                    imageURL: widget.itemlist[index]['picture']['large'],
+                    designation: "Numerology, Face Reading",
+                    languages: "English, Hindi, Gujarati",
+                    experience: "Exp: 15 Years",
+                    charge: "₹ 60/min",
+                    totalnum: "12456",
+                    age: widget.itemlist[index]['dob']['age'],
+                    waitingstatus: age > 60
+                        ? ""
+                        : age < 40
+                            ? "wait time - 4m"
+                            : "",
+                    btncolor: age > 60
+                        ? MaterialStateProperty.all<Color>(Colors.grey)
+                        : age < 40
+                            ? MaterialStateProperty.all<Color>(Colors.red)
+                            : MaterialStateProperty.all<Color>(Colors.green),
+                    btnbordercolor: age > 60
+                        ? Colors.grey
+                        : age < 40
+                            ? Colors.red
+                            : Colors.green,
+                    onTapImage: () {},
+                    onTapOfTile: () {},
+                    callbtnclick: () {
+                      _showCallClickDialog(
+                          _scaffoldKey.currentContext,
+                          "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['name']['first']}",
+                          homeNotifier);
+                    },
+                  ),
+                );
+              },
+            ),
+          );
         },
       ),
     );
   }
 
-  void _showCallClickDialog(context, String dialoguetext,homeNotifier) async {
+  void _showCallClickDialog(context, String dialoguetext, homeNotifier) async {
     showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -142,99 +160,102 @@ class _ChatPageState extends State<ChatPage> {
           ),
           contentTextStyle: const TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
-            actionsPadding : const EdgeInsets.all(10),
+          actionsPadding: const EdgeInsets.all(10),
           actions: <Widget>[
-            _build_btn_of_dialogue("Cancel", Colors.black, () {
+            _build_btn_of_dialogue("Cancel", Colors.black, () async {
+              var nres = await sendFcmMessage("Test", "Notification from Harsh",
+                  "fTZXMCcSSteGiz8I_k-xAO:APA91bGitwsJ7vXl3gThjKCHtALo1WJU34psyqtdICJLaf8g0KYLkbSmJfpwkzE6ihB92998H7jPk2MANxX2s8_w-0wn1CRzRJEse89fQDjhAFyK4gK1mWyOoHdIdHjKWGv_5NLPYe8Y");
+              print("Notification send :----------------$nres");
               Navigator.pop(context);
             }),
-            _build_btn_of_dialogue("Recharge",  Colors.black,
-                () async {
+            _build_btn_of_dialogue("Recharge", Colors.black, () async {
               Navigator.pop(context);
               await Navigator.push(context,
                   MaterialPageRoute(builder: (builder) => AddMoneyPage()));
             }),
-            _build_btn_of_dialogue("VideoCall",  Colors.black, ()  async{
+            _build_btn_of_dialogue("VideoCall", Colors.black, () async {
               try {
-                final result =
-                    await InternetAddress.lookup('example.com');
-                if (result.isNotEmpty &&
-                    result[0].rawAddress.isNotEmpty){
+                final result = await InternetAddress.lookup('example.com');
+                if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
                   print('internet connected');
+                  Navigator.pop(context);
+                  // var emitdata = {"u_mobile": "9601603611", "c_charge": 50};
+                    CommonConstants.socket.emit('start_video_call', {"u_mobile": "9601603611", "c_charge": 50});
+                    CommonConstants.socket.on("balance_ok", (data)
+                    {
+                      print(
+                          "=========balance ok ===============================$data");
 
-                  createTokenAPI(homeNotifier).whenComplete(() async {
-                    Navigator.pop(context);
-                  await homeNotifier.onJoin(context,Agora.Channel_name);
+                      if (data == true) {
+                        if (CommonConstants.CallDone == '' ||
+                            CommonConstants.CallDone == null ||
+                            CommonConstants.CallDone.isEmpty) {
+                          CommonConstants.CallDone = data.toString();
+                          homeNotifier.onJoin(_scaffoldKey.currentContext, Agora.Channel_name);
+
+                        } else {
+                          print(
+                              "=========balance ok ===============================ELSSSSSS$data");
+                        }
+                      } else {
+                        print("Dialog Open karo");
+                      }
+                    });
+                    CommonConstants.socket.on("balance_not_ok", (data) {
+                      print("blalance not ok ============$data");
                   });
+
                 }
               } on SocketException catch (_) {
-                Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+                Fluttertoast.showToast(
+                    msg:
+                        '"There is no internet connection , please turn on your internet."');
               }
-
             }),
           ],
-
           actionsAlignment: MainAxisAlignment.spaceEvenly,
         );
       },
     );
   }
 
-
-
-
-  Future<void> createTokenAPI(homeNotifier) async {
-
-    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CreateToken  );
-    final headers = {'Content-Type': 'application/json',};
-    Map<String, dynamic> body = {
-      "channel_name":"myChannel",
-      "uid":Agora.UUID,
-      "role":"customer",
-      "expire_time":Agora.TokenExpireTime
-    };
-    String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      // encoding: encoding,
-    );
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      // Fluttertoast.showToast(msg: res.toString());
-      await setAgoraVariables(res).whenComplete(() {
-        // Fluttertoast.showToast(msg: "variables set succssfully");
-        // try{
-        //   homeNotifier.onJoin(context,Agora.Channel_name);
-        // }
-        //     catch(e){
-        //       Fluttertoast.showToast(msg: e.toString());
-        //     }
-      });
-
-    }
-    else{
-      Fluttertoast.showToast(msg: response.statusCode.toString());
-    }
-  }
-
-  Future<void> setAgoraVariables (res)async{
-    setState(() {
-      Agora.APP_ID = res["appId"];
-      Agora.UUID = res['uid'];
-      Agora.Channel_name = res['channel'];
-      Agora.Token = res['token'];
-    });
-  }
+  // Future<void> CalculateTime() async {
+  //   print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+  //   final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CalculateTime);
+  //   final headers = {
+  //     'Content-Type': 'application/json',
+  //   };
+  //   Map<String, dynamic> body = {
+  //     "u_mobile": "9601603611",
+  //     "c_charge": 50,
+  //   };
+  //   String jsonBody = json.encode(body);
+  //   final encoding = Encoding.getByName('utf-8');
+  //
+  //   Response response = await post(
+  //     uri,
+  //     headers: headers,
+  //     body: jsonBody,
+  //     encoding: encoding,
+  //   );
+  //
+  //   int statusCode = response.statusCode;
+  //   String responseBody = response.body;
+  //   var res = jsonDecode(responseBody);
+  //
+  //   Fluttertoast.showToast(msg: "CalculateTime API $responseBody");
+  //
+  //   if (statusCode == 200) {
+  //     Fluttertoast.showToast(msg: "CalculateTime API $res");
+  //   } else {
+  //     Fluttertoast.showToast(msg: "CalculateTime API Error${response.statusCode.toString()}");
+  //   }
+  // }
 
   SizedBox _build_btn_of_dialogue(String btnname, Color color, Function ontap) {
     return SizedBox(
-      height: CommonConstants.device_height*0.05,
-      width: CommonConstants.device_width*0.21,
+      height: CommonConstants.device_height * 0.05,
+      width: CommonConstants.device_width * 0.21,
       child: ElevatedButton(
           child: Text(btnname,
               style:
@@ -253,7 +274,6 @@ class _ChatPageState extends State<ChatPage> {
           }),
     );
   }
-
 
   void _showMyDialog(context) async {
     showDialog<bool>(

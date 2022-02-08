@@ -284,7 +284,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       'Content-Type': 'application/json',
     };
     Map<String, dynamic> body = {
-      "u_name": "test1",
+      "u_name": "test",
       "u_mobile": "9601603611",
       "amount": "$apiAmount",
       "order_id": orderID,

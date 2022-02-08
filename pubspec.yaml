@@ -38,8 +38,7 @@ dependencies:
   uuid: ^3.0.5
   fluttertoast: ^8.0.8
   firebase_core:
-  socket_io_client: ^1.0.2
-  web_socket_channel: ^2.1.0
+  socket_io_client: ^2.0.0-beta.4-nullsafety.0
   # for splashscreen
   flutter_spinkit: ^5.1.0
   # for payment integration

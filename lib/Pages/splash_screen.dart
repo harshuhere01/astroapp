@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
+import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Pages/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:uuid/uuid.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -31,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // loginUser();
     pushFCMtoken();
     initMessaging();
+    // createTokenAPI();
     // generateRandomUIDforVideoCall();
     navigatetoDashBoard();
   }
@@ -65,6 +69,55 @@ class _SplashScreenState extends State<SplashScreen> {
         fltNotification.show(notification.hashCode, notification.title,
             notification.body, generalNotificationDetails);
       }
+    });
+  }
+
+  Future<void> createTokenAPI() async {
+
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CreateToken  );
+    final headers = {'Content-Type': 'application/json',};
+    Map<String, dynamic> body = {
+      "channel_name":"myChannel",
+      "uid":Agora.UUID,
+      "role":"customer",
+      "expire_time":Agora.TokenExpireTime
+    };
+    String jsonBody = json.encode(body);
+    // final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      // encoding: encoding,
+    );
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      // Fluttertoast.showToast(msg: res.toString());
+      await setAgoraVariables(res).whenComplete(() {
+        // Fluttertoast.showToast(msg: "variables set succssfully");
+        // try{
+        //   homeNotifier.onJoin(context,Agora.Channel_name);
+        // }
+        //     catch(e){
+        //       Fluttertoast.showToast(msg: e.toString());
+        //     }
+      });
+
+    }
+    else{
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
+
+  Future<void> setAgoraVariables (res)async{
+    setState(() {
+      Agora.APP_ID = res["appId"];
+      Agora.UUID = res['uid'];
+      Agora.Channel_name = res['channel'];
+      Agora.Token = res['token'];
     });
   }
 
