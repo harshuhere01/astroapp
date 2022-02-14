@@ -1,4 +1,5 @@
 import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -84,10 +85,13 @@ class CallNotifier extends ChangeNotifier {
         },
         userJoined: (uid, elapsed) {
           infoString('userJoined: $uid');
+
           addUser(uid);
         },
         userOffline: (uid, elapsed) {
           infoString('userOffline: $uid');
+
+
           removeUser(uid);
         },
         firstRemoteVideoFrame: (uid, width, height, elapsed) {}));

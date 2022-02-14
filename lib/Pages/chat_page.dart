@@ -26,11 +26,45 @@ class ChatPage extends StatefulWidget {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _ChatPageState extends State<ChatPage> {
+
+   String? astro_status;
+
   @override
   void initState() {
     socketConnectToServer();
+    //Getastrologer();
     super.initState();
   }
+
+  // Future<void> Getastrologer() async {
+  //
+  //   final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetAllUsers);
+  //   final headers = {'Content-Type': 'application/json',};
+  //   Map<String, dynamic> body = {
+  //     "u_type":"astrologer",
+  //   };
+  //   String jsonBody = json.encode(body);
+  //   // final encoding = Encoding.getByName('utf-8');
+  //
+  //   Response response = await post(
+  //     uri,
+  //     headers: headers,
+  //     body: jsonBody,
+  //     // encoding: encoding,
+  //   );
+  //   int statusCode = response.statusCode;
+  //   String responseBody = response.body;
+  //   var res = jsonDecode(responseBody);
+  //
+  //
+  //   if (statusCode == 200) {
+  //     Fluttertoast.showToast(msg: res.toString());
+  //
+  //   }
+  //   else{
+  //     Fluttertoast.showToast(msg: response.statusCode.toString());
+  //   }
+  // }
 
   Future<void> socketConnectToServer() async {
     try {
@@ -40,46 +74,63 @@ class _ChatPageState extends State<ChatPage> {
             print("Socket Connection :-:" +
                 CommonConstants.socket.connected.toString())
           });
+      // CommonConstants.socket.emit(
+      //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
       CommonConstants.socket.on("socket_connected_backend", (data) {
         print(
-            "on socket connection socket_connected_backend event emitted ...$data ");
+            "Socket connection message from socket_connected_backend event :- $data ");
       });
+      CommonConstants.socket.on('no_data', (data) {
+        Fluttertoast.showToast(msg: data.toString());
+      });
+      CommonConstants.socket.on('event', (data) {
+        Fluttertoast.showToast(msg: data.toString());
+      });
+      CommonConstants.socket.on('call_status', (data) {
+        Fluttertoast.showToast(msg: "Call status = ${data['status']}");
+        setState(() {
+          astro_status = data['status'];
+        });
+      });
+
     } catch (e) {
       print("socket_error:" + e.toString());
     }
   }
 
-  static Future<bool> sendFcmMessage(
-      String title, String message, String fcmToken) async {
-    try {
-      var url = 'https://fcm.googleapis.com/fcm/send';
-      var header = {
-        "Content-Type": "application/json",
-        // "Authorization": "key=your_server_key",
-      };
-      var request = {
-        "notification": {
-          "title": title,
-          "text": message,
-          "sound": "default",
-          "color": "#990000",
-        },
-        "priority": "high",
-        "to": fcmToken,
-      };
-
-      var client = new Client();
-      var response = await client.post(
-          Uri.parse(APIConstants.FirebaseNotificationAPI),
-          headers: header,
-          body: json.encode(request));
-      return true;
-    } catch (e, s) {
-      print(e);
-      print(s);
-      return false;
-    }
-  }
+  // for send notification
+  // static Future<bool> sendFcmMessage(
+  //     String title, String message, String fcmToken) async {
+  //   try {
+  //     var header = {
+  //       "Content-Type": "application/json",
+  //       "Authorization": "key=AAAApOGu0ok:APA91bFS07zT3qrfNpSpFjIVfJ_QzKc0ujfd3FTxLuLONesfgYBBV0Yh9u5Wm2jWWSsVe4fUF4tu1caGIbkzc1LvPqJOHh-Y6yXdu2HrQxE9Q8OtqXO3MTSZZfW4Lb1cYAi6-q0M8jN6",
+  //     };
+  //     var request = {
+  //       "notification": {
+  //         "title": title,
+  //         "body": message,
+  //         "data": Agora.APP_ID,
+  //         "sound": "default",
+  //         "color": "#990000",
+  //
+  //       },
+  //       "priority": "high",
+  //       "to": fcmToken,
+  //     };
+  //
+  //     var client = new Client();
+  //     var response = await client.post(
+  //         Uri.parse(APIConstants.FirebaseNotificationAPI),
+  //         headers: header,
+  //         body: json.encode(request));
+  //     return true;
+  //   } catch (e, s) {
+  //     print(e);
+  //     print(s);
+  //     return false;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -97,39 +148,41 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.all(8),
               itemCount: widget.itemlist.length,
               itemBuilder: (BuildContext context, int index) {
-                int age = widget.itemlist[index]['dob']['age'];
+                int age = int.parse(widget.itemlist[index]['status']);
                 return Card(
                   elevation: 5,
                   child: UserListTile(
-                    userName: "${widget.itemlist[index]['name']['first']}",
-                    imageURL: widget.itemlist[index]['picture']['large'],
-                    designation: "Numerology, Face Reading",
-                    languages: "English, Hindi, Gujarati",
-                    experience: "Exp: 15 Years",
-                    charge: "₹ 60/min",
+                    userName: "${widget.itemlist[index]['u_name']}",
+                    imageURL:
+                        'https://randomuser.me/api/portraits/med/women/5.jpg',
+                    designation: widget.itemlist[index]['u_type'],
+                    languages: widget.itemlist[index]['languages'],
+                    experience: widget.itemlist[index]['experience'],
+                    charge: '₹ ' +
+                        widget.itemlist[index]['charge_per_minute'] +
+                        '/min',
                     totalnum: "12456",
-                    age: widget.itemlist[index]['dob']['age'],
-                    waitingstatus: age > 60
-                        ? ""
-                        : age < 40
+                    astro_status: astro_status,
+                    waitingstatus: astro_status == "Busy"
                             ? "wait time - 4m"
                             : "",
-                    btncolor: age > 60
-                        ? MaterialStateProperty.all<Color>(Colors.grey)
-                        : age < 40
+                    btncolor: astro_status == "Available"
+                        ? MaterialStateProperty.all<Color>(Colors.green)
+                        : astro_status == "Busy"
                             ? MaterialStateProperty.all<Color>(Colors.red)
-                            : MaterialStateProperty.all<Color>(Colors.green),
-                    btnbordercolor: age > 60
-                        ? Colors.grey
-                        : age < 40
+                            : MaterialStateProperty.all<Color>(Colors.grey),
+                    btnbordercolor: astro_status == "Available"
+                        ? Colors.green
+                        : astro_status == "Busy"
                             ? Colors.red
-                            : Colors.green,
+                            : Colors.grey,
                     onTapImage: () {},
                     onTapOfTile: () {},
                     callbtnclick: () {
                       _showCallClickDialog(
                           _scaffoldKey.currentContext,
-                          "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['name']['first']}",
+                          "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['u_name']}",
+                          "${widget.itemlist[index]['id']}",
                           homeNotifier);
                     },
                   ),
@@ -142,7 +195,8 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  void _showCallClickDialog(context, String dialoguetext, homeNotifier) async {
+  void _showCallClickDialog(
+      context, String dialoguetext, String userID, homeNotifier) async {
     showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -162,61 +216,162 @@ class _ChatPageState extends State<ChatPage> {
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
           actionsPadding: const EdgeInsets.all(10),
           actions: <Widget>[
-            _build_btn_of_dialogue("Cancel", Colors.black, () async {
-              var nres = await sendFcmMessage("Test", "Notification from Harsh",
-                  "fTZXMCcSSteGiz8I_k-xAO:APA91bGitwsJ7vXl3gThjKCHtALo1WJU34psyqtdICJLaf8g0KYLkbSmJfpwkzE6ihB92998H7jPk2MANxX2s8_w-0wn1CRzRJEse89fQDjhAFyK4gK1mWyOoHdIdHjKWGv_5NLPYe8Y");
-              print("Notification send :----------------$nres");
-              Navigator.pop(context);
-            }),
-            _build_btn_of_dialogue("Recharge", Colors.black, () async {
-              Navigator.pop(context);
-              await Navigator.push(context,
-                  MaterialPageRoute(builder: (builder) => AddMoneyPage()));
-            }),
-            _build_btn_of_dialogue("VideoCall", Colors.black, () async {
-              try {
-                final result = await InternetAddress.lookup('example.com');
-                if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-                  print('internet connected');
-                  Navigator.pop(context);
-                  // var emitdata = {"u_mobile": "9601603611", "c_charge": 50};
-                    CommonConstants.socket.emit('start_video_call', {"u_mobile": "9601603611", "c_charge": 50});
-                    CommonConstants.socket.on("balance_ok", (data)
-                    {
-                      print(
-                          "=========balance ok ===============================$data");
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _build_btn_of_dialogue("Cancel", Colors.black, () async {
+                      Navigator.pop(context);
+                    }),
+                    _build_btn_of_dialogue("Recharge", Colors.black, () async {
+                      Navigator.pop(context);
+                      await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => AddMoneyPage()));
+                    }),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _build_btn_of_dialogue("VideoCall", Colors.black, () async {
+                      try {
+                        final result =
+                            await InternetAddress.lookup('example.com');
+                        if (result.isNotEmpty &&
+                            result[0].rawAddress.isNotEmpty) {
+                          print('internet connected');
+                          Navigator.pop(context);
+                          await createToken(userID).whenComplete(() {
+                            var emitdata = {
+                              "u_mobile": "9601603611",
+                              "c_charge": 50
+                            };
 
-                      if (data == true) {
-                        if (CommonConstants.CallDone == '' ||
-                            CommonConstants.CallDone == null ||
-                            CommonConstants.CallDone.isEmpty) {
-                          CommonConstants.CallDone = data.toString();
-                          homeNotifier.onJoin(_scaffoldKey.currentContext, Agora.Channel_name);
-
-                        } else {
-                          print(
-                              "=========balance ok ===============================ELSSSSSS$data");
+                            CommonConstants.socket
+                                .emit('start_video_call', emitdata);
+                          });
+                          CommonConstants.socket.on("balance_ok", (data) {
+                            print(
+                                "=========balance ok ===============================$data");
+                            if (data == true) {
+                              if (CommonConstants.CallDone == '' ||
+                                  CommonConstants.CallDone == null ||
+                                  CommonConstants.CallDone.isEmpty) {
+                                CommonConstants.CallDone = data.toString();
+                                homeNotifier.onJoin(_scaffoldKey.currentContext,
+                                    Agora.Channel_name);
+                              } else {
+                                print(
+                                    "else part =========balance ok ===============================$data");
+                              }
+                            } else {
+                              print("data = $data");
+                            }
+                          });
+                          CommonConstants.socket.on("balance_not_ok", (data) {
+                            print("blalance not ok ============$data");
+                          });
                         }
-                      } else {
-                        print("Dialog Open karo");
+                      } on SocketException catch (_) {
+                        Fluttertoast.showToast(
+                            msg:
+                                '"There is no internet connection , please turn on your internet."');
                       }
-                    });
-                    CommonConstants.socket.on("balance_not_ok", (data) {
-                      print("blalance not ok ============$data");
-                  });
-
-                }
-              } on SocketException catch (_) {
-                Fluttertoast.showToast(
-                    msg:
-                        '"There is no internet connection , please turn on your internet."');
-              }
-            }),
+                    }),
+                    _build_btn_of_dialogue("Join Call", Colors.black, () async {
+                      await createToken(userID).whenComplete(() {
+                        homeNotifier.onJoin(
+                            _scaffoldKey.currentContext, Agora.Channel_name);
+                      });
+                    }),
+                  ],
+                )
+              ],
+            ),
           ],
           actionsAlignment: MainAxisAlignment.spaceEvenly,
         );
       },
     );
+  }
+
+  Future<void> createToken(String userID) async {
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CreateToken);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "channel_name": userID,
+      "uid": "0",
+      "role": "customer",
+      "expire_time": "null"
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      await setAgoraVariables(res);
+      print("token generated successfully :- $res");
+    } else {
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
+
+  Future<void> setAgoraVariables(res) async {
+    setState(() {
+      Agora.APP_ID = res["appId"];
+      Agora.UUID = res['uid'];
+      Agora.Channel_name = res['channel'];
+      Agora.Token = res['token'];
+    });
+    send_notification();
+  }
+
+  Future<void> send_notification() async {
+    final uri =
+        Uri.parse(APIConstants.BaseURL + APIConstants.send_notification);
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    Map<String, dynamic> body = {
+      "fcm_token": CommonConstants.MobileTokenNotifiaction,
+      "channelName": Agora.Channel_name,
+      "agora_token": Agora.Token,
+    };
+    String jsonBody = json.encode(body);
+    // final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      // encoding: encoding,
+    );
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    print(res.toString());
+
+    if (statusCode == 200) {
+      //Fluttertoast.showToast(msg: res.toString());
+    } else {
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
   }
 
   // Future<void> CalculateTime() async {

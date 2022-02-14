@@ -12,7 +12,7 @@ class UserListTile extends StatelessWidget {
       this.languages,
       this.onTapImage,
       this.experience,
-        this.age,
+        this.astro_status,
       this.charge,this.btncolor,
       this.waitingstatus,required this.btnbordercolor,
       this.callbtnclick,
@@ -28,7 +28,7 @@ class UserListTile extends StatelessWidget {
   String? waitingstatus;
   MaterialStateProperty<Color>? btncolor;
   Color btnbordercolor;
-  int? age;
+  String? astro_status;
   Function? onTapImage;
   Function? onTapOfTile;
   Function? callbtnclick;
@@ -160,8 +160,10 @@ class UserListTile extends StatelessWidget {
                                               BorderRadius.circular(10.0),
                                           side:  BorderSide(
                                               color: btnbordercolor)))),
-                              onPressed:age! > 60 ? null : age! < 40 ? null : () {
-                                callbtnclick!();
+                              onPressed: () {
+                                if(astro_status=="Available"){
+                                  callbtnclick!();
+                                }
                               },
                             ),
                           ),
