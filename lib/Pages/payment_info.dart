@@ -1,15 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Constant/payment_variables.dart';
-import 'package:astro/Pages/add_money_to_wallet.dart';
-import 'package:astro/Pages/home_page.dart';
+import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Widgets/simple_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
@@ -71,7 +67,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   }
 
   // for generate orderID From Frontend
-  Future<String> generateOrderId(String key, String secret, int amount) async {
+  /*Future<String> generateOrderId(String key, String secret, int amount) async {
     var authn = 'Basic ' + base64Encode(utf8.encode('$key:$secret'));
 
     var headers = {
@@ -84,12 +80,13 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
     var res = await http.post(Uri.parse('https://api.razorpay.com/v1/orders'),
         headers: headers, body: data);
-    if (res.statusCode != 200)
+    if (res.statusCode != 200) {
       throw Exception('http.post error: statusCode= ${res.statusCode}');
+    }
     print('ORDER ID response => ${res.body}');
 
     return json.decode(res.body)['id'].toString();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +198,9 @@ class _PaymentInfoState extends State<PaymentInfo> {
                         setState(() {
                           isLoading = false;
                         });
-                       Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+                        Fluttertoast.showToast(
+                            msg:
+                                '"There is no internet connection , please turn on your internet."');
                       }
                       // openCheckout();
                     },
@@ -229,25 +228,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
     );
   }
 
-  Future<void> addMoneyAPI() async {
-    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.AddMoneyURL);
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, dynamic> body = {
-      "u_name": "test1",
-      "u_mobile": "9601603611",
-      "amount": apiAmount
-    };
-    String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      // encoding: encoding,
-    );
+  addMoneyAPI() async {
+    var response = await API().addMoneyAPI(apiAmount!);
 
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -255,10 +237,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
     if (statusCode == 200) {
       Fluttertoast.showToast(msg: responseBody);
       try {
-        final result =
-        await InternetAddress.lookup('example.com');
-        if (result.isNotEmpty &&
-            result[0].rawAddress.isNotEmpty) {
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           print('internet connected');
           openCheckout("${res['order_ID']}");
         }
@@ -266,9 +246,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+        Fluttertoast.showToast(
+            msg:
+                '"There is no internet connection , please turn on your internet."');
       }
-
     } else {
       setState(() {
         isLoading = false;
@@ -277,29 +258,9 @@ class _PaymentInfoState extends State<PaymentInfo> {
     }
   }
 
-  Future<void> verifyPayment(
-      String orderID, String paymentID, String signature) async {
-    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.VerifyPaymentURL);
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, dynamic> body = {
-      "u_name": "test",
-      "u_mobile": "9601603611",
-      "amount": "$apiAmount",
-      "order_id": orderID,
-      "razorpay_payment_id": paymentID,
-      "razorpay_signature": signature,
-    };
-    String jsonBody = json.encode(body);
-    final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      encoding: encoding,
-    );
+  verifyPayment(String orderID, String paymentID, String signature) async {
+    var response =
+        await API().verifyPayment(orderID, paymentID, signature, apiAmount!);
 
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -323,10 +284,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
     if (response.paymentId != null || response.paymentId != "") {
       PaymentVariables.payment_id = response.paymentId;
       try {
-        final result =
-        await InternetAddress.lookup('example.com');
-        if (result.isNotEmpty &&
-            result[0].rawAddress.isNotEmpty) {
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           print('internet connected');
           verifyPayment("${response.orderId}", "${response.paymentId}",
               "${response.signature}");
@@ -335,9 +294,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+        Fluttertoast.showToast(
+            msg:
+                '"There is no internet connection , please turn on your internet."');
       }
-
     }
   }
 
@@ -375,10 +335,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
     try {
       try {
-        final result =
-        await InternetAddress.lookup('example.com');
-        if (result.isNotEmpty &&
-            result[0].rawAddress.isNotEmpty) {
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           print('internet connected');
           razorpay.open(options);
         }
@@ -386,9 +344,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: '"There is no internet connection , please turn on your internet."');
+        Fluttertoast.showToast(
+            msg:
+                '"There is no internet connection , please turn on your internet."');
       }
-
     } catch (e) {
       debugPrint('Error: $e');
       setState(() {
@@ -398,7 +357,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   }
 
   // for create order from frontend
-  Future<void> createOrder() async {
+  /*Future<void> createOrder() async {
     var key = "https://api.razorpay.com/v1/orders";
     final uri = Uri.parse(key);
     final headers = {'Content-Type': 'application/json'};
@@ -429,5 +388,5 @@ class _PaymentInfoState extends State<PaymentInfo> {
     } else {
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }
-  }
+  }*/
 }

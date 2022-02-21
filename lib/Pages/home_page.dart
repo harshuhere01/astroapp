@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/api_constant.dart';
+import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
 import 'package:astro/Widgets/simple_button.dart';
@@ -112,8 +113,8 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.all(2),
                 child: TextButton(
                   onPressed: () async {
-                    CommonConstants.socket.emit(
-                        'socket_connected_frontend', {"id": CommonConstants.socket.id});
+                    // CommonConstants.socket.emit(
+                    //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
                     await getWalletBalance();
                     checksocketConnection();
                   },
@@ -203,23 +204,8 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Future<void> getWalletBalance() async {
-    final uri =
-        Uri.parse(APIConstants.BaseURL + APIConstants.GetWalletAmountURL);
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, dynamic> body = {"u_mobile": "9601603611"};
-    String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      // encoding: encoding,
-    );
-
+  getWalletBalance() async {
+    var response = await API().getWalletBalance();
     int statusCode = response.statusCode;
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
@@ -228,10 +214,8 @@ class _HomePageState extends State<HomePage>
         walletBalance = res["wallet_amount"];
         buttonName = "Check balance again";
       });
-      // Fluttertoast.showToast(msg: responseBody);
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Wallet Amount is :- ${res["wallet_amount"]}")));
+      Fluttertoast.showToast(
+          msg: "Wallet Amount is :- ${res["wallet_amount"]}");
     } else {
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }

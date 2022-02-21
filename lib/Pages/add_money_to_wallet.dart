@@ -158,17 +158,9 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                                     _balancefieldcontroller.text = itemlist[index].toString();
                                     amount=_balancefieldcontroller.text;
                                   });
-
                                   // var convertedamount = int.parse(_balancefieldcontroller.text) * 100;
-
                                   print("!!!!!!!!!!!!!!!!!$amount");
-                                  // ScaffoldMessenger.of(context)
-                                  //     .clearSnackBars();
-                                  // ScaffoldMessenger.of(context).showSnackBar(
-                                  //   SnackBar(
-                                  //       content: Text(
-                                  //           "You've selected ₹ ${itemlist[index]}.")),
-                                  // );
+
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(

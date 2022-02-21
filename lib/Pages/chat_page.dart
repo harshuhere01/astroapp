@@ -4,13 +4,12 @@ import 'dart:io';
 import 'package:astro/Agora%20Functions/Video%20Call/screens/home/home_model.dart';
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
-import 'package:astro/Constant/api_constant.dart';
+import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Widgets/user_listtile_design.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart';
 import 'package:socket_io_client/socket_io_client.dart' as Io;
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -32,41 +31,10 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     socketConnectToServer();
-    //Getastrologer();
     super.initState();
   }
 
-  // Future<void> Getastrologer() async {
-  //
-  //   final uri = Uri.parse(APIConstants.BaseURL + APIConstants.GetAllUsers);
-  //   final headers = {'Content-Type': 'application/json',};
-  //   Map<String, dynamic> body = {
-  //     "u_type":"astrologer",
-  //   };
-  //   String jsonBody = json.encode(body);
-  //   // final encoding = Encoding.getByName('utf-8');
-  //
-  //   Response response = await post(
-  //     uri,
-  //     headers: headers,
-  //     body: jsonBody,
-  //     // encoding: encoding,
-  //   );
-  //   int statusCode = response.statusCode;
-  //   String responseBody = response.body;
-  //   var res = jsonDecode(responseBody);
-  //
-  //
-  //   if (statusCode == 200) {
-  //     Fluttertoast.showToast(msg: res.toString());
-  //
-  //   }
-  //   else{
-  //     Fluttertoast.showToast(msg: response.statusCode.toString());
-  //   }
-  // }
-
-  Future<void> socketConnectToServer() async {
+   socketConnectToServer()  {
     try {
       print("socket connection process started");
       CommonConstants.socket.connect();
@@ -302,25 +270,8 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Future<void> createToken(String userID) async {
-    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CreateToken);
-    final headers = {'Content-Type': 'application/json'};
-    Map<String, dynamic> body = {
-      "channel_name": userID,
-      "uid": "0",
-      "role": "customer",
-      "expire_time": "null"
-    };
-    String jsonBody = json.encode(body);
-    final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      encoding: encoding,
-    );
-
+   createToken(String userID) async {
+    var response = await API().createToken(userID);
     int statusCode = response.statusCode;
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
@@ -342,33 +293,15 @@ class _ChatPageState extends State<ChatPage> {
     send_notification();
   }
 
-  Future<void> send_notification() async {
-    final uri =
-        Uri.parse(APIConstants.BaseURL + APIConstants.send_notification);
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, dynamic> body = {
-      "fcm_token": CommonConstants.MobileTokenNotifiaction,
-      "channelName": Agora.Channel_name,
-      "agora_token": Agora.Token,
-    };
-    String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      // encoding: encoding,
-    );
+   send_notification() async {
+    var response = await API().send_notification();
     int statusCode = response.statusCode;
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     print(res.toString());
 
     if (statusCode == 200) {
-      //Fluttertoast.showToast(msg: res.toString());
+      Fluttertoast.showToast(msg: "Send Notification :- $res");
     } else {
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }
