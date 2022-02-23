@@ -145,7 +145,17 @@ class _ChatPageState extends State<ChatPage> {
                             result[0].rawAddress.isNotEmpty) {
                           print('internet connected');
                           Navigator.pop(context);
-                          await createToken(userID).whenComplete(() async {await calculateTime("9601603611", "50", userID);});
+                          await createToken(userID).whenComplete(() async {
+                            var emitdata = {
+                              "u_mobile": "9601603611",
+                              "c_charge": 50,
+                              "id": CommonConstants.socketID,
+                              "room": 1,
+                              "uid": userID
+                            };
+                            CommonConstants.socket.emit('start_video_call', emitdata);
+                            // await calculateTime("9601603611", "50", userID);
+                          });
                           CommonConstants.socket.on("balance_ok", (data) {
                             print("========== balance_ok ==== chat page");
                             if (CommonConstants.caller) {
@@ -210,26 +220,26 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  calculateTime(String uMobile, String cCharge, String userID) async {
-    var response = await API().calculateTime(uMobile, cCharge);
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      Fluttertoast.showToast(msg: "CalculateTime API $res");
-      var emitdata = {
-        "u_mobile": "9601603611",
-        "c_charge": 50,
-        "id": CommonConstants.socketID,
-        "room": 1,
-        "uid": userID
-      };
-      CommonConstants.socket.emit('start_video_call', emitdata);
-    } else {
-      Fluttertoast.showToast(
-          msg: "CalculateTime API Error${response.statusCode.toString()}");
-    }
-  }
+  // calculateTime(String uMobile, String cCharge, String userID) async {
+  //   var response = await API().calculateTime(uMobile, cCharge);
+  //   int statusCode = response.statusCode;
+  //   String responseBody = response.body;
+  //   var res = jsonDecode(responseBody);
+  //   if (statusCode == 200) {
+  //     Fluttertoast.showToast(msg: "CalculateTime API $res");
+  //     var emitdata = {
+  //       "u_mobile": "9601603611",
+  //       "c_charge": 50,
+  //       "id": CommonConstants.socketID,
+  //       "room": 1,
+  //       "uid": userID
+  //     };
+  //     CommonConstants.socket.emit('start_video_call', emitdata);
+  //   } else {
+  //     Fluttertoast.showToast(
+  //         msg: "CalculateTime API Error${response.statusCode.toString()}");
+  //   }
+  // }
 
   Future<void> setAgoraVariables(res) async {
     setState(() {
