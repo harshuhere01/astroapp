@@ -9,29 +9,37 @@ import 'package:provider/provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await initializeNotification();
+  runApp(const MyApp());
+}
 
-
-  WidgetsFlutterBinding.ensureInitialized();
-  AwesomeNotifications().initialize(
-    // set the icon to null if you want to use the default app icon
-    // 'resource://drawable/res_app_icon',
+initializeNotification() async {
+  await AwesomeNotifications().initialize(
+      // set the icon to null if you want to use the default app icon
       null,
       [
         NotificationChannel(
-            defaultRingtoneType: DefaultRingtoneType.Ringtone,
-            locked: true,
-            // playSound: true,
-            importance: NotificationImportance.Max,
+            channelGroupKey: 'basic_channel_group',
             channelKey: 'basic_channel',
-            channelName: 'Basic notifications',
+            channelName: 'basic_channel',
             channelDescription: 'Notification channel for basic tests',
-            defaultColor: Color(0xff365d96),
-            ledColor: Color(0xfff1f2f3))
-      ]);
-
-
-  runApp(const MyApp());
-
+            locked: false,
+            importance: NotificationImportance.High,
+            defaultRingtoneType: DefaultRingtoneType.Ringtone,
+            playSound: true,
+            enableVibration: true,
+            channelShowBadge: true,
+            vibrationPattern: highVibrationPattern,
+            defaultColor: Colors.red,
+            ledColor: Colors.blueAccent)
+      ],
+      // Channel groups are only visual and are not required
+      channelGroups: [
+        NotificationChannelGroup(
+            channelGroupkey: 'basic_channel_group',
+            channelGroupName: 'Basic group')
+      ],
+      debug: true);
 }
 
 class MyApp extends StatelessWidget {

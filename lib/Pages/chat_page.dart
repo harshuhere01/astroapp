@@ -10,13 +10,12 @@ import 'package:astro/Widgets/user_listtile_design.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:socket_io_client/socket_io_client.dart' as Io;
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
 class ChatPage extends StatefulWidget {
-  ChatPage({Key? key, this.itemlist}) : super(key: key);
+  ChatPage({Key? key, this.itemlist, this.astroStatus}) : super(key: key);
   var itemlist;
+  String? astroStatus;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -25,81 +24,6 @@ class ChatPage extends StatefulWidget {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _ChatPageState extends State<ChatPage> {
-
-   String? astro_status;
-
-  @override
-  void initState() {
-    socketConnectToServer();
-    super.initState();
-  }
-
-   socketConnectToServer()  {
-    try {
-      print("socket connection process started");
-      CommonConstants.socket.connect();
-      CommonConstants.socket.onConnect((data) => {
-            print("Socket Connection :-:" +
-                CommonConstants.socket.connected.toString())
-          });
-      // CommonConstants.socket.emit(
-      //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
-      CommonConstants.socket.on("socket_connected_backend", (data) {
-        print(
-            "Socket connection message from socket_connected_backend event :- $data ");
-      });
-      CommonConstants.socket.on('no_data', (data) {
-        Fluttertoast.showToast(msg: data.toString());
-      });
-      CommonConstants.socket.on('event', (data) {
-        Fluttertoast.showToast(msg: data.toString());
-      });
-      CommonConstants.socket.on('call_status', (data) {
-        Fluttertoast.showToast(msg: "Call status = ${data['status']}");
-        setState(() {
-          astro_status = data['status'];
-        });
-      });
-
-    } catch (e) {
-      print("socket_error:" + e.toString());
-    }
-  }
-
-  // for send notification
-  // static Future<bool> sendFcmMessage(
-  //     String title, String message, String fcmToken) async {
-  //   try {
-  //     var header = {
-  //       "Content-Type": "application/json",
-  //       "Authorization": "key=AAAApOGu0ok:APA91bFS07zT3qrfNpSpFjIVfJ_QzKc0ujfd3FTxLuLONesfgYBBV0Yh9u5Wm2jWWSsVe4fUF4tu1caGIbkzc1LvPqJOHh-Y6yXdu2HrQxE9Q8OtqXO3MTSZZfW4Lb1cYAi6-q0M8jN6",
-  //     };
-  //     var request = {
-  //       "notification": {
-  //         "title": title,
-  //         "body": message,
-  //         "data": Agora.APP_ID,
-  //         "sound": "default",
-  //         "color": "#990000",
-  //
-  //       },
-  //       "priority": "high",
-  //       "to": fcmToken,
-  //     };
-  //
-  //     var client = new Client();
-  //     var response = await client.post(
-  //         Uri.parse(APIConstants.FirebaseNotificationAPI),
-  //         headers: header,
-  //         body: json.encode(request));
-  //     return true;
-  //   } catch (e, s) {
-  //     print(e);
-  //     print(s);
-  //     return false;
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -130,18 +54,17 @@ class _ChatPageState extends State<ChatPage> {
                         widget.itemlist[index]['charge_per_minute'] +
                         '/min',
                     totalnum: "12456",
-                    astro_status: astro_status,
-                    waitingstatus: astro_status == "Busy"
-                            ? "wait time - 4m"
-                            : "",
-                    btncolor: astro_status == "Available"
+                    astro_status: widget.astroStatus,
+                    waitingstatus:
+                        widget.astroStatus == "Busy" ? "wait time - 4m" : "",
+                    btncolor: widget.astroStatus == "Available"
                         ? MaterialStateProperty.all<Color>(Colors.green)
-                        : astro_status == "Busy"
+                        : widget.astroStatus == "Busy"
                             ? MaterialStateProperty.all<Color>(Colors.red)
                             : MaterialStateProperty.all<Color>(Colors.grey),
-                    btnbordercolor: astro_status == "Available"
+                    btnbordercolor: widget.astroStatus == "Available"
                         ? Colors.green
-                        : astro_status == "Busy"
+                        : widget.astroStatus == "Busy"
                             ? Colors.red
                             : Colors.grey,
                     onTapImage: () {},
@@ -192,6 +115,9 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     _build_btn_of_dialogue("Cancel", Colors.black, () async {
                       Navigator.pop(context);
+                      // Future.delayed(const Duration(seconds: 5),(){
+                      //   send_notification();
+                      // });
                     }),
                     _build_btn_of_dialogue("Recharge", Colors.black, () async {
                       Navigator.pop(context);
@@ -209,6 +135,9 @@ class _ChatPageState extends State<ChatPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _build_btn_of_dialogue("VideoCall", Colors.black, () async {
+                      setState(() {
+                        CommonConstants.caller = true;
+                      });
                       try {
                         final result =
                             await InternetAddress.lookup('example.com');
@@ -216,35 +145,31 @@ class _ChatPageState extends State<ChatPage> {
                             result[0].rawAddress.isNotEmpty) {
                           print('internet connected');
                           Navigator.pop(context);
-                          await createToken(userID).whenComplete(() {
-                            var emitdata = {
-                              "u_mobile": "9601603611",
-                              "c_charge": 50
-                            };
-
-                            CommonConstants.socket
-                                .emit('start_video_call', emitdata);
-                          });
+                          await createToken(userID).whenComplete(() async {await calculateTime("9601603611", "50", userID);});
                           CommonConstants.socket.on("balance_ok", (data) {
-                            print(
-                                "=========balance ok ===============================$data");
-                            if (data == true) {
+                            print("========== balance_ok ==== chat page");
+                            if (CommonConstants.caller) {
+                              print("balance_ok - data = $data");
                               if (CommonConstants.CallDone == '' ||
                                   CommonConstants.CallDone == null ||
                                   CommonConstants.CallDone.isEmpty) {
+                                send_notification();
                                 CommonConstants.CallDone = data.toString();
                                 homeNotifier.onJoin(_scaffoldKey.currentContext,
                                     Agora.Channel_name);
+                                CommonConstants.socket
+                                    .emit('join_room', {"room": userID});
                               } else {
                                 print(
                                     "else part =========balance ok ===============================$data");
                               }
                             } else {
-                              print("data = $data");
+                              print(
+                                  "CommonConstants.caller :- ${CommonConstants.caller}");
                             }
                           });
                           CommonConstants.socket.on("balance_not_ok", (data) {
-                            print("blalance not ok ============$data");
+                            print("========== on balance_not_ok ==== chat page");
                           });
                         }
                       } on SocketException catch (_) {
@@ -254,7 +179,8 @@ class _ChatPageState extends State<ChatPage> {
                       }
                     }),
                     _build_btn_of_dialogue("Join Call", Colors.black, () async {
-                      await createToken(userID).whenComplete(() {
+                      await createToken(userID)
+                          .whenComplete(() {
                         homeNotifier.onJoin(
                             _scaffoldKey.currentContext, Agora.Channel_name);
                       });
@@ -270,16 +196,38 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-   createToken(String userID) async {
+  Future <void> createToken(String userID) async {
     var response = await API().createToken(userID);
     int statusCode = response.statusCode;
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       await setAgoraVariables(res);
+      // await calculateTime(uMobile, cCharge, userID);
       print("token generated successfully :- $res");
     } else {
       Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
+  }
+
+  calculateTime(String uMobile, String cCharge, String userID) async {
+    var response = await API().calculateTime(uMobile, cCharge);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      Fluttertoast.showToast(msg: "CalculateTime API $res");
+      var emitdata = {
+        "u_mobile": "9601603611",
+        "c_charge": 50,
+        "id": CommonConstants.socketID,
+        "room": 1,
+        "uid": userID
+      };
+      CommonConstants.socket.emit('start_video_call', emitdata);
+    } else {
+      Fluttertoast.showToast(
+          msg: "CalculateTime API Error${response.statusCode.toString()}");
     }
   }
 
@@ -290,10 +238,10 @@ class _ChatPageState extends State<ChatPage> {
       Agora.Channel_name = res['channel'];
       Agora.Token = res['token'];
     });
-    send_notification();
+    // send_notification();
   }
 
-   send_notification() async {
+  send_notification() async {
     var response = await API().send_notification();
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -306,39 +254,6 @@ class _ChatPageState extends State<ChatPage> {
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }
   }
-
-  // Future<void> CalculateTime() async {
-  //   print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-  //   final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CalculateTime);
-  //   final headers = {
-  //     'Content-Type': 'application/json',
-  //   };
-  //   Map<String, dynamic> body = {
-  //     "u_mobile": "9601603611",
-  //     "c_charge": 50,
-  //   };
-  //   String jsonBody = json.encode(body);
-  //   final encoding = Encoding.getByName('utf-8');
-  //
-  //   Response response = await post(
-  //     uri,
-  //     headers: headers,
-  //     body: jsonBody,
-  //     encoding: encoding,
-  //   );
-  //
-  //   int statusCode = response.statusCode;
-  //   String responseBody = response.body;
-  //   var res = jsonDecode(responseBody);
-  //
-  //   Fluttertoast.showToast(msg: "CalculateTime API $responseBody");
-  //
-  //   if (statusCode == 200) {
-  //     Fluttertoast.showToast(msg: "CalculateTime API $res");
-  //   } else {
-  //     Fluttertoast.showToast(msg: "CalculateTime API Error${response.statusCode.toString()}");
-  //   }
-  // }
 
   SizedBox _build_btn_of_dialogue(String btnname, Color color, Function ontap) {
     return SizedBox(
@@ -398,3 +313,37 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 }
+
+// for send notification
+// static Future<bool> sendFcmMessage(
+//     String title, String message, String fcmToken) async {
+//   try {
+//     var header = {
+//       "Content-Type": "application/json",
+//       "Authorization": "key=AAAApOGu0ok:APA91bFS07zT3qrfNpSpFjIVfJ_QzKc0ujfd3FTxLuLONesfgYBBV0Yh9u5Wm2jWWSsVe4fUF4tu1caGIbkzc1LvPqJOHh-Y6yXdu2HrQxE9Q8OtqXO3MTSZZfW4Lb1cYAi6-q0M8jN6",
+//     };
+//     var request = {
+//       "notification": {
+//         "title": title,
+//         "body": message,
+//         "data": Agora.APP_ID,
+//         "sound": "default",
+//         "color": "#990000",
+//
+//       },
+//       "priority": "high",
+//       "to": fcmToken,
+//     };
+//
+//     var client = new Client();
+//     var response = await client.post(
+//         Uri.parse(APIConstants.FirebaseNotificationAPI),
+//         headers: header,
+//         body: json.encode(request));
+//     return true;
+//   } catch (e, s) {
+//     print(e);
+//     print(s);
+//     return false;
+//   }
+// }

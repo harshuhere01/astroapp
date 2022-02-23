@@ -53,7 +53,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   void initState() {
     super.initState();
     addGSTtoAmount();
-    razorpay = new Razorpay();
+    razorpay =  Razorpay();
     razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
@@ -61,7 +61,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     razorpay.clear();
   }
@@ -74,7 +73,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
       'content-type': 'application/json',
       'Authorization': authn,
     };
-
     var data =
         '{ "amount": $amount, "currency": "INR", "receipt": "receipt#R1", "payment_capture": 1 }'; // as per my experience the receipt doesn't play any role in helping you generate a certain pattern in your Order ID!!
 

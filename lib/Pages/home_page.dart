@@ -1,15 +1,17 @@
 import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
-import 'package:astro/Constant/api_constant.dart';
 import 'package:astro/Model/API_Model.dart';
+import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
-import 'package:astro/Widgets/simple_button.dart';
 import 'package:astro/Widgets/tab_button.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart';
+import 'package:socket_io_client/src/darty.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key, this.userList}) : super(key: key);
@@ -29,6 +31,11 @@ class _HomePageState extends State<HomePage>
   PageController _pageController = PageController(
     keepPage: true,
   );
+  String? walletBalance;
+  String buttonName = "Check wallet balance";
+  String? astroStatus;
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  late FlutterLocalNotificationsPlugin fltNotification;
 
   void _changePage(int pageNum) {
     setState(() {
@@ -42,9 +49,12 @@ class _HomePageState extends State<HomePage>
   }
 
   @override
-  void initState() {
+  initState() {
     _pageController = PageController();
     walletBalance = "";
+    socketConnectToServer();
+    handleNotificationEvents();
+    // initMessaging();
     super.initState();
   }
 
@@ -54,13 +64,107 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  checksocketConnection() {
-    var connection = CommonConstants.socket.connected;
-    print("Checked Socket Connection :- $connection");
+  handleNotificationEvents() {
+    AwesomeNotifications().actionStream.listen((receivedNotifiction) {
+      if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
+        print("Call Accept");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (builder) => AddMoneyPage(
+                      balance: "5000",
+                    )));
+      } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
+        print("Call Reject");
+      }
+    });
   }
 
-  String? walletBalance;
-  String buttonName = "Check wallet balance";
+  void initMessaging() {
+    var androiInit =
+        const AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
+    var iosInit = const IOSInitializationSettings();
+    var initSetting = InitializationSettings(android: androiInit, iOS: iosInit);
+    fltNotification = FlutterLocalNotificationsPlugin();
+    fltNotification.initialize(initSetting);
+    var androidDetails = const AndroidNotificationDetails(
+      "1",
+      "basic_channel",
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      fullScreenIntent: true,
+      enableVibration: true,
+      autoCancel: false,
+    );
+    var iosDetails = const IOSNotificationDetails();
+    var generalNotificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Fluttertoast.showToast(msg: 'A new onMessageOpenedApp event was published! :- ${message.data}');
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      print('FirebaseMessaging.onMessage.listen' + message.data.toString());
+
+      if (notification != null && android != null) {
+        // fltNotification.show(notification.hashCode, notification.title,
+        //     notification.body, generalNotificationDetails);
+        // Future.delayed(const Duration(seconds: 5),(){
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (builder) => AddMoneyPage(
+        //               balance: "5000",
+        //             )));
+
+        // });
+      }
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("onMessageOpenedApp");
+    });
+  }
+
+  socketConnectToServer() {
+    try {
+      print("socket connection process started");
+      CommonConstants.socket.connect();
+      CommonConstants.socket.onConnect((data) {
+        print("========== on socket connect");
+        setState(() {
+          CommonConstants.socketID = "${CommonConstants.socket.id}";
+        });
+        print("Socket Connection :-:" +
+            CommonConstants.socket.connected.toString());
+      });
+
+      // CommonConstants.socket.emit(
+      //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
+      CommonConstants.socket.on('call_status', (data) {
+        print("========== on call_status");
+        Fluttertoast.showToast(msg: "Call status = ${data['status']}");
+        setState(() {
+          astroStatus = data['status'];
+        });
+      });
+      CommonConstants.socket.on("socket_connected_backend", (data) {
+        print(
+            "========== on socket_connected_backend  :- $data ");
+      });
+      CommonConstants.socket.on('no_data', (data) {
+        print("========== on no_data");
+        Fluttertoast.showToast(msg: data.toString());
+      });
+      CommonConstants.socket.on('event', (data) {
+        print("========== on event");
+        Fluttertoast.showToast(msg: data.toString());
+      });
+    } catch (e) {
+      print("socket_error:" + e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +220,6 @@ class _HomePageState extends State<HomePage>
                     // CommonConstants.socket.emit(
                     //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
                     await getWalletBalance();
-                    checksocketConnection();
                   },
                   child: Text(
                     buttonName,
@@ -186,6 +289,7 @@ class _HomePageState extends State<HomePage>
                       )
                     : ChatPage(
                         itemlist: widget.userList,
+                        astroStatus: astroStatus,
                       ),
                 widget.userList!.isEmpty
                     ? const Center(

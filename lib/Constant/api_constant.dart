@@ -4,7 +4,7 @@ class APIConstants{
   // BaseURL_Live = 'http://34.205.139.16:8085/';
   //    BaseURL_Local = 'http://192.168.1.2:8085/';
   static String FirebaseNotificationAPI = 'https://fcm.googleapis.com/fcm/send';
-  static String BaseURL = 'http://34.205.139.16:8080/';
+  static String BaseURL = 'http://34.205.139.16:8081/';
   static String GetAllUsers = "register/getAll";
   static String AddMoneyURL = 'payments/add_money';
   static String VerifyPaymentURL = 'payments/verify_payment';

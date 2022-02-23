@@ -35,7 +35,13 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
     100000
   ];
 
-
+  @override
+  void dispose() {
+    // if(!mounted) {
+      _balancefieldcontroller.dispose();
+    // }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

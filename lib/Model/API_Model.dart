@@ -155,4 +155,27 @@ class API{
     return response;
   }
 
+  Future<Response> calculateTime(String uMobile,String cCharge) async {
+    final uri = Uri.parse(APIConstants.BaseURL + APIConstants.CalculateTime);
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    Map<String, dynamic> body = {
+      "u_mobile": uMobile,
+      "c_charge": cCharge,
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+
+
+  }
+
 }

@@ -161,9 +161,9 @@ class UserListTile extends StatelessWidget {
                                           side:  BorderSide(
                                               color: btnbordercolor)))),
                               onPressed: () {
-                                if(astro_status=="Available"){
+                                // if(astro_status=="Available"){
                                   callbtnclick!();
-                                }
+                                // }
                               },
                             ),
                           ),

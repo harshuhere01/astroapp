@@ -12,12 +12,13 @@ class _MyHomePageState extends State<MyHomePage> {
   /// create a channelController to retrieve text value
   final _channelController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, HomeNotifier homeNotifier, child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Video Call App'),
+          title: const Text('Video Call App'),
         ),
         body: Center(
           child: Padding(
@@ -32,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       errorText: homeNotifier.validateError
                           ? 'Channel name is mandatory'
                           : null,
-                      border: UnderlineInputBorder(
+                      border: const UnderlineInputBorder(
                         borderSide: BorderSide(width: 1),
                       ),
                       hintText: 'Channel name',
@@ -69,4 +70,5 @@ class _MyHomePageState extends State<MyHomePage> {
     _channelController.dispose();
     super.dispose();
   }
+
 }

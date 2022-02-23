@@ -24,6 +24,9 @@ class _SplashScreenState extends State<SplashScreen> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   late FlutterLocalNotificationsPlugin fltNotification;
   String? userid;
+  late BuildContext buildContext;
+
+  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -32,17 +35,42 @@ class _SplashScreenState extends State<SplashScreen> {
     initMessaging();
     // generateRandomUIDforVideoCall();
     navigatetoDashBoard();
-
-    AwesomeNotifications().actionStream.listen((receivedNotifiction) {
-      if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
-        print("Call Accept");
-        Navigator.push(
-            context, MaterialPageRoute(builder: (builder) => AddMoneyPage()));
-      } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
-        print("Call Reject");
-      }
-    });
     checkPermission();
+  }
+
+
+  void notify() async {
+    AwesomeNotifications().createNotification(
+      actionButtons: [
+        NotificationActionButton(
+          key: "CANCEL",
+          label: "CANCEL",
+        ),
+        NotificationActionButton(
+          key: "ACCEPT",
+          label: "ACCEPT",
+        )
+      ],
+      // schedule: NotificationInterval(
+      //     interval: 45, timeZone: localTimeZone, repeats: true),
+      content: NotificationContent(
+          fullScreenIntent: true,
+          wakeUpScreen: true,
+          locked: true,
+          category: NotificationCategory.Call,
+          displayOnBackground: true,
+          displayOnForeground: true,
+          autoDismissible: false,
+          // autoCancel: true,
+          id: 1,
+          channelKey: 'basic_channel',
+          title: "Incoming call",
+          body: "Incoming call from name",
+          payload: {
+            "sound": "default",
+          },
+          summary: "Hello"),
+    );
   }
 
   Future<void> generateRandomUIDforVideoCall() async {
@@ -56,34 +84,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   checkPermission() {
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
-      print("Checkk == $isAllowed");
+      print("Checkk notification permission == $isAllowed");
       if (!isAllowed) {
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
-  }
-
-  void notify() async {
-    AwesomeNotifications().createNotification(
-        actionButtons: [
-          NotificationActionButton(key: "CANCEL", label: "CANCEL"),
-          NotificationActionButton(
-            key: "ACCEPT",
-            label: "ACCEPT",
-          )
-        ],
-        // schedule: NotificationInterval(
-        //     interval: 45, timeZone: localTimeZone, repeats: true),
-        content: NotificationContent(
-            fullScreenIntent: true,
-            wakeUpScreen: true,
-            locked: true,
-            // autoCancel: true,
-            id: 10,
-            channelKey: 'basic_channel',
-            title: "Incoming call",
-            body: "Incoming call from name",
-            summary: "Hello"));
   }
 
   void pushFCMtoken() async {
@@ -99,8 +104,16 @@ class _SplashScreenState extends State<SplashScreen> {
     var initSetting = InitializationSettings(android: androiInit, iOS: iosInit);
     fltNotification = FlutterLocalNotificationsPlugin();
     fltNotification.initialize(initSetting);
-    var androidDetails = const AndroidNotificationDetails("1", "channelName",
-        importance: Importance.high, priority: Priority.high);
+    var androidDetails = const AndroidNotificationDetails(
+      "1",
+      "basic_channel",
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      fullScreenIntent: true,
+      enableVibration: true,
+      autoCancel: false,
+    );
     var iosDetails = const IOSNotificationDetails();
     var generalNotificationDetails =
         NotificationDetails(android: androidDetails, iOS: iosDetails);
@@ -110,12 +123,21 @@ class _SplashScreenState extends State<SplashScreen> {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      print('gefwgefwe' + message.data.toString());
-      //Notify();
+      print('FirebaseMessaging.onMessage.listen' + message.data.toString());
 
       if (notification != null && android != null) {
-        fltNotification.show(notification.hashCode, notification.title,
-            notification.body, generalNotificationDetails);
+        // fltNotification.show(notification.hashCode, notification.title,
+        //     notification.body, generalNotificationDetails);
+        // Future.delayed(const Duration(seconds: 5),(){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (builder) => HomePage(
+                userList: userList,
+              ),
+            ));
+        notify();
+        // });
       }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -125,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _firebaseMessagingBackgroundHandler(BuildContext context) async {
     //print('message from background handler');
-    //print("Handling a background message: ${message.messageId}");
+    // print("Handling a background message: ${message.messageId}");
     Navigator.push(
         context, MaterialPageRoute(builder: (builder) => AddMoneyPage()));
   }
@@ -147,12 +169,15 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
+
     CommonConstants.device_width = MediaQuery.of(context).size.width;
     CommonConstants.device_height = MediaQuery.of(context).size.height;
-
+    buildContext=context;
     return Scaffold(
+      // key: _scaffoldKey,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
@@ -185,4 +210,5 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false);
     });
   }
+
 }

@@ -142,7 +142,8 @@ class _CallPageState extends State<CallPage> {
                           await createToken(userID).whenComplete(() {
                             var emitdata = {
                               "u_mobile": "9601603611",
-                              "c_charge": 50
+                              "c_charge": 50,
+                              "id" : CommonConstants.socketID
                             };
 
                             CommonConstants.socket
@@ -150,7 +151,7 @@ class _CallPageState extends State<CallPage> {
                           });
                           CommonConstants.socket.on("balance_ok", (data) {
                             print(
-                                "=========balance ok ===============================$data");
+                                "on balance_ok ==== call page");
                             if (data == true) {
                               if (CommonConstants.CallDone == '' ||
                                   CommonConstants.CallDone == null ||
@@ -211,9 +212,9 @@ class _CallPageState extends State<CallPage> {
       Agora.APP_ID = res["appId"];
       Agora.UUID = res['uid'];
       Agora.Channel_name = res['channel'];
-      Agora.Token = res['token'];
+      // Agora.Token = res['token'];
     });
-    send_notification();
+    // send_notification();
   }
 
   Future<void> send_notification() async {
