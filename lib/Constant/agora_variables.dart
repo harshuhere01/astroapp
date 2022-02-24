@@ -10,7 +10,7 @@ class Agora{
    // static String UUID = "";
 
    static String APP_ID = "";
-   static String Token = "00603ae3cde77704437a2fa2e6975a059c6IAA1a1iuH3ARa5VkiJGkKqN+wucBCdgcukYC5ZrniJOoOUOQEggh39v0EADkAbsqtcIUYgEAAQAAAAAA";
+   static String Token = "";
    static String Channel_name = "0";
    static String UUID = "0";
    static int CallDisconnectSeconds = 60;

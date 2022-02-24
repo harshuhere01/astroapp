@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/src/darty.dart';
+
 
 class ChatPage extends StatefulWidget {
   ChatPage({Key? key, this.itemlist, this.astroStatus}) : super(key: key);
@@ -24,6 +26,41 @@ class ChatPage extends StatefulWidget {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _ChatPageState extends State<ChatPage> {
+
+
+Future<void> socketConnectToServer() async {
+    try {
+      print("socket connection process started");
+      CommonConstants.socket.connect();
+      CommonConstants.socket.onConnect((data) {
+        // print("========== on socket connect");
+        setState(() {
+          CommonConstants.socketID = "${CommonConstants.socket.id}";
+        });
+        print("Socket Connection :-:" +
+            CommonConstants.socket.connected.toString());
+      });
+      // CommonConstants.socket.on('call_status', (data) {
+      //   // print("========== on call_status");
+      //   Fluttertoast.showToast(msg: "Call status = ${data['status']}");
+      //   setState(() {
+      //     astroStatus = data['status'];
+      //   });
+      // });
+      // CommonConstants.socket.on("socket_connected_backend", (data) {
+      //   print(
+      //       "========== on socket_connected_backend  :- $data ");
+      // });
+      // CommonConstants.socket.on('event', (data) {
+      //   print("========== on event");
+      //   Fluttertoast.showToast(msg: data.toString());
+      // });
+
+    } catch (e) {
+      print("socket_error:" + e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -69,12 +106,17 @@ class _ChatPageState extends State<ChatPage> {
                             : Colors.grey,
                     onTapImage: () {},
                     onTapOfTile: () {},
-                    callbtnclick: () {
-                      _showCallClickDialog(
-                          _scaffoldKey.currentContext,
-                          "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['u_name']}",
-                          "${widget.itemlist[index]['id']}",
-                          homeNotifier);
+                    callbtnclick: () async {
+                      await socketConnectToServer().whenComplete(() {
+                        setState(() {
+                          CommonConstants.receiverIdforSendNotification = "${widget.itemlist[index]['id']}";
+                        });
+                        _showCallClickDialog(
+                            _scaffoldKey.currentContext,
+                            "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.itemlist[index]['u_name']}",
+                            "${widget.itemlist[index]['id']}",
+                            homeNotifier,index);
+                      });
                     },
                   ),
                 );
@@ -87,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _showCallClickDialog(
-      context, String dialoguetext, String userID, homeNotifier) async {
+      context, String dialoguetext, String userID, homeNotifier,index) async {
     showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -115,9 +157,6 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     _build_btn_of_dialogue("Cancel", Colors.black, () async {
                       Navigator.pop(context);
-                      // Future.delayed(const Duration(seconds: 5),(){
-                      //   send_notification();
-                      // });
                     }),
                     _build_btn_of_dialogue("Recharge", Colors.black, () async {
                       Navigator.pop(context);
@@ -136,7 +175,7 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     _build_btn_of_dialogue("VideoCall", Colors.black, () async {
                       setState(() {
-                        CommonConstants.caller = true;
+                       CommonConstants.receiverFCMToken = widget.itemlist[index]['fcm_token'];
                       });
                       try {
                         final result =
@@ -153,34 +192,49 @@ class _ChatPageState extends State<ChatPage> {
                               "room": 1,
                               "uid": userID
                             };
-                            CommonConstants.socket.emit('start_video_call', emitdata);
-                            // await calculateTime("9601603611", "50", userID);
+                            CommonConstants.socket
+                                .emit('start_video_call', emitdata);
                           });
-                          CommonConstants.socket.on("balance_ok", (data) {
-                            print("========== balance_ok ==== chat page");
-                            if (CommonConstants.caller) {
-                              print("balance_ok - data = $data");
-                              if (CommonConstants.CallDone == '' ||
-                                  CommonConstants.CallDone == null ||
-                                  CommonConstants.CallDone.isEmpty) {
-                                send_notification();
-                                CommonConstants.CallDone = data.toString();
-                                homeNotifier.onJoin(_scaffoldKey.currentContext,
-                                    Agora.Channel_name);
-                                CommonConstants.socket
-                                    .emit('join_room', {"room": userID});
-                              } else {
-                                print(
-                                    "else part =========balance ok ===============================$data");
-                              }
-                            } else {
-                              print(
-                                  "CommonConstants.caller :- ${CommonConstants.caller}");
-                            }
+                          CommonConstants.socket.on('no_data', (data) {
+                            Fluttertoast.showToast(msg: data.toString());
+                            CommonConstants.socket.dispose();
+                            print("on call no_data connection is :-${CommonConstants.socket.connected}");
+
                           });
-                          CommonConstants.socket.on("balance_not_ok", (data) {
-                            print("========== on balance_not_ok ==== chat page");
+                          CommonConstants.socket.on("balance_ok", (data) async {
+                            print("========== balance_ok ==== chat page ${data['uid']}");
+                            CommonConstants.socket
+                                /// .emit('join_room', {data['uid']});
+                                .emit('join_room', 1);
+                            await sendNotification();
+                            homeNotifier.onJoin(_scaffoldKey.currentContext,
+                                Agora.Channel_name);
+                            ///
+                            // if (CommonConstants.caller) {
+                            //   print("balance_ok - data = $data");
+                            //   if (CommonConstants.CallDone == '' ||
+                            //       CommonConstants.CallDone == null ||
+                            //       CommonConstants.CallDone.isEmpty) {
+                            //     send_notification();
+                            //     CommonConstants.CallDone = data.toString();
+                            //     homeNotifier.onJoin(_scaffoldKey.currentContext,
+                            //         Agora.Channel_name);
+                            //     CommonConstants.socket
+                            //         .emit('join_room', {"room": userID});
+                            //   } else {
+                            //     print(
+                            //         "else part =========balance ok ===============================$data");
+                            //   }
+                            // } else {
+                            //   print(
+                            //       "CommonConstants.caller :- ${CommonConstants.caller}");
+                            // }
                           });
+
+                          // CommonConstants.socket.on("balance_not_ok", (data) {
+                          //   print(
+                          //       "========== on balance_not_ok ==== chat page");
+                          // });
                         }
                       } on SocketException catch (_) {
                         Fluttertoast.showToast(
@@ -189,8 +243,8 @@ class _ChatPageState extends State<ChatPage> {
                       }
                     }),
                     _build_btn_of_dialogue("Join Call", Colors.black, () async {
-                      await createToken(userID)
-                          .whenComplete(() {
+                      await createToken(userID).whenComplete(() async {
+                        await connectSocket();
                         homeNotifier.onJoin(
                             _scaffoldKey.currentContext, Agora.Channel_name);
                       });
@@ -205,8 +259,10 @@ class _ChatPageState extends State<ChatPage> {
       },
     );
   }
-
-  Future <void> createToken(String userID) async {
+Future<void> connectSocket()async {
+  CommonConstants.socket.connect();
+}
+  Future<void> createToken(String userID) async {
     var response = await API().createToken(userID);
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -251,7 +307,7 @@ class _ChatPageState extends State<ChatPage> {
     // send_notification();
   }
 
-  send_notification() async {
+  Future<void> sendNotification() async {
     var response = await API().send_notification();
     int statusCode = response.statusCode;
     String responseBody = response.body;

@@ -91,9 +91,12 @@ class API{
       'Content-Type': 'application/json',
     };
     Map<String, dynamic> body = {
-      "fcm_token": CommonConstants.MobileTokenNotifiaction,
+      "fcm_token": CommonConstants.receiverFCMToken,
       "channelName": Agora.Channel_name,
       "agora_token": Agora.Token,
+      "u_mobile" : "9876543210",
+      "receiverId":CommonConstants.receiverIdforSendNotification,
+      "app_id" : Agora.APP_ID,
     };
     String jsonBody = json.encode(body);
     // final encoding = Encoding.getByName('utf-8');
