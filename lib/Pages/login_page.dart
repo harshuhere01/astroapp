@@ -182,9 +182,10 @@ class _LogInPageState extends State<LogInPage> {
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
+      await updateFCMToken();
       setState(() {
         gbtnprogress = false;
-        CommonConstants.userID = res['data']['id'];
+        CommonConstants.userID = "${res['data']['id']}";
       });
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('id', '${res['data']['id']}');
@@ -198,7 +199,7 @@ class _LogInPageState extends State<LogInPage> {
       prefs.setString('isMember', '${res['data']['isMember']}');
       prefs.setString('isActive', '${res['data']['isActive']}');
       prefs.setString('fcm_token', '${res['data']['fcm_token']}');
-      await updateFCMToken();
+
       if(res['message'] == ""){
         Fluttertoast.showToast(msg: "Registered Successfully!!!");
       }
@@ -221,7 +222,7 @@ class _LogInPageState extends State<LogInPage> {
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      Fluttertoast.showToast(msg: res['message']);
+      // Fluttertoast.showToast(msg: res['message']);
     } else {
       Fluttertoast.showToast(msg: "updateFCMToken API :- ${response.statusCode} :- $res");
     }
