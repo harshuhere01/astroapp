@@ -28,13 +28,10 @@ class _BtnWidgetState extends State<BtnWidget> {
           border: Border.all(color: Colors.black87.withOpacity(0.1)),
         ),
         padding: const EdgeInsets.all(10),
-        child: Padding(
-          padding: EdgeInsets.only(left: 5),
-          child: Text(
-            "${widget.lable}",
-            style: const TextStyle(
-                color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
-          ),
+        child: Text(
+          "${widget.lable}",
+          style: const TextStyle(
+              color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
         ),
       ),
     );

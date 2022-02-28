@@ -9,9 +9,9 @@ class Agora{
    // static String Channel_name = "myChannel";
    // static String UUID = "";
 
-   static String APP_ID = "";
-   static String Token = "";
-   static String Channel_name = "0";
+   static String APP_ID = "03ae3cde77704437a2fa2e6975a059c6";
+   static String Token = "00603ae3cde77704437a2fa2e6975a059c6IAByGZBbO08PkeDgj32n9HiQk1EGTbDcHZv9Si9i/tsdurfv3IMh39v0EABPgcveUuodYgEAAQBS6h1i";
+   static String Channel_name = "1";
    static String UUID = "0";
    static int CallDisconnectSeconds = 60;
    static String TokenExpireTime = "null";

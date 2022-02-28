@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:astro/Agora%20Functions/Video%20Call/screens/home/home_model.dart';
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
+import 'package:astro/Firebase%20Services/firebase_auth_service.dart';
 import 'package:astro/Model/API_Model.dart';
+import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
+import 'package:astro/Pages/login_page.dart';
 import 'package:astro/Widgets/tab_button.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,12 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/src/darty.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key, this.userList}) : super(key: key);
-
-  List<dynamic>? userList;
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -36,9 +37,10 @@ class _HomePageState extends State<HomePage>
   String? walletBalance;
   String buttonName = "Check wallet balance";
   String? astroStatus;
-  bool listened = false;
+  String? userName;
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   late FlutterLocalNotificationsPlugin fltNotification;
+  List<dynamic>? userList;
 
   void _changePage(int pageNum) {
     setState(() {
@@ -54,35 +56,67 @@ class _HomePageState extends State<HomePage>
   @override
   initState() {
     _pageController = PageController();
-    walletBalance = "";
-    // socketConnectToServer();
-    // handleNotificationEvents();
     initMessaging();
+    getdisplayName();
+    // handleNotificationEvents();
+    // getAllMember();
     super.initState();
   }
 
   @override
   void dispose() {
+    CommonConstants.listened = true;
     _pageController.dispose();
     super.dispose();
   }
 
-  handleNotificationEvents(HomeNotifier homeNotifier) {
-    AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
-      if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
-        print("Call Accept");
-        await connectSocket();
-          homeNotifier.onJoin(
-              context, CommonConstants.joiningchannelName);
-      } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
-        print("Call Reject");
-      }
-    });
-  }
-  Future<void> connectSocket()async {
-    CommonConstants.socket.connect();
+
+
+  Future<void> getAllMember() async {
+    var response = await API().getAllMember(CommonConstants.userID);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      setState(() {
+        userList = res['data'];
+      });
+      print(userList.toString());
+    } else {
+      Fluttertoast.showToast(
+          msg: "response of fetchuser :- ${response.statusCode.toString()}");
+    }
   }
 
+  Future<void>getdisplayName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('name');
+      CommonConstants.userID = prefs.getString('id')!;
+      CommonConstants.userName = prefs.getString('name')!;
+    });
+    getAllMember();
+  }
+
+  handleNotificationEvents(homeNotifier) {
+    print("handel notification");
+    // Consumer(builder: (context, HomeNotifier homeNotifier, child) {
+      AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
+        if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
+          print("Call Accept");
+          await connectSocket();
+          homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
+        } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
+          print("Call Reject");
+        }
+      });
+      return Container();
+    // });
+  }
+
+  Future<void> connectSocket() async {
+    CommonConstants.socket.connect();
+  }
 
   void initMessaging() {
     var androiInit =
@@ -105,7 +139,7 @@ class _HomePageState extends State<HomePage>
     var generalNotificationDetails =
         NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
@@ -114,18 +148,23 @@ class _HomePageState extends State<HomePage>
       if (notification != null && android != null) {
         setState(() {
           CommonConstants.receiverId = message.data['receiverId'];
+          CommonConstants.callerId = message.data['callerId'];
+          CommonConstants.room = message.data['receiverId'];
           CommonConstants.joiningchannelName = message.data['channelName'];
           Agora.Token = message.data['agoraToken'];
           Agora.APP_ID = message.data['app_id'];
         });
 
-        /// Normal Notification
-        // fltNotification.show(notification.hashCode, notification.title,
-        //     notification.body, generalNotificationDetails);
+        await notify();
         ///Awesome Notification
         print(
             "Incoming Notification :-Title - ${notification.title}, Body - ${notification.body}, BodyLocARGS - ${notification.bodyLocArgs}");
-        notify();
+
+
+        /// Normal Notification
+        // fltNotification.show(notification.hashCode, notification.title,
+        //     notification.body, generalNotificationDetails);
+
       }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -133,7 +172,7 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  void notify() async {
+  Future<void> notify() async {
     AwesomeNotifications().createNotification(
       actionButtons: [
         NotificationActionButton(
@@ -164,49 +203,105 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // socketConnectToServer() {
-  //   try {
-  //     print("socket connection process started");
-  //     CommonConstants.socket.connect();
-  //     CommonConstants.socket.onConnect((data) {
-  //       // print("========== on socket connect");
-  //       setState(() {
-  //         CommonConstants.socketID = "${CommonConstants.socket.id}";
-  //       });
-  //       print("Socket Connection :-:" +
-  //           CommonConstants.socket.connected.toString());
-  //     });
-  //     // CommonConstants.socket.on('call_status', (data) {
-  //     //   // print("========== on call_status");
-  //     //   Fluttertoast.showToast(msg: "Call status = ${data['status']}");
-  //     //   setState(() {
-  //     //     astroStatus = data['status'];
-  //     //   });
-  //     // });
-  //     // CommonConstants.socket.on("socket_connected_backend", (data) {
-  //     //   print(
-  //     //       "========== on socket_connected_backend  :- $data ");
-  //     // });
-  //     // CommonConstants.socket.on('event', (data) {
-  //     //   print("========== on event");
-  //     //   Fluttertoast.showToast(msg: data.toString());
-  //     // });
-  //
-  //   } catch (e) {
-  //     print("socket_error:" + e.toString());
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, HomeNotifier homeNotifier, child) {
-      if(listened == false){
+      if (CommonConstants.listened == false) {
         handleNotificationEvents(homeNotifier);
-          listened=true;
+        CommonConstants.listened = true;
       }
       return Scaffold(
         backgroundColor: Colors.grey[200],
+        drawer: SizedBox(
+          child: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  padding: EdgeInsets.fromLTRB(
+                      CommonConstants.device_height * 0.028,
+                      CommonConstants.device_height * 0.15,
+                      0.0,
+                      CommonConstants.device_height * 0.01),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[600],
+                  ),
+                  child: Text(
+                    "$userName",
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person, size: 28),
+                  title: const Text(
+                    'Profile',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.account_balance_wallet, size: 28),
+                  title: const Text(
+                    'Wallet',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddMoneyPage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history, size: 28),
+                  title: const Text(
+                    'History',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout, size: 28),
+                  title: const Text(
+                    'Log Out',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  onTap: () async {
+                    await AuthClass().signOut();
+                    Navigator.pop(context);
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (builder) => LogInPage()),
+                        (route) => false);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
         appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.black),
           actions: [
             IconButton(
                 onPressed: () {
@@ -238,45 +333,6 @@ class _HomePageState extends State<HomePage>
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  width: 200,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow[600],
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    border: Border.all(color: Colors.black87.withOpacity(0.1)),
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: TextButton(
-                    onPressed: () async {
-                      // CommonConstants.socket.emit(
-                      //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
-                      await getWalletBalance();
-                    },
-                    child: Text(
-                      buttonName,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w300),
-                    ),
-                  ),
-                ),
-                walletBalance == null || walletBalance == ""
-                    ? Container()
-                    : Text(
-                        "Your wallet Balance is : ₹ $walletBalance",
-                        style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w300),
-                      ),
-              ],
-            ),
             Container(
               height: 80,
               padding:
@@ -289,7 +345,7 @@ class _HomePageState extends State<HomePage>
                     child: TabButton(
                         selectedPage: _selectedPage,
                         pageNumber: 0,
-                        text: "Chat",
+                        text: "Call",
                         onPressed: () {
                           _changePage(0);
                         }),
@@ -299,7 +355,7 @@ class _HomePageState extends State<HomePage>
                     child: TabButton(
                         selectedPage: _selectedPage,
                         pageNumber: 1,
-                        text: "Call",
+                        text: "Chat",
                         onPressed: () {
                           _changePage(1);
                         }),
@@ -312,31 +368,33 @@ class _HomePageState extends State<HomePage>
                 onPageChanged: (int page) {
                   setState(() {
                     _selectedPage = page;
-                    buttonName = "Check wallet balance";
                     walletBalance = "";
                   });
                 },
                 controller: _pageController,
                 children: [
-                  widget.userList!.isEmpty
+                  userList == null ?? userList!.isEmpty
                       ? const Center(
                           child: CircularProgressIndicator(
                             color: Colors.black,
                           ),
                         )
-                      : ChatPage(
-                          itemlist: widget.userList,
-                          astroStatus: astroStatus,
-                        ),
-                  widget.userList!.isEmpty
+                      : userList!.isEmpty
+                          ? const Center(
+                              child: Text(
+                              "No members record found !!!",
+                              style: TextStyle(color: Colors.black),
+                            ))
+                          : CallPage(
+                              userList: userList,
+                            ),
+                  userList == null ?? userList!.isEmpty
                       ? const Center(
                           child: CircularProgressIndicator(
                             color: Colors.black,
                           ),
                         )
-                      : CallPage(
-                          itemlist: widget.userList,
-                        ),
+                      : const ChatPage(),
                 ],
               ),
             ),
@@ -346,20 +404,47 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  getWalletBalance() async {
-    var response = await API().getWalletBalance();
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      setState(() {
-        walletBalance = res["wallet_amount"];
-        buttonName = "Check balance again";
-      });
-      Fluttertoast.showToast(
-          msg: "Wallet Amount is :- ${res["wallet_amount"]}");
-    } else {
-      Fluttertoast.showToast(msg: response.statusCode.toString());
-    }
-  }
+
+  /// check wallet balance button
+//   Column(
+//   children: [
+//   Container(
+//   margin: const EdgeInsets.all(10),
+//   width: 200,
+//   height: 40,
+//   alignment: Alignment.center,
+//   decoration: BoxDecoration(
+//   color: Colors.yellow[600],
+//   borderRadius: const BorderRadius.all(Radius.circular(10)),
+//   border: Border.all(color: Colors.black87.withOpacity(0.1)),
+//   ),
+//   padding: const EdgeInsets.all(2),
+//   child: TextButton(
+//   onPressed: () async {
+//   // CommonConstants.socket.emit(
+//   //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
+//   await getWalletBalance();
+// },
+// child: Text(
+// buttonName,
+// style: const TextStyle(
+// fontSize: 15,
+// color: Colors.black,
+// fontWeight: FontWeight.w300),
+// ),
+// ),
+// ),
+// walletBalance == null || walletBalance == ""
+// ? Container()
+//     : Text(
+// "Your wallet Balance is : ₹ $walletBalance",
+// style: const TextStyle(
+// fontSize: 15,
+// color: Colors.black,
+// fontWeight: FontWeight.w300),
+// ),
+// ],
+// ),
+
+
 }

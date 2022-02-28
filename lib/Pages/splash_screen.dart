@@ -5,14 +5,15 @@ import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/home_page.dart';
+import 'package:astro/Pages/login_page.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import 'package:socket_io_client/src/darty.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -26,6 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   late FlutterLocalNotificationsPlugin fltNotification;
   String? userid;
   late BuildContext buildContext;
+  // List<dynamic>? userList;
 
   // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -33,75 +35,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     pushFCMtoken();
-    // initMessaging();
-    // generateRandomUIDforVideoCall();
-    // socketConnectToServer();
     navigatetoDashBoard();
     checkPermission();
   }
-  // socketConnectToServer() {
-  //   try {
-  //     print("socket connection process started");
-  //     CommonConstants.socket.connect();
-  //     CommonConstants.socket.onConnect((data) {
-  //       // print("========== on socket connect");
-  //       setState(() {
-  //         CommonConstants.socketID = "${CommonConstants.socket.id}";
-  //       });
-  //       print("Socket Connection :-:" +
-  //           CommonConstants.socket.connected.toString());
-  //     });
-  //     // CommonConstants.socket.on('call_status', (data) {
-  //     //   // print("========== on call_status");
-  //     //   Fluttertoast.showToast(msg: "Call status = ${data['status']}");
-  //     //   setState(() {
-  //     //     astroStatus = data['status'];
-  //     //   });
-  //     // });
-  //     // CommonConstants.socket.on("socket_connected_backend", (data) {
-  //     //   print(
-  //     //       "========== on socket_connected_backend  :- $data ");
-  //     // });
-  //     // CommonConstants.socket.on('event', (data) {
-  //     //   print("========== on event");
-  //     //   Fluttertoast.showToast(msg: data.toString());
-  //     // });
-  //
-  //   } catch (e) {
-  //     print("socket_error:" + e.toString());
-  //   }
-  // }
-
-  // void notify() async {
-  //   AwesomeNotifications().createNotification(
-  //     actionButtons: [
-  //       NotificationActionButton(
-  //         key: "CANCEL",
-  //         label: "CANCEL",
-  //       ),
-  //       NotificationActionButton(
-  //         key: "ACCEPT",
-  //         label: "ACCEPT",
-  //       )
-  //     ],
-  //     // schedule: NotificationInterval(
-  //     //     interval: 45, timeZone: localTimeZone, repeats: true),
-  //     content: NotificationContent(
-  //         fullScreenIntent: true,
-  //         wakeUpScreen: true,
-  //         locked: true,
-  //         category: NotificationCategory.Call,
-  //         displayOnBackground: true,
-  //         displayOnForeground: true,
-  //         autoDismissible: false,
-  //         // autoCancel: true,
-  //         id: 1,
-  //         channelKey: 'basic_channel',
-  //         title: "Incoming call",
-  //         body: "Incoming call from name",
-  //         summary: "Hello"),
-  //   );
-  // }
 
   Future<void> generateRandomUIDforVideoCall() async {
     var uuid = const Uuid();
@@ -110,6 +46,27 @@ class _SplashScreenState extends State<SplashScreen> {
     setState(() {
       Agora.UUID = v4;
     });
+  }
+  Future<void> navigatetoDashBoard() async {
+    // await fetchUsers().whenComplete(() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = prefs.getString('email');
+    if(key!=null && key!=""){
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (builder) =>  HomePage()),
+                (route) => false);
+      });
+    }else{
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (builder) =>  LogInPage()),
+                (route) => false);
+      });
+    }
+    // });
   }
 
   checkPermission() {
@@ -124,9 +81,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void pushFCMtoken() async {
     String? token = await messaging.getToken();
     print("FCM Token Is:-" + token!);
-    // setState(() {
-    //   CommonConstants.receiverFCMToken = token;
-    // });
+    setState(() {
+      CommonConstants.userFCMToken = token;
+    });
   }
 
   // void initMessaging() {
@@ -179,22 +136,22 @@ class _SplashScreenState extends State<SplashScreen> {
         context, MaterialPageRoute(builder: (builder) => AddMoneyPage()));
   }
 
-  List<dynamic>? userList;
-  final String apiUrl = "https://randomuser.me/api/?results=50";
 
-  fetchUsers() async {
-    var response = await API().fetchUsers();
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      ///Fluttertoast.showToast(msg: res.toString());
-      userList = res;
-      print(userList.toString());
-    } else {
-      Fluttertoast.showToast(msg: response.statusCode.toString());
-    }
-  }
+  // final String apiUrl = "https://randomuser.me/api/?results=50";
+
+  // fetchUsers() async {
+  //   var response = await API().fetchUsers();
+  //   int statusCode = response.statusCode;
+  //   String responseBody = response.body;
+  //   var res = jsonDecode(responseBody);
+  //   if (statusCode == 200) {
+  //     ///Fluttertoast.showToast(msg: res.toString());
+  //     userList = res;
+  //     print(userList.toString());
+  //   } else {
+  //     Fluttertoast.showToast(msg: response.statusCode.toString());
+  //   }
+  // }
 
 
   @override
@@ -225,17 +182,5 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  void navigatetoDashBoard() async {
-    await fetchUsers().whenComplete(() {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (builder) => HomePage(
-              userList: userList,
-            ),
-          ),
-          (route) => false);
-    });
-  }
 
 }

@@ -57,8 +57,8 @@ class UserListTile extends StatelessWidget {
                     child: ClipOval(
                       child: FadeInImage(
                         fit: BoxFit.cover,
-                        width: CommonConstants.device_width/4.9,
-                        height: CommonConstants.device_height/10.5,
+                        width: CommonConstants.device_width/5,
+                        height: CommonConstants.device_width/5,
                         placeholder: const AssetImage("asset/placeholder.png"),
                         image: NetworkImage("$imageURL"),
                       ),
@@ -161,9 +161,7 @@ class UserListTile extends StatelessWidget {
                                           side:  BorderSide(
                                               color: btnbordercolor)))),
                               onPressed: () {
-                                // if(astro_status=="Available"){
                                   callbtnclick!();
-                                // }
                               },
                             ),
                           ),

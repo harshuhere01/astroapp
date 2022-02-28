@@ -179,7 +179,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 : BtnWidget(
                     height: 45,
                     width: 200,
-                    lable: "Pay now",
+                    lable: " Pay now",
                     ontap: () async {
                       setState(() {
                         isLoading = true;
@@ -233,12 +233,12 @@ class _PaymentInfoState extends State<PaymentInfo> {
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      Fluttertoast.showToast(msg: responseBody);
+      // Fluttertoast.showToast(msg: responseBody);
       try {
         final result = await InternetAddress.lookup('example.com');
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           print('internet connected');
-          openCheckout("${res['order_ID']}");
+          openCheckout("${res['data']['orderId']}");
         }
       } on SocketException catch (_) {
         setState(() {
@@ -267,7 +267,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: responseBody);
+      // Fluttertoast.showToast(msg: responseBody);
       Navigator.pop(context);
       Navigator.pop(context);
     } else {

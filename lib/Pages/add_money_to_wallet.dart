@@ -1,12 +1,15 @@
+import 'dart:convert';
+
+import 'package:astro/Constant/CommonConstant.dart';
+import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/payment_info.dart';
 import 'package:astro/Widgets/custom_gridview.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class AddMoneyPage extends StatefulWidget {
-  AddMoneyPage({Key? key, this.balance }) : super(key: key);
+  AddMoneyPage({Key? key,}) : super(key: key);
 
-  String? balance;
 
   @override
   _AddMoneyPageState createState() => _AddMoneyPageState();
@@ -15,6 +18,7 @@ class AddMoneyPage extends StatefulWidget {
 class _AddMoneyPageState extends State<AddMoneyPage> {
   final _balancefieldcontroller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String? balance;
 
   String? amount;
   List<int> itemlist = [
@@ -36,11 +40,33 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
   ];
 
   @override
+  void initState() {
+    getBalance();
+    super.initState();
+  }
+
+  @override
   void dispose() {
     // if(!mounted) {
-      _balancefieldcontroller.dispose();
+    _balancefieldcontroller.dispose();
     // }
     super.dispose();
+  }
+
+  Future<void> getBalance() async {
+    var response = await API().getBalance(CommonConstants.userID);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      setState(() {
+        balance = res['data']!= null ? res['data']["wallet_amount"] : "0.00" ;
+      });
+      // Fluttertoast.showToast(
+      //     msg: "Wallet Amount is :- ${res['data']["wallet_amount"]}");
+    } else {
+      Fluttertoast.showToast(msg: response.statusCode.toString());
+    }
   }
 
   @override
@@ -66,26 +92,27 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
             Container(
               alignment: Alignment.center,
               padding: const EdgeInsets.all(25),
-              child: Text(
-                "Available Balance: ₹ ${widget.balance}",
-                style:  TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: widget.balance != null? Colors.black : Colors.white),
+              child: balance == null ? const CircularProgressIndicator(color: Colors.black,):Text(
+                "Available Balance: ₹ $balance",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.black
+                ),
               ),
             ),
             Form(
               key: _formKey,
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width / 1.1,
                 child: TextFormField(
-                  onChanged: (value){
-                    amount=_balancefieldcontroller.text;
+                  onChanged: (value) {
+                    amount = _balancefieldcontroller.text;
                   },
                   controller: _balancefieldcontroller,
                   keyboardType: TextInputType.number,
-                  style:
-                      const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w300, fontSize: 18),
                   validator: (valuee) {
                     if (valuee == null || valuee.isEmpty) {
                       return "*Enter money";
@@ -102,17 +129,19 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                         onTap: () {
                           if (_formKey.currentState?.validate() == true) {
                             int val = int.parse(_balancefieldcontroller.text);
-                            if(val > 25 ){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) =>  PaymentInfo(selectedAmount: amount,)));
-                            }
-                            else{
-                              Fluttertoast.showToast(msg: "Minimum recharge value is ₹25");
+                            if (val > 25) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => PaymentInfo(
+                                            selectedAmount: amount,
+                                          )));
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "Minimum recharge value is ₹25");
                             }
                           }
-    },
+                        },
                         child: Container(
                           margin: const EdgeInsets.all(5),
                           width: MediaQuery.of(context).size.width / 4.5,
@@ -161,12 +190,12 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                               child: InkWell(
                                 onTap: () {
                                   setState(() {
-                                    _balancefieldcontroller.text = itemlist[index].toString();
-                                    amount=_balancefieldcontroller.text;
+                                    _balancefieldcontroller.text =
+                                        itemlist[index].toString();
+                                    amount = _balancefieldcontroller.text;
                                   });
                                   // var convertedamount = int.parse(_balancefieldcontroller.text) * 100;
                                   print("!!!!!!!!!!!!!!!!!$amount");
-
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -192,8 +221,9 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                           : InkWell(
                               onTap: () {
                                 setState(() {
-                                  _balancefieldcontroller.text = itemlist[index].toString();
-                                  amount=_balancefieldcontroller.text;
+                                  _balancefieldcontroller.text =
+                                      itemlist[index].toString();
+                                  amount = _balancefieldcontroller.text;
                                 });
                                 print(amount);
                                 // ScaffoldMessenger.of(context).clearSnackBars();
