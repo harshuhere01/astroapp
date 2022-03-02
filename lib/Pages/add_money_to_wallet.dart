@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class AddMoneyPage extends StatefulWidget {
-  AddMoneyPage({Key? key,}) : super(key: key);
-
+  const AddMoneyPage({Key? key}) : super(key: key);
 
   @override
   _AddMoneyPageState createState() => _AddMoneyPageState();
@@ -47,9 +46,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
 
   @override
   void dispose() {
-    // if(!mounted) {
     _balancefieldcontroller.dispose();
-    // }
     super.dispose();
   }
 
@@ -60,12 +57,10 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       setState(() {
-        balance = res['data']!= null ? res['data']["wallet_amount"] : "0.00" ;
+        balance = res['data'] != null ? res['data']["wallet_amount"] : "0.00";
       });
-      // Fluttertoast.showToast(
-      //     msg: "Wallet Amount is :- ${res['data']["wallet_amount"]}");
     } else {
-      Fluttertoast.showToast(msg: response.statusCode.toString());
+      Fluttertoast.showToast(msg: "GetBalance API error :- ${response.statusCode.toString()}");
     }
   }
 
@@ -92,14 +87,17 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
             Container(
               alignment: Alignment.center,
               padding: const EdgeInsets.all(25),
-              child: balance == null ? const CircularProgressIndicator(color: Colors.black,):Text(
-                "Available Balance: ₹ $balance",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.black
-                ),
-              ),
+              child: balance == null
+                  ? const CircularProgressIndicator(
+                      color: Colors.black,
+                    )
+                  : Text(
+                      "Available Balance: ₹ $balance",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.black),
+                    ),
             ),
             Form(
               key: _formKey,

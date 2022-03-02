@@ -14,9 +14,11 @@ import 'package:provider/provider.dart';
 import 'package:socket_io_client/src/darty.dart';
 
 class CallPage extends StatefulWidget {
-  CallPage({Key? key, this.userList,}) : super(key: key);
+  CallPage({
+    Key? key,
+    this.userList,
+  }) : super(key: key);
   var userList;
-
 
   @override
   State<CallPage> createState() => _CallPageState();
@@ -25,27 +27,12 @@ class CallPage extends StatefulWidget {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _CallPageState extends State<CallPage> {
-  String astroStatus = "true";
-  Future<void> socketConnectToServer() async {
-    try {
-      print("socket connection process started");
-      CommonConstants.socket.connect();
-      CommonConstants.socket.onConnect((data) {
-        // print("========== on socket connect");
-        setState(() {
-          CommonConstants.socketID = "${CommonConstants.socket.id}";
-        });
-        print("Socket Connection :-:" +
-            CommonConstants.socket.connected.toString());
-      });
-      CommonConstants.socket.on('status_change', (data) {
-        setState(() {
-          astroStatus = data;
-        });
-      });
-    } catch (e) {
-      print("socket_error:" + e.toString());
-    }
+  String astroStatus = "yes";
+  bool checkingbalancebool = false;
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -61,51 +48,69 @@ class _CallPageState extends State<CallPage> {
             key: _scaffoldKey,
             backgroundColor: Colors.grey[200],
             body: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: widget.userList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  elevation: 5,
-                  child: UserListTile(
-                    userName: "${widget.userList[index]['name']}",
-                    imageURL: '${widget.userList[index]['photo']}',
-                    designation: "Astrologer",
-                    languages: "Gujarati,Hindi,English",
-                    experience: "10 Years",
-                    charge: '₹ 50/min',
-                    totalnum: "12456",
-                    astro_status: astroStatus,
-                    waitingstatus:
-                        astroStatus == "Busy" ? "wait time - 4m" : "",
-                    btncolor: widget.userList[index]['available'] == "yes"
-                        ? astroStatus == "true"? MaterialStateProperty.all<Color>(Colors.green)
-                        : MaterialStateProperty.all<Color>(Colors.red)
-                        :MaterialStateProperty.all<Color>(Colors.red),
-                    btnbordercolor: widget.userList[index]['available'] == "yes"
-                        ?  astroStatus == "true"? Colors.green
-                        : Colors.red : Colors.red,
-                    onTapImage: () {},
-                    onTapOfTile: () {},
-                    callbtnclick: () async {
-                      if (widget.userList[index]['available'] == "yes" || astroStatus == "true") {
-                        await socketConnectToServer().whenComplete(() {
-                          setState(() {
-                            CommonConstants.receiverIdforSendNotification =
-                                "${widget.userList[index]['id']}";
-                          });
-                          _showCallClickDialog(
-                              _scaffoldKey.currentContext,
-                              "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.userList[index]['u_name']}",
-                              "${widget.userList[index]['id']}",
-                              homeNotifier,
-                              index);
-                        });
-                      } else {}
+                    padding: const EdgeInsets.all(8),
+                    itemCount: widget.userList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                        elevation: 5,
+                        child: UserListTile(
+                          userName: "${widget.userList[index]['name']}",
+                          imageURL: '${widget.userList[index]['photo']}',
+                          designation: "Astrologer",
+                          languages: "Gujarati,Hindi,English",
+                          experience: "10 Years",
+                          charge: '₹ 50/min',
+                          totalnum: "12456",
+                          waitingstatus:
+                              astroStatus == "no" ? "wait time - 4m" : "",
+                          btncolor: widget.userList[index]['available'] == "yes"
+                              ? MaterialStateProperty.all<Color>(Colors.green)
+                              : MaterialStateProperty.all<Color>(Colors.red),
+                          // widget.userList[index]['available'] == "yes"
+                          //     ? astroStatus == "yes"? MaterialStateProperty.all<Color>(Colors.green)
+                          //     : MaterialStateProperty.all<Color>(Colors.red)
+                          //     :MaterialStateProperty.all<Color>(Colors.red),
+                          btnbordercolor:
+                              widget.userList[index]['available'] == "yes"
+                                  ? Colors.green
+                                  : Colors.red,
+                          // widget.userList[index]['available'] == "yes"
+                          //     ?  astroStatus == "yes"? Colors.green
+                          //     : Colors.red : Colors.red,
+                          onTapImage: () {},
+                          onTapOfTile: () {},
+                          callbtnclick: () async {
+                            if (widget.userList[index]['available'] == "yes") {
+                            setState(() {
+                              CommonConstants.receiverIdforSendNotification =
+                                  "${widget.userList[index]['id']}";
+                            });
+                            // if (CommonConstants.socket.connected) {
+                            //   _showCallClickDialog(
+                            //       _scaffoldKey.currentContext,
+                            //       "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.userList[index]['u_name']}",
+                            //       "${widget.userList[index]['id']}",
+                            //       homeNotifier,
+                            //       index);
+                            // } else {
+                            // await socketConnectToServer().whenComplete(() {
+                            _showCallClickDialog(
+                                _scaffoldKey.currentContext,
+                                "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.userList[index]['u_name']}",
+                                "${widget.userList[index]['id']}",
+                                homeNotifier,
+                                index);
+                            // });
+                            // }
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "Member is on another call");
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
-            ),
           );
         },
       ),
@@ -120,7 +125,7 @@ class _CallPageState extends State<CallPage> {
       builder: (
         BuildContext context,
       ) {
-        return AlertDialog(
+        return  AlertDialog(
           backgroundColor: Colors.white,
           content: SingleChildScrollView(
             child: ListBody(
@@ -136,10 +141,16 @@ class _CallPageState extends State<CallPage> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Row(
+                checkingbalancebool
+                    ? const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.black,
+                    ))
+                    : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _build_btn_of_dialogue("Cancel", Colors.black, () async {
+                      // CommonConstants.socket.dispose();
                       Navigator.pop(context);
                     }),
                     _build_btn_of_dialogue("Recharge", Colors.black, () async {
@@ -152,75 +163,62 @@ class _CallPageState extends State<CallPage> {
                     _build_btn_of_dialogue("VideoCall", Colors.black, () async {
                       setState(() {
                         CommonConstants.receiverFCMToken =
-
-                        widget.userList[index]['fcm_token'];
+                            widget.userList[index]['fcm_token'];
                       });
                       try {
                         final result =
-                        await InternetAddress.lookup('example.com');
+                            await InternetAddress.lookup('example.com');
                         if (result.isNotEmpty &&
                             result[0].rawAddress.isNotEmpty) {
                           print('internet connected');
-                          Navigator.pop(context);
-                          await createToken(userID).whenComplete(() async {
-                            CommonConstants.socket.emit('start_video_call', {
-                              "c_charge": 50,
-                              "id": CommonConstants.socketID,
-                              "userId": CommonConstants.userID,// logged in user ID
-                              "uid": userID // member ID / Receiver ID
-                            });
-                          });
-                          CommonConstants.socket.on("balance_ok", (data) async {
-                            print(
-                                "========== balance_ok ==== chat page ${data['uid']}");
-                            CommonConstants.socket
-                                .emit('join_room', data['uid']);
-                            setState(() {
-                              CommonConstants.receiverId = data['uid'];
-                              CommonConstants.room = data['uid'];
-                            });
-                            await sendNotification();
-                            homeNotifier.onJoin(_scaffoldKey.currentContext,
-                                Agora.Channel_name);
 
-                            ///
-                            // if (CommonConstants.caller) {
-                            //   print("balance_ok - data = $data");
-                            //   if (CommonConstants.CallDone == '' ||
-                            //       CommonConstants.CallDone == null ||
-                            //       CommonConstants.CallDone.isEmpty) {
-                            //     send_notification();
-                            //     CommonConstants.CallDone = data.toString();
-                            //     homeNotifier.onJoin(_scaffoldKey.currentContext,
-                            //         Agora.Channel_name);
-                            //     CommonConstants.socket
-                            //         .emit('join_room', {"room": userID});
-                            //   } else {
-                            //     print(
-                            //         "else part =========balance ok ===============================$data");
-                            //   }
-                            // } else {
-                            //   print(
-                            //       "CommonConstants.caller :- ${CommonConstants.caller}");
-                            // }
-                          });
-                          CommonConstants.socket.on('no_data', (data) {
+                          await startVideoCall(homeNotifier, userID);
+
+                          ///
+                          // CommonConstants.socket.emit('start_video_call', {
+                          //   "c_charge": 50,
+                          //   "id": CommonConstants.socketID,
+                          //   "userId": CommonConstants.userID,
+                          //   // logged in user ID
+                          //   "uid": userID
+                          //   // member ID / Receiver ID
+                          // });
+
+                          ///
+                          ///
+                          CommonConstants.socket.once('no_data', (data) {
                             Fluttertoast.showToast(msg: data.toString());
-                            CommonConstants.socket.dispose();
+                            // CommonConstants.socket.dispose();
                             print(
                                 "on call no_data connection is :-${CommonConstants.socket.connected}");
                           });
 
-
-                          // CommonConstants.socket.on("balance_not_ok", (data) {
+                          ///
+                          ///
+                          // CommonConstants.socket.once("balance_ok", (data) async {
                           //   print(
-                          //       "========== on balance_not_ok ==== chat page");
+                          //       "========== balance_ok ==== chat page ${data['uid']}");
+                          //   CommonConstants.socket
+                          //       .emit('join_room', data['uid']);
+                          //   setState(() {
+                          //     CommonConstants.receiverId = data['uid'];
+                          //     CommonConstants.room = data['uid'];
+                          //   });
+                          //   await createToken(userID).whenComplete(() async {
+                          //     await sendNotification().whenComplete(() =>
+                          //         homeNotifier.onJoin(
+                          //             _scaffoldKey.currentContext,
+                          //             Agora.Channel_name));
+                          //   });
                           // });
+
+                          ///
+
                         }
                       } on SocketException catch (_) {
                         Fluttertoast.showToast(
                             msg:
-                            '"There is no internet connection , please turn on your internet."');
+                                '"There is no internet connection , please turn on your internet."');
                       }
                     }),
                   ],
@@ -228,95 +226,6 @@ class _CallPageState extends State<CallPage> {
                 const SizedBox(
                   height: 10,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    // _build_btn_of_dialogue("VideoCall", Colors.black, () async {
-                    //   setState(() {
-                    //     CommonConstants.receiverFCMToken =
-                    //
-                    //     widget.userList[index]['fcm_token'];
-                    //   });
-                    //   try {
-                    //     final result =
-                    //         await InternetAddress.lookup('example.com');
-                    //     if (result.isNotEmpty &&
-                    //         result[0].rawAddress.isNotEmpty) {
-                    //       print('internet connected');
-                    //       Navigator.pop(context);
-                    //       await createToken(userID).whenComplete(() async {
-                    //         CommonConstants.socket.emit('start_video_call', {
-                    //           "c_charge": 50,
-                    //           "id": CommonConstants.socketID,
-                    //           "userId": CommonConstants.userID,// logged in user ID
-                    //           "uid": userID // member ID / Receiver ID
-                    //         });
-                    //       });
-                    //       CommonConstants.socket.on("balance_ok", (data) async {
-                    //         print(
-                    //             "========== balance_ok ==== chat page ${data['uid']}");
-                    //         CommonConstants.socket
-                    //             .emit('join_room', data['uid']);
-                    //         setState(() {
-                    //           CommonConstants.receiverId = data['uid'];
-                    //           CommonConstants.room = data['uid'];
-                    //         });
-                    //         await sendNotification();
-                    //         homeNotifier.onJoin(_scaffoldKey.currentContext,
-                    //             Agora.Channel_name);
-                    //
-                    //         ///
-                    //         // if (CommonConstants.caller) {
-                    //         //   print("balance_ok - data = $data");
-                    //         //   if (CommonConstants.CallDone == '' ||
-                    //         //       CommonConstants.CallDone == null ||
-                    //         //       CommonConstants.CallDone.isEmpty) {
-                    //         //     send_notification();
-                    //         //     CommonConstants.CallDone = data.toString();
-                    //         //     homeNotifier.onJoin(_scaffoldKey.currentContext,
-                    //         //         Agora.Channel_name);
-                    //         //     CommonConstants.socket
-                    //         //         .emit('join_room', {"room": userID});
-                    //         //   } else {
-                    //         //     print(
-                    //         //         "else part =========balance ok ===============================$data");
-                    //         //   }
-                    //         // } else {
-                    //         //   print(
-                    //         //       "CommonConstants.caller :- ${CommonConstants.caller}");
-                    //         // }
-                    //       });
-                    //       CommonConstants.socket.on('no_data', (data) {
-                    //         Fluttertoast.showToast(msg: data.toString());
-                    //         CommonConstants.socket.dispose();
-                    //         print(
-                    //             "on call no_data connection is :-${CommonConstants.socket.connected}");
-                    //       });
-                    //
-                    //
-                    //       // CommonConstants.socket.on("balance_not_ok", (data) {
-                    //       //   print(
-                    //       //       "========== on balance_not_ok ==== chat page");
-                    //       // });
-                    //     }
-                    //   } on SocketException catch (_) {
-                    //     Fluttertoast.showToast(
-                    //         msg:
-                    //             '"There is no internet connection , please turn on your internet."');
-                    //   }
-                    // }),
-                    // _build_btn_of_dialogue("Join Call", Colors.black, () async {
-                    //   print("join call ===================================");
-                    //   // await createToken(userID).whenComplete(() async {
-                    //     await connectSocket();
-                    //     // homeNotifier.onJoin(
-                    //     //     _scaffoldKey.currentContext, Agora.Channel_name);
-                    //     // await connectSocket();
-                    //     homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
-                    //   // });
-                    // }),
-                  ],
-                )
               ],
             ),
           ],
@@ -324,10 +233,6 @@ class _CallPageState extends State<CallPage> {
         );
       },
     );
-  }
-
-  Future<void> connectSocket() async {
-    CommonConstants.socket.connect();
   }
 
   Future<void> createToken(String userID) async {
@@ -342,6 +247,39 @@ class _CallPageState extends State<CallPage> {
     } else {
       Fluttertoast.showToast(
           msg: "createToken API :- ${response.statusCode} :- $res");
+    }
+  }
+
+  Future<void> startVideoCall(homeNotifier, userID) async {
+    setState(() {
+      checkingbalancebool = true;
+    });
+    var response = await API().startVideoCallAPI();
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      setState(() {
+        checkingbalancebool = false;
+      });
+      Navigator.pop(context);
+      if (res['message'] == "no_data") {
+        Fluttertoast.showToast(msg: res['data']['message']);
+      } else if (res['message'] == "balance_ok") {
+        print("======= balance_ok ==== chat page ${res['data']['memberId']}");
+        CommonConstants.socket.emit('join_room', res['data']['memberId']);
+        setState(() {
+          CommonConstants.receiverId = res['data']['memberId'];
+          CommonConstants.room = res['data']['memberId'];
+        });
+        await createToken(userID).whenComplete(() async {
+          await sendNotification().whenComplete(() => homeNotifier.onJoin(
+              _scaffoldKey.currentContext, Agora.Channel_name));
+        });
+      }
+    } else {
+      Fluttertoast.showToast(
+          msg: "startVideoCall API :- ${response.statusCode} :- $res");
     }
   }
 
@@ -397,8 +335,7 @@ class _CallPageState extends State<CallPage> {
       width: CommonConstants.device_width * 0.20,
       child: ElevatedButton(
           child: Text(btnname,
-              style:
-                  const TextStyle(fontSize: 10, fontWeight: FontWeight.w300)),
+              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w300)),
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             backgroundColor: MaterialStateProperty.all<Color>(color),
@@ -434,6 +371,7 @@ class _CallPageState extends State<CallPage> {
             TextButton(
               child: const Text('Yes'),
               onPressed: () {
+                CommonConstants.socket.dispose();
                 SystemNavigator.pop();
               },
             ),

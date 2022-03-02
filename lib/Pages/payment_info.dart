@@ -61,8 +61,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
   @override
   void dispose() {
-    super.dispose();
     razorpay.clear();
+    super.dispose();
   }
 
   // for generate orderID From Frontend
@@ -246,13 +246,13 @@ class _PaymentInfoState extends State<PaymentInfo> {
         });
         Fluttertoast.showToast(
             msg:
-                '"There is no internet connection , please turn on your internet."');
+                'There is no internet connection , please turn on your internet.');
       }
     } else {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: response.statusCode.toString());
+      Fluttertoast.showToast(msg: 'AddMoneyAPI API error :- ${response.statusCode.toString()}');
     }
   }
 
@@ -274,7 +274,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: response.statusCode.toString());
+      Fluttertoast.showToast(msg: 'VerifyPayment API error :- ${response.statusCode.toString()}');
     }
   }
 

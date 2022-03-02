@@ -1,18 +1,5 @@
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/material.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:voice_to_text/Pages/Audio_Record_screen.dart';
-// import 'package:voice_to_text/Pages/login_page.dart';
-
-import 'dart:convert';
-
-import 'package:astro/Constant/CommonConstant.dart';
-import 'package:astro/Model/API_Model.dart';
-import 'package:astro/Pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,9 +23,6 @@ class AuthClass {
         try {
           userCredential =
               await auth.signInWithCredential(credential);
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          // prefs.setString('email', '${userCredential.user!.email}');
-          // prefs.setString('displayName', '${userCredential.user!.displayName}');
 
         } catch (e) {
           print(e);

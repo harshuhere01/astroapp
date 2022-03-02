@@ -5,25 +5,7 @@ import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Constant/api_constant.dart';
 import 'package:http/http.dart';
 
-class API{
-  // Future<Response> ForgotPasswordAPI(String email) async {
-  //   final uri = Uri.parse(APIConstants.BaseURL + APIConstants.ForgotPassword);
-  //   final headers = {'Content-Type': 'application/json'};
-  //   Map<String, dynamic> body = {
-  //     "email": email,
-  //   };
-  //   String jsonBody = json.encode(body);
-  //   final encoding = Encoding.getByName('utf-8');
-  //
-  //   Response response = await post(
-  //     uri,
-  //     headers: headers,
-  //     body: jsonBody,
-  //     encoding: encoding,
-  //   );
-  //   return response;
-  // }
-
+class API {
   Future<Response> fetchUsers() async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.getAllUsers);
     final headers = {
@@ -39,7 +21,21 @@ class API{
   }
 
   Future<Response> getAllMember(id) async {
-    final uri = Uri.parse(APIConstants.baseURL + APIConstants.getAllMember +"/$id");
+    final uri =
+        Uri.parse(APIConstants.baseURL + APIConstants.getAllMember + "/$id");
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    // final encoding = Encoding.getByName('utf-8');
+    Response response = await get(
+      uri,
+      headers: headers,
+      // encoding: encoding,
+    );
+    return response;
+  }Future<Response> getSingelUser(id) async {
+    final uri =
+        Uri.parse(APIConstants.baseURL + APIConstants.getSingelUser + "/$id");
     final headers = {
       'Content-Type': 'application/json',
     };
@@ -53,7 +49,8 @@ class API{
   }
 
   Future<Response> getBalance(id) async {
-    final uri = Uri.parse(APIConstants.baseURL + APIConstants.getBalance +"/$id");
+    final uri =
+        Uri.parse(APIConstants.baseURL + APIConstants.getBalance + "/$id");
     final headers = {
       'Content-Type': 'application/json',
     };
@@ -107,19 +104,18 @@ class API{
   }
 
   Future<Response> send_notification() async {
-    final uri =
-    Uri.parse(APIConstants.baseURL + APIConstants.sendNotification);
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.sendNotification);
     final headers = {
       'Content-Type': 'application/json',
     };
     Map<String, dynamic> body = {
-      "username" : CommonConstants.userName,
+      "username": CommonConstants.userName,
       "fcm_token": CommonConstants.receiverFCMToken,
       "channelName": Agora.Channel_name,
       "agora_token": Agora.Token,
-      "receiverId":CommonConstants.receiverIdforSendNotification,
-      "app_id" : Agora.APP_ID,
-      "callerId" : CommonConstants.userID,
+      "receiverId": CommonConstants.receiverIdforSendNotification,
+      "app_id": Agora.APP_ID,
+      "callerId": CommonConstants.userID,
     };
     String jsonBody = json.encode(body);
     // final encoding = Encoding.getByName('utf-8');
@@ -139,7 +135,7 @@ class API{
       'Content-Type': 'application/json',
     };
     Map<String, dynamic> body = {
-      "id" : CommonConstants.userID,
+      "id": CommonConstants.userID,
       "amount": apiAmount
     };
     String jsonBody = json.encode(body);
@@ -155,13 +151,13 @@ class API{
   }
 
   Future<Response> verifyPayment(
-      String orderID, String paymentID, String signature,int apiAmount) async {
+      String orderID, String paymentID, String signature, int apiAmount) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.verifyPaymentURL);
     final headers = {
       'Content-Type': 'application/json',
     };
     Map<String, dynamic> body = {
-     "id": CommonConstants.userID,
+      "id": CommonConstants.userID,
       "amount": apiAmount,
       "order_id": orderID,
       "razorpay_payment_id": paymentID,
@@ -179,7 +175,7 @@ class API{
     return response;
   }
 
-  Future<Response> calculateTime(String uMobile,String cCharge) async {
+  Future<Response> calculateTime(String uMobile, String cCharge) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.calculateTime);
     final headers = {
       'Content-Type': 'application/json',
@@ -200,7 +196,12 @@ class API{
     return response;
   }
 
-  Future<Response> registerUser(String name,String email,String photoURL,String fcmToken,) async {
+  Future<Response> registerUser(
+    String name,
+    String email,
+    String photoURL,
+    String fcmToken,
+  ) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.registerUser);
     final headers = {
       'Content-Type': 'application/json',
@@ -208,15 +209,14 @@ class API{
     Map<String, dynamic> body = {
       "name": name,
       "email": email,
-      "photo" :photoURL,
-      "fcm_token":fcmToken,
-      "isMember" :false,
-      "isActive" :true,
-      "available" :"yes",
+      "photo": photoURL,
+      "fcm_token": fcmToken,
+      "isMember": false,
+      "isActive": true,
+      "available": "yes",
       // "age": "",
       // "sex" :"",
       // "mobile" :"",
-
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -234,8 +234,8 @@ class API{
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateFCMToken);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
-      "id" : CommonConstants.userID,
-      "fcm_token" : CommonConstants.userFCMToken,
+      "id": CommonConstants.userID,
+      "fcm_token": CommonConstants.userFCMToken,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -249,4 +249,53 @@ class API{
     return response;
   }
 
+  Future<Response> updateUser(
+    String name,
+    String age,
+    String gender,
+    String mobile,
+  ) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateUser);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "id": CommonConstants.userID,
+      "name": name,
+      "email": CommonConstants.userEmail,
+      "photo": CommonConstants.userPhoto,
+      "age": age,
+      "sex": gender,
+      "mobile": mobile,
+      // "available": "yes",
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await put(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
+
+  Future<Response> startVideoCallAPI() async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.startVideoCall);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "id": CommonConstants.userID,
+      "c_charge": 50,
+      "memberId": CommonConstants.receiverIdforSendNotification,
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
 }

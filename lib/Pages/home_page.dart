@@ -5,6 +5,7 @@ import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Firebase%20Services/firebase_auth_service.dart';
 import 'package:astro/Model/API_Model.dart';
+import 'package:astro/Pages/Drawer%20Pages/profile_page.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
 import 'package:astro/Pages/chat_page.dart';
@@ -17,6 +18,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart';
+import 'package:socket_io_client/src/darty.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -34,13 +37,17 @@ class _HomePageState extends State<HomePage>
   PageController _pageController = PageController(
     keepPage: true,
   );
-  String? walletBalance;
-  String buttonName = "Check wallet balance";
-  String? astroStatus;
   String? userName;
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   late FlutterLocalNotificationsPlugin fltNotification;
   List<dynamic>? userList;
+
+  String? photo;
+  String? name;
+  String? email;
+  String? agee;
+  String? genderr;
+  String? mobilenumber;
 
   void _changePage(int pageNum) {
     setState(() {
@@ -58,8 +65,11 @@ class _HomePageState extends State<HomePage>
     _pageController = PageController();
     initMessaging();
     getdisplayName();
-    // handleNotificationEvents();
-    // getAllMember();
+    CommonConstants.socket.on('change_status', (data) {
+      print(
+          "change_status :-----------------------------------------------$data");
+      getAllMember();
+    });
     super.initState();
   }
 
@@ -70,9 +80,25 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-
+  Future<void> getUserDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final age = prefs.getString('age') == "null" ? '' : prefs.getString('age');
+    final gender =
+        prefs.getString('sex') == "null" ? '' : prefs.getString('sex');
+    final mobile =
+        prefs.getString('mobile') == "null" ? '' : prefs.getString('mobile');
+    // setState(() {
+    //   photo = prefs.getString('photo');
+    //   name = "${prefs.getString('name')}";
+    //   email = "${prefs.getString('email')}";
+    //   agee = "$age";
+    //   genderr = "$gender";
+    //   mobilenumber = "$mobile";
+    // });
+  }
 
   Future<void> getAllMember() async {
+    await socketConnectToServer();
     var response = await API().getAllMember(CommonConstants.userID);
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -82,47 +108,89 @@ class _HomePageState extends State<HomePage>
         userList = res['data'];
       });
       print(userList.toString());
+      await getUserDetails();
     } else {
       Fluttertoast.showToast(
-          msg: "response of fetchuser :- ${response.statusCode.toString()}");
+          msg: "Fetchuser API error :- ${response.statusCode.toString()}");
     }
   }
 
-  Future<void>getdisplayName() async {
+  Future<void> getSingelUser() async {
+    var response = await API().getSingelUser(CommonConstants.userID);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      setState(() {
+        photo = res['data']['photo'];
+        name = res['data']['name'];
+        email = res['data']['email'];
+        agee = res['data']['age'];
+        genderr = res['data']['sex'];
+        mobilenumber = res['data']['mobile'];
+      });
+      print(userList.toString());
+    } else {
+      Fluttertoast.showToast(
+          msg: "Fetchuser API error :- ${response.statusCode.toString()}");
+    }
+  }
+
+  Future<void> socketConnectToServer() async {
+    try {
+      print("socket connection process started");
+      CommonConstants.socket.connect();
+      CommonConstants.socket.onConnect((data) {
+        setState(() {
+          CommonConstants.socketID = "${CommonConstants.socket.id}";
+        });
+        print("Socket Connection :-:" +
+            CommonConstants.socket.connected.toString());
+      });
+    } catch (e) {
+      print("socket_error:" + e.toString());
+    }
+  }
+
+  Future<void> getdisplayName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('name');
       CommonConstants.userID = prefs.getString('id')!;
       CommonConstants.userName = prefs.getString('name')!;
+      CommonConstants.userEmail = prefs.getString('email')!;
+      CommonConstants.userAge = prefs.getString('age')!;
+      CommonConstants.userGender = prefs.getString('sex')!;
+      CommonConstants.userMobilenumber = prefs.getString('mobile')!;
+      CommonConstants.userPhoto = prefs.getString('photo')!;
     });
-    getAllMember();
+    await getAllMember();
   }
 
   handleNotificationEvents(homeNotifier) {
-    print("handel notification");
-    // Consumer(builder: (context, HomeNotifier homeNotifier, child) {
-      AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
-        if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
-          print("Call Accept");
-          await connectSocket();
-          homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
-        } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
-          print("Call Reject");
-        }
-      });
-      return Container();
-    // });
+    AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
+      if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
+        homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
+        print("Call Accepted");
+      } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
+        print("Call Rejected");
+      }
+    });
   }
 
   Future<void> connectSocket() async {
     CommonConstants.socket.connect();
+    setState(() {
+      CommonConstants.socketID = "${CommonConstants.socket.id}";
+    });
   }
 
   void initMessaging() {
-    var androiInit =
+    var androidInit =
         const AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
     var iosInit = const IOSInitializationSettings();
-    var initSetting = InitializationSettings(android: androiInit, iOS: iosInit);
+    var initSetting =
+        InitializationSettings(android: androidInit, iOS: iosInit);
     fltNotification = FlutterLocalNotificationsPlugin();
     fltNotification.initialize(initSetting);
     var androidDetails = const AndroidNotificationDetails(
@@ -154,12 +222,17 @@ class _HomePageState extends State<HomePage>
           Agora.Token = message.data['agoraToken'];
           Agora.APP_ID = message.data['app_id'];
         });
-
+        // if(CommonConstants.socket.connected){
+        //   await notify();
+        // }
+        // else {
+        //   await connectSocket();
         await notify();
+        // }
+
         ///Awesome Notification
         print(
             "Incoming Notification :-Title - ${notification.title}, Body - ${notification.body}, BodyLocARGS - ${notification.bodyLocArgs}");
-
 
         /// Normal Notification
         // fltNotification.show(notification.hashCode, notification.title,
@@ -167,9 +240,9 @@ class _HomePageState extends State<HomePage>
 
       }
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("onMessageOpenedApp");
-    });
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   print("onMessageOpenedApp");
+    // });
   }
 
   Future<void> notify() async {
@@ -194,7 +267,6 @@ class _HomePageState extends State<HomePage>
           displayOnBackground: true,
           displayOnForeground: true,
           autoDismissible: false,
-          // autoCancel: true,
           id: 1,
           channelKey: 'basic_channel',
           title: "Incoming call",
@@ -243,9 +315,23 @@ class _HomePageState extends State<HomePage>
                         fontSize: 18,
                         fontWeight: FontWeight.w400),
                   ),
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(context);
-
+                    await getSingelUser().whenComplete(() {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(
+                            photo: photo,
+                            name: name,
+                            email: email,
+                            age: agee,
+                            gender: genderr,
+                            mobile: mobilenumber,
+                          ),
+                        ),
+                      );
+                    });
                   },
                 ),
                 ListTile(
@@ -262,7 +348,7 @@ class _HomePageState extends State<HomePage>
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => AddMoneyPage()));
+                            builder: (context) => const AddMoneyPage()));
                   },
                 ),
                 ListTile(
@@ -292,7 +378,8 @@ class _HomePageState extends State<HomePage>
                     Navigator.pop(context);
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (builder) => LogInPage()),
+                        MaterialPageRoute(
+                            builder: (builder) => const LogInPage()),
                         (route) => false);
                   },
                 ),
@@ -307,7 +394,7 @@ class _HomePageState extends State<HomePage>
                 onPressed: () {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Tepped Search")));
+                      const SnackBar(content: Text("Tapped Search")));
                 },
                 icon: const Icon(
                   Icons.search,
@@ -317,7 +404,7 @@ class _HomePageState extends State<HomePage>
                 onPressed: () {
                   ScaffoldMessenger.of(context).clearSnackBars();
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Tepped Settings")));
+                      const SnackBar(content: Text("Tapped Settings")));
                 },
                 icon: const Icon(
                   Icons.settings,
@@ -368,12 +455,11 @@ class _HomePageState extends State<HomePage>
                 onPageChanged: (int page) {
                   setState(() {
                     _selectedPage = page;
-                    walletBalance = "";
                   });
                 },
                 controller: _pageController,
                 children: [
-                  userList == null ?? userList!.isEmpty
+                  userList == null
                       ? const Center(
                           child: CircularProgressIndicator(
                             color: Colors.black,
@@ -388,13 +474,14 @@ class _HomePageState extends State<HomePage>
                           : CallPage(
                               userList: userList,
                             ),
-                  userList == null ?? userList!.isEmpty
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.black,
-                          ),
-                        )
-                      : const ChatPage(),
+                  // userList!.isEmpty
+                  //    ? const Center(
+                  //        child: CircularProgressIndicator(
+                  //          color: Colors.black,
+                  //        ),
+                  //      )
+                  //    :
+                  const ChatPage(),
                 ],
               ),
             ),
@@ -403,7 +490,6 @@ class _HomePageState extends State<HomePage>
       );
     });
   }
-
 
   /// check wallet balance button
 //   Column(
@@ -445,6 +531,5 @@ class _HomePageState extends State<HomePage>
 // ),
 // ],
 // ),
-
 
 }
