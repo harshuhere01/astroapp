@@ -66,33 +66,20 @@ class _CallPageState extends State<CallPage> {
                           btncolor: widget.userList[index]['available'] == "yes"
                               ? MaterialStateProperty.all<Color>(Colors.green)
                               : MaterialStateProperty.all<Color>(Colors.red),
-                          // widget.userList[index]['available'] == "yes"
-                          //     ? astroStatus == "yes"? MaterialStateProperty.all<Color>(Colors.green)
-                          //     : MaterialStateProperty.all<Color>(Colors.red)
-                          //     :MaterialStateProperty.all<Color>(Colors.red),
+
                           btnbordercolor:
                               widget.userList[index]['available'] == "yes"
                                   ? Colors.green
                                   : Colors.red,
-                          // widget.userList[index]['available'] == "yes"
-                          //     ?  astroStatus == "yes"? Colors.green
-                          //     : Colors.red : Colors.red,
+
                           onTapImage: () {},
                           onTapOfTile: () {},
                           callbtnclick: () async {
                             if (widget.userList[index]['available'] == "yes") {
                             setState(() {
                               CommonConstants.receiverIdforSendNotification =
-                                  "${widget.userList[index]['id']}";
+                                  widget.userList[index]['id'];
                             });
-                            // if (CommonConstants.socket.connected) {
-                            //   _showCallClickDialog(
-                            //       _scaffoldKey.currentContext,
-                            //       "Minimum balance of 5\nminutes (INR 90.0) is\nrequired to start call with\n${widget.userList[index]['u_name']}",
-                            //       "${widget.userList[index]['id']}",
-                            //       homeNotifier,
-                            //       index);
-                            // } else {
                             // await socketConnectToServer().whenComplete(() {
                             _showCallClickDialog(
                                 _scaffoldKey.currentContext,
@@ -137,6 +124,7 @@ class _CallPageState extends State<CallPage> {
           contentTextStyle: const TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
           actionsPadding: const EdgeInsets.all(10),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: <Widget>[
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -158,7 +146,7 @@ class _CallPageState extends State<CallPage> {
                       await Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (builder) => AddMoneyPage()));
+                              builder: (builder) => const AddMoneyPage()));
                     }),
                     _build_btn_of_dialogue("VideoCall", Colors.black, () async {
                       setState(() {
@@ -229,7 +217,7 @@ class _CallPageState extends State<CallPage> {
               ],
             ),
           ],
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
+
         );
       },
     );

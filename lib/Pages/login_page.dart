@@ -190,10 +190,10 @@ class _LogInPageState extends State<LogInPage> {
     if (statusCode == 200) {
       setState(() {
         gbtnprogress = false;
-        CommonConstants.userID = "${res['data']['id']}";
+        CommonConstants.userID = res['data']['id'];
       });
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('id', '${res['data']['id']}');
+      prefs.setInt('id', res['data']['id']);
       prefs.setString('name', '${res['data']['name']}');
       prefs.setString('email', '${res['data']['email']}');
       prefs.setString('photo', '${res['data']['photo']}');

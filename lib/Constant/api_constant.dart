@@ -18,4 +18,6 @@ class APIConstants {
   static String getBalance = 'payments/get_balance';
   static String startVideoCall = 'video_chat/start_video_call';
   static String getSingelUser = 'user/getById';
+  static String createMember = 'member/create';
+
 }

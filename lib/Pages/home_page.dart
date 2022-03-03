@@ -42,13 +42,6 @@ class _HomePageState extends State<HomePage>
   late FlutterLocalNotificationsPlugin fltNotification;
   List<dynamic>? userList;
 
-  String? photo;
-  String? name;
-  String? email;
-  String? agee;
-  String? genderr;
-  String? mobilenumber;
-
   void _changePage(int pageNum) {
     setState(() {
       _selectedPage = pageNum;
@@ -80,23 +73,6 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  Future<void> getUserDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final age = prefs.getString('age') == "null" ? '' : prefs.getString('age');
-    final gender =
-        prefs.getString('sex') == "null" ? '' : prefs.getString('sex');
-    final mobile =
-        prefs.getString('mobile') == "null" ? '' : prefs.getString('mobile');
-    // setState(() {
-    //   photo = prefs.getString('photo');
-    //   name = "${prefs.getString('name')}";
-    //   email = "${prefs.getString('email')}";
-    //   agee = "$age";
-    //   genderr = "$gender";
-    //   mobilenumber = "$mobile";
-    // });
-  }
-
   Future<void> getAllMember() async {
     await socketConnectToServer();
     var response = await API().getAllMember(CommonConstants.userID);
@@ -108,33 +84,34 @@ class _HomePageState extends State<HomePage>
         userList = res['data'];
       });
       print(userList.toString());
-      await getUserDetails();
     } else {
       Fluttertoast.showToast(
           msg: "Fetchuser API error :- ${response.statusCode.toString()}");
     }
   }
 
-  Future<void> getSingelUser() async {
-    var response = await API().getSingelUser(CommonConstants.userID);
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      setState(() {
-        photo = res['data']['photo'];
-        name = res['data']['name'];
-        email = res['data']['email'];
-        agee = res['data']['age'];
-        genderr = res['data']['sex'];
-        mobilenumber = res['data']['mobile'];
-      });
-      print(userList.toString());
-    } else {
-      Fluttertoast.showToast(
-          msg: "Fetchuser API error :- ${response.statusCode.toString()}");
-    }
-  }
+  // Future<void> getSingelUser() async {
+  //   var response = await API().getSingelUser(CommonConstants.userID);
+  //   int statusCode = response.statusCode;
+  //   String responseBody = response.body;
+  //   var res = jsonDecode(responseBody);
+  //   if (statusCode == 200) {
+  //     setState(() {
+  //       isMemberRequested = res['data']['isMemberRequested'];
+  //       isMember = res['data']['isMember'];
+  //       photo = res['data']['photo'];
+  //       name = res['data']['name'];
+  //       email = res['data']['email'];
+  //       agee = res['data']['age'];
+  //       genderr = res['data']['sex'];
+  //       mobilenumber = res['data']['mobile'];
+  //     });
+  //     print(userList.toString());
+  //   } else {
+  //     Fluttertoast.showToast(
+  //         msg: "Fetchuser API error :- ${response.statusCode.toString()}");
+  //   }
+  // }
 
   Future<void> socketConnectToServer() async {
     try {
@@ -156,7 +133,7 @@ class _HomePageState extends State<HomePage>
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('name');
-      CommonConstants.userID = prefs.getString('id')!;
+      CommonConstants.userID = prefs.getInt('id')!;
       CommonConstants.userName = prefs.getString('name')!;
       CommonConstants.userEmail = prefs.getString('email')!;
       CommonConstants.userAge = prefs.getString('age')!;
@@ -215,9 +192,9 @@ class _HomePageState extends State<HomePage>
 
       if (notification != null && android != null) {
         setState(() {
-          CommonConstants.receiverId = message.data['receiverId'];
-          CommonConstants.callerId = message.data['callerId'];
-          CommonConstants.room = message.data['receiverId'];
+          CommonConstants.receiverId = int.parse(message.data['receiverId'])??0;
+          CommonConstants.callerId = int.parse(message.data['callerId'])??0;
+          CommonConstants.room = int.parse(message.data['receiverId'])??0;
           CommonConstants.joiningchannelName = message.data['channelName'];
           Agora.Token = message.data['agoraToken'];
           Agora.APP_ID = message.data['app_id'];
@@ -317,21 +294,12 @@ class _HomePageState extends State<HomePage>
                   ),
                   onTap: () async {
                     Navigator.pop(context);
-                    await getSingelUser().whenComplete(() {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfilePage(
-                            photo: photo,
-                            name: name,
-                            email: email,
-                            age: agee,
-                            gender: genderr,
-                            mobile: mobilenumber,
-                          ),
-                        ),
-                      );
-                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(

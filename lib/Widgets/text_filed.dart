@@ -4,7 +4,7 @@ class CustomTextField extends StatefulWidget {
   CustomTextField(
       {Key? key,
       required this.controller,
-      required this.icon,
+      required this.prefixIcon,
       required this.readOnly,
       this.ontapofeditText,
       required this.hint,
@@ -15,7 +15,7 @@ class CustomTextField extends StatefulWidget {
       : super(key: key);
 
   final TextEditingController controller;
-  IconData icon;
+  IconData prefixIcon;
   String hint;
   int? maxlength;
   bool readOnly;
@@ -76,15 +76,15 @@ class CustomTextFieldState extends State<CustomTextField> {
                 borderRadius: BorderRadius.circular(15),
               ),
               prefixIcon: Icon(
-                widget.icon,
+                widget.prefixIcon,
               ),
               errorMaxLines: 4,
               labelText: widget.hint,
               labelStyle: const TextStyle(fontSize: 16.0, color: Colors.grey),
               suffixIcon: widget.controller.text.isEmpty
                   ? Container(width: 0)
-                  : widget.hint == "Email"
-                      ? Container(width: 0)
+                  : widget.readOnly == true
+                      ? null
                       : IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => widget.controller.clear(),

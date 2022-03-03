@@ -33,7 +33,9 @@ class API {
       // encoding: encoding,
     );
     return response;
-  }Future<Response> getSingelUser(id) async {
+  }
+
+  Future<Response> getSingelUser(id) async {
     final uri =
         Uri.parse(APIConstants.baseURL + APIConstants.getSingelUser + "/$id");
     final headers = {
@@ -254,6 +256,11 @@ class API {
     String age,
     String gender,
     String mobile,
+    String available,
+    String callRate,
+    String achievements,
+    String socialmediaLink,
+    String aboutMe,
   ) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateUser);
     final headers = {'Content-Type': 'application/json'};
@@ -265,12 +272,47 @@ class API {
       "age": age,
       "sex": gender,
       "mobile": mobile,
-      // "available": "yes",
+      "available":available ,
+      "call_rate": callRate,
+      "achievements": achievements,
+      "social_media_link": socialmediaLink,
+      "about_me": aboutMe,
+
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
 
     Response response = await put(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
+
+  Future<Response> createMember(
+    int userId,
+    double callRate,
+    String socialMediaLink,
+    String aboutMe,
+    String achievements,
+    String status,
+  ) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.createMember);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "userId":userId,
+      "call_rate": callRate,
+      "social_media_link": socialMediaLink,
+      "about_me": aboutMe,
+      "achievements": achievements,
+      "status": status
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
       uri,
       headers: headers,
       body: jsonBody,

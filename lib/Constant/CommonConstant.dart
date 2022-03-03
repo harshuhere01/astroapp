@@ -14,17 +14,17 @@ class CommonConstants {
 
   static bool listened = false;
   static String CallDone = '';
-  static String receiverIdforSendNotification = '';
-  static String receiverId = '';
-  static String callerId = '';
-  static String room = '';
+  static late int receiverIdforSendNotification ;
+  static late int receiverId ;
+  static late int callerId ;
+  static late int room ;
   static String joiningchannelName = '';
   static String joiningchannelId = '';
   static String joiningAppId = '';
   static bool caller = false;
 
   ///user details
-  static var userID = '';
+  static late int userID;
   static var userPhoto = '';
   static var userName = '';
   static var userEmail = '';
