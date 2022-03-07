@@ -23,15 +23,16 @@ class _PaymentInfoState extends State<PaymentInfo> {
   double? gstamount;
   double? totalpayableamount;
   String? razorpayAmount;
-  int? apiAmount;
+  double? apiAmount;
   bool isLoading = false;
 
   addGSTtoAmount() {
-    var cgstamount = double.parse("${widget.selectedAmount}") / 18;
+    var cgstamount = double.parse("${widget.selectedAmount}") * 18 / 100;
     // var ctotalpayableamount = double.parse("${widget.selectedAmount}");
 
     var ctotalpayableamount =
         double.parse("${widget.selectedAmount}") + cgstamount;
+
 
     setState(() {
       gstamount = double.parse("$cgstamount");
@@ -41,10 +42,12 @@ class _PaymentInfoState extends State<PaymentInfo> {
   }
 
   void setrazorpayamount() {
-    var tempvalue = totalpayableamount?.toStringAsFixed(2);
-    var razorpayconvert = double.parse("$tempvalue") * 100;
-    apiAmount = razorpayconvert.toInt();
+    var addmoneyAPIAmount = double.parse("${widget.selectedAmount}");
+    var tempvalue = addmoneyAPIAmount.toStringAsFixed(2);
+    var razorpayconvert = double.parse(tempvalue) * 100;
+    apiAmount = razorpayconvert;
     setState(() {
+
       razorpayAmount = razorpayconvert.toString();
     });
   }
@@ -53,7 +56,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   void initState() {
     super.initState();
     addGSTtoAmount();
-    razorpay =  Razorpay();
+    razorpay = Razorpay();
     razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
@@ -64,27 +67,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
     razorpay.clear();
     super.dispose();
   }
-
-  // for generate orderID From Frontend
-  /*Future<String> generateOrderId(String key, String secret, int amount) async {
-    var authn = 'Basic ' + base64Encode(utf8.encode('$key:$secret'));
-
-    var headers = {
-      'content-type': 'application/json',
-      'Authorization': authn,
-    };
-    var data =
-        '{ "amount": $amount, "currency": "INR", "receipt": "receipt#R1", "payment_capture": 1 }'; // as per my experience the receipt doesn't play any role in helping you generate a certain pattern in your Order ID!!
-
-    var res = await http.post(Uri.parse('https://api.razorpay.com/v1/orders'),
-        headers: headers, body: data);
-    if (res.statusCode != 200) {
-      throw Exception('http.post error: statusCode= ${res.statusCode}');
-    }
-    print('ORDER ID response => ${res.body}');
-
-    return json.decode(res.body)['id'].toString();
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +172,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                         if (result.isNotEmpty &&
                             result[0].rawAddress.isNotEmpty) {
                           print('Internet connected');
-                          await addMoneyAPI();
+                          await addMoneyAPI(apiAmount);
                         }
                       } on SocketException catch (_) {
                         setState(() {
@@ -226,8 +208,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
     );
   }
 
-  addMoneyAPI() async {
-    var response = await API().addMoneyAPI(apiAmount!);
+  addMoneyAPI(apiAmount) async {
+    var response = await API().addMoneyAPI(apiAmount);
 
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -252,7 +234,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: 'AddMoneyAPI API error :- ${response.statusCode.toString()}');
+      Fluttertoast.showToast(
+          msg: 'AddMoneyAPI API error :- ${response.statusCode.toString()}');
     }
   }
 
@@ -274,7 +257,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
       setState(() {
         isLoading = false;
       });
-      Fluttertoast.showToast(msg: 'VerifyPayment API error :- ${response.statusCode.toString()}');
+      Fluttertoast.showToast(
+          msg: 'VerifyPayment API error :- ${response.statusCode.toString()}');
     }
   }
 
@@ -303,12 +287,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
     setState(() {
       isLoading = false;
     });
+    var res = jsonDecode("${response.message}");
     Fluttertoast.showToast(
-        msg: "ERROR: " +
-            response.code.toString() +
-            " - " +
-            "${response.message}",
-        toastLength: Toast.LENGTH_SHORT);
+      msg: res['error']['description'],
+    );
     print("------------>>>>>>>..error" + "${response.message}");
   }
 
@@ -318,14 +300,15 @@ class _PaymentInfoState extends State<PaymentInfo> {
     // var id = await generateOrderId("rzp_test_Feaa1lopTSehMR","8zCaOyWVVpXmvSueI10woby6",apiAmount!);
     var options = {
       "key": PaymentVariables.api_key,
-      "amount": "$razorpayAmount", // Convert Paisa to Rupees
+      "amount": "$razorpayAmount",
+      // Convert Paisa to Rupees
       "name": "Astro Talk",
       "description": "desc",
       "timeout": "180",
       'order_id': OrderID,
       "theme.color": "#1B4670",
       "currency": "INR",
-      "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
+      // "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
       "external": {
         "wallets": ["paytm"]
       }
@@ -354,8 +337,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
     }
   }
 
-  // for create order from frontend
-  /*Future<void> createOrder() async {
+// for create order from frontend
+/*Future<void> createOrder() async {
     var key = "https://api.razorpay.com/v1/orders";
     final uri = Uri.parse(key);
     final headers = {'Content-Type': 'application/json'};
@@ -386,5 +369,26 @@ class _PaymentInfoState extends State<PaymentInfo> {
     } else {
       Fluttertoast.showToast(msg: response.statusCode.toString());
     }
+  }*/
+
+// for generate orderID From Frontend
+/*Future<String> generateOrderId(String key, String secret, int amount) async {
+    var authn = 'Basic ' + base64Encode(utf8.encode('$key:$secret'));
+
+    var headers = {
+      'content-type': 'application/json',
+      'Authorization': authn,
+    };
+    var data =
+        '{ "amount": $amount, "currency": "INR", "receipt": "receipt#R1", "payment_capture": 1 }'; // as per my experience the receipt doesn't play any role in helping you generate a certain pattern in your Order ID!!
+
+    var res = await http.post(Uri.parse('https://api.razorpay.com/v1/orders'),
+        headers: headers, body: data);
+    if (res.statusCode != 200) {
+      throw Exception('http.post error: statusCode= ${res.statusCode}');
+    }
+    print('ORDER ID response => ${res.body}');
+
+    return json.decode(res.body)['id'].toString();
   }*/
 }

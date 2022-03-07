@@ -127,7 +127,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                         onTap: () {
                           if (_formKey.currentState?.validate() == true) {
                             int val = int.parse(_balancefieldcontroller.text);
-                            if (val > 25) {
+                            if (val >= 25) {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(

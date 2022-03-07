@@ -3,7 +3,9 @@ class APIConstants {
   //    BaseURL_Local = 'http://192.168.1.2:8085/';
 
   static String firebaseNotificationAPI = 'https://fcm.googleapis.com/fcm/send';
+  ///
   static String baseURL = 'http://34.205.139.16:8081/';
+  ///
   static String getAllUsers = "user/getAll";
   static String getAllMember = "user/getAllMember";
   static String registerUser = "user/create";
@@ -19,5 +21,7 @@ class APIConstants {
   static String startVideoCall = 'video_chat/start_video_call';
   static String getSingelUser = 'user/getById';
   static String createMember = 'member/create';
+  static String createCallLog = 'call_logs/create';
+  static String getCallLogs = 'call_logs/getCallLogsByUser';
 
 }

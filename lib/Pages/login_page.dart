@@ -104,20 +104,28 @@ class _LogInPageState extends State<LogInPage> {
                                 if (result.isNotEmpty &&
                                     result[0].rawAddress.isNotEmpty) {
                                   print('connected');
-
-                                  UserCredential? userCredential =
-                                      await AuthClass()
-                                          .googleSignin(context)
-                                          .onError((error, stackTrace) {
+                                  try {
+                                    UserCredential? userCredential =
+                                        await AuthClass()
+                                            .googleSignin(context)
+                                            .onError((error, stackTrace) {
+                                      setState(() {
+                                        gbtnprogress = false;
+                                      });
+                                      return null;
+                                    });
+                                    await registerUser(userCredential)
+                                        .whenComplete(() {
+                                      updateFCMToken();
+                                    });
+                                  } catch (e) {
                                     setState(() {
                                       gbtnprogress = false;
                                     });
-                                    return null;
-                                  });
-                                  await registerUser(userCredential)
-                                      .whenComplete(() {
-                                    updateFCMToken();
-                                  });
+                                    print(e);
+                                  }
+
+
                                 }
                               } on SocketException catch (_) {
                                 setState(() {
@@ -183,6 +191,9 @@ class _LogInPageState extends State<LogInPage> {
       "${userCredential.user!.email}",
       "${userCredential.user!.photoURL}",
       CommonConstants.userFCMToken,
+      "",
+      "",
+      "",
     );
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -194,16 +205,16 @@ class _LogInPageState extends State<LogInPage> {
       });
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('id', res['data']['id']);
-      prefs.setString('name', '${res['data']['name']}');
-      prefs.setString('email', '${res['data']['email']}');
-      prefs.setString('photo', '${res['data']['photo']}');
-      prefs.setString('age', '${res['data']['age']}');
-      prefs.setString('sex', '${res['data']['sex']}');
-      prefs.setString('mobile', '${res['data']['mobile']}');
-      prefs.setString('available', '${res['data']['available']}');
-      prefs.setString('isMember', '${res['data']['isMember']}');
-      prefs.setString('isActive', '${res['data']['isActive']}');
-      prefs.setString('fcm_token', '${res['data']['fcm_token']}');
+      prefs.setString('name', '${res['data']['name']??''}');
+      prefs.setString('email', '${res['data']['email']??''}');
+      prefs.setString('photo', '${res['data']['photo']??''}');
+      prefs.setString('age', '${res['data']['age']??''}');
+      prefs.setString('sex', '${res['data']['sex']??''}');
+      prefs.setString('mobile', '${res['data']['mobile']??''}');
+      prefs.setString('available', '${res['data']['available']??''}');
+      prefs.setBool('isMember', res['data']['isMember']?? false);
+      prefs.setString('isActive', '${res['data']['isActive']??''}');
+      prefs.setString('fcm_token', '${res['data']['fcm_token']??''}');
 
       if (res['message'] == "") {
         Fluttertoast.showToast(msg: "Registered Successfully!!!");

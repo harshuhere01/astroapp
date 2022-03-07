@@ -17,6 +17,7 @@ class CommonConstants {
   static late int receiverIdforSendNotification ;
   static late int receiverId ;
   static late int callerId ;
+  static String callerSocketId ='' ;
   static late int room ;
   static String joiningchannelName = '';
   static String joiningchannelId = '';
@@ -31,4 +32,11 @@ class CommonConstants {
   static var userAge = '';
   static var userGender = '';
   static var userMobilenumber = '';
+
+  /// call log variables
+  static String outgoingCall = 'Outgoing';
+  static String incomingCall = 'Incoming';
+  static bool userIsMember = false;
+
+  static String calljoinername = '';
 }

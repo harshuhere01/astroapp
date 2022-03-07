@@ -5,6 +5,7 @@ import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Firebase%20Services/firebase_auth_service.dart';
 import 'package:astro/Model/API_Model.dart';
+import 'package:astro/Pages/Drawer%20Pages/Call%20History/callHistoryPage.dart';
 import 'package:astro/Pages/Drawer%20Pages/profile_page.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
@@ -32,11 +33,13 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin<HomePage> {
   @override
   bool get wantKeepAlive => true;
+  /// for Page View
   int _selectedPage = 0;
   bool isPageSelected = false;
   PageController _pageController = PageController(
     keepPage: true,
   );
+  /// others
   String? userName;
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   late FlutterLocalNotificationsPlugin fltNotification;
@@ -63,6 +66,7 @@ class _HomePageState extends State<HomePage>
           "change_status :-----------------------------------------------$data");
       getAllMember();
     });
+
     super.initState();
   }
 
@@ -71,6 +75,23 @@ class _HomePageState extends State<HomePage>
     CommonConstants.listened = true;
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> createCallLog(
+      int userID, String callType, bool isMember, int receiverID) async {
+    var response =
+        await API().createCallLog(userID, callType, isMember, receiverID);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    print(res.toString());
+
+    if (statusCode == 200) {
+      // Fluttertoast.showToast(msg: "createCallLog :- $res");
+    } else {
+      Fluttertoast.showToast(
+          msg: "createCallLog API :- ${response.statusCode} :- $res");
+    }
   }
 
   Future<void> getAllMember() async {
@@ -90,29 +111,6 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  // Future<void> getSingelUser() async {
-  //   var response = await API().getSingelUser(CommonConstants.userID);
-  //   int statusCode = response.statusCode;
-  //   String responseBody = response.body;
-  //   var res = jsonDecode(responseBody);
-  //   if (statusCode == 200) {
-  //     setState(() {
-  //       isMemberRequested = res['data']['isMemberRequested'];
-  //       isMember = res['data']['isMember'];
-  //       photo = res['data']['photo'];
-  //       name = res['data']['name'];
-  //       email = res['data']['email'];
-  //       agee = res['data']['age'];
-  //       genderr = res['data']['sex'];
-  //       mobilenumber = res['data']['mobile'];
-  //     });
-  //     print(userList.toString());
-  //   } else {
-  //     Fluttertoast.showToast(
-  //         msg: "Fetchuser API error :- ${response.statusCode.toString()}");
-  //   }
-  // }
-
   Future<void> socketConnectToServer() async {
     try {
       print("socket connection process started");
@@ -124,6 +122,7 @@ class _HomePageState extends State<HomePage>
         print("Socket Connection :-:" +
             CommonConstants.socket.connected.toString());
       });
+
     } catch (e) {
       print("socket_error:" + e.toString());
     }
@@ -132,14 +131,15 @@ class _HomePageState extends State<HomePage>
   Future<void> getdisplayName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userName = prefs.getString('name');
-      CommonConstants.userID = prefs.getInt('id')!;
-      CommonConstants.userName = prefs.getString('name')!;
-      CommonConstants.userEmail = prefs.getString('email')!;
-      CommonConstants.userAge = prefs.getString('age')!;
-      CommonConstants.userGender = prefs.getString('sex')!;
-      CommonConstants.userMobilenumber = prefs.getString('mobile')!;
-      CommonConstants.userPhoto = prefs.getString('photo')!;
+      userName = prefs.getString('name') ?? '';
+      CommonConstants.userID = prefs.getInt('id') ?? 0;
+      CommonConstants.userName = prefs.getString('name') ?? '';
+      CommonConstants.userEmail = prefs.getString('email') ?? '';
+      CommonConstants.userAge = prefs.getString('age') ?? '';
+      CommonConstants.userGender = prefs.getString('sex') ?? '';
+      CommonConstants.userMobilenumber = prefs.getString('mobile') ?? '';
+      CommonConstants.userPhoto = prefs.getString('photo') ?? '';
+      CommonConstants.userIsMember = prefs.getBool('isMember') ?? false;
     });
     await getAllMember();
   }
@@ -148,8 +148,14 @@ class _HomePageState extends State<HomePage>
     AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
       if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
         homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
+        await createCallLog(
+            CommonConstants.userID,
+            CommonConstants.incomingCall,
+            CommonConstants.userIsMember,
+            CommonConstants.callerId);
         print("Call Accepted");
       } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
+        CommonConstants.socket.emit('call_rejection', { "socketId" : CommonConstants.callerSocketId});
         print("Call Rejected");
       }
     });
@@ -192,20 +198,18 @@ class _HomePageState extends State<HomePage>
 
       if (notification != null && android != null) {
         setState(() {
-          CommonConstants.receiverId = int.parse(message.data['receiverId'])??0;
-          CommonConstants.callerId = int.parse(message.data['callerId'])??0;
-          CommonConstants.room = int.parse(message.data['receiverId'])??0;
-          CommonConstants.joiningchannelName = message.data['channelName'];
-          Agora.Token = message.data['agoraToken'];
-          Agora.APP_ID = message.data['app_id'];
+          CommonConstants.receiverId =
+              int.parse(message.data['receiverId'] ?? 0);
+          CommonConstants.callerId = int.parse(message.data['callerId'] ?? 0);
+          CommonConstants.callerSocketId = message.data['socketId'] ?? '';
+          CommonConstants.room = int.parse(message.data['receiverId'] ?? 0);
+            CommonConstants.calljoinername = message.data['username']??'';
+          CommonConstants.joiningchannelName =
+              message.data['channelName'] ?? '';
+          Agora.Token = message.data['agoraToken'] ?? '';
+          Agora.APP_ID = message.data['app_id'] ?? '';
         });
-        // if(CommonConstants.socket.connected){
-        //   await notify();
-        // }
-        // else {
-        //   await connectSocket();
-        await notify();
-        // }
+        await notify(message);
 
         ///Awesome Notification
         print(
@@ -222,7 +226,7 @@ class _HomePageState extends State<HomePage>
     // });
   }
 
-  Future<void> notify() async {
+  Future<void> notify(message) async {
     AwesomeNotifications().createNotification(
       actionButtons: [
         NotificationActionButton(
@@ -247,7 +251,7 @@ class _HomePageState extends State<HomePage>
           id: 1,
           channelKey: 'basic_channel',
           title: "Incoming call",
-          body: "Incoming call from name",
+          body: "Incoming call from ${message.data['username']}",
           summary: "Hello"),
     );
   }
@@ -269,18 +273,41 @@ class _HomePageState extends State<HomePage>
                 DrawerHeader(
                   padding: EdgeInsets.fromLTRB(
                       CommonConstants.device_height * 0.028,
-                      CommonConstants.device_height * 0.15,
+                      CommonConstants.device_height * 0.10,
                       0.0,
-                      CommonConstants.device_height * 0.01),
+                      CommonConstants.device_height * 0.01,),
                   decoration: BoxDecoration(
                     color: Colors.yellow[600],
                   ),
-                  child: Text(
-                    "$userName",
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500),
+                  child: Row(
+                    mainAxisAlignment : MainAxisAlignment.start ,
+                    children: [
+                      Container(
+                        // decoration: BoxDecoration(
+                        //   border: Border.all(
+                        //     color: Colors.black,
+                        //   ),
+                        //   shape: BoxShape.circle,
+                        // ),
+                        child: ClipOval(
+                          child: FadeInImage(
+                            fit: BoxFit.cover,
+                            width: CommonConstants.device_width / 7.5,
+                            height: CommonConstants.device_width / 7.5,
+                            placeholder: const AssetImage("asset/placeholder.png"),
+                            image: NetworkImage(CommonConstants.userPhoto),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      Text(
+                        "$userName",
+                        style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
                 ),
                 ListTile(
@@ -330,6 +357,12 @@ class _HomePageState extends State<HomePage>
                   ),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CallHistoryPage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(

@@ -33,11 +33,11 @@ class UserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 150,
+      height: CommonConstants.device_height*0.2,
       padding: const EdgeInsets.fromLTRB(10, 10, 15, 10),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -52,13 +52,21 @@ class UserListTile extends StatelessWidget {
                     onTap: () {
                       onTapImage!();
                     },
-                    child: ClipOval(
-                      child: FadeInImage(
-                        fit: BoxFit.cover,
-                        width: CommonConstants.device_width/5,
-                        height: CommonConstants.device_width/5,
-                        placeholder: const AssetImage("asset/placeholder.png"),
-                        image: NetworkImage("$imageURL"),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black38,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipOval(
+                        child: FadeInImage(
+                          fit: BoxFit.cover,
+                          width: CommonConstants.device_width/5,
+                          height: CommonConstants.device_width/5,
+                          placeholder: const AssetImage("asset/placeholder.png"),
+                          image: NetworkImage("$imageURL"),
+                        ),
                       ),
                     )
                     // FadeInImage(

@@ -104,6 +104,24 @@ class API {
     );
     return response;
   }
+  Future<Response> getCallLogs(int userID,bool isMember) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.getCallLogs);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "userId":userID,
+      "isMember" : isMember
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
 
   Future<Response> send_notification() async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.sendNotification);
@@ -115,9 +133,11 @@ class API {
       "fcm_token": CommonConstants.receiverFCMToken,
       "channelName": Agora.Channel_name,
       "agora_token": Agora.Token,
-      "receiverId": CommonConstants.receiverIdforSendNotification,
+      "receiverId": CommonConstants.  receiverIdforSendNotification,
       "app_id": Agora.APP_ID,
       "callerId": CommonConstants.userID,
+      "socketId": CommonConstants.socketID,
+
     };
     String jsonBody = json.encode(body);
     // final encoding = Encoding.getByName('utf-8');
@@ -131,7 +151,7 @@ class API {
     return response;
   }
 
-  Future<Response> addMoneyAPI(int apiAmount) async {
+  Future<Response> addMoneyAPI(double apiAmount) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.addMoneyURL);
     final headers = {
       'Content-Type': 'application/json',
@@ -153,7 +173,7 @@ class API {
   }
 
   Future<Response> verifyPayment(
-      String orderID, String paymentID, String signature, int apiAmount) async {
+      String orderID, String paymentID, String signature, double apiAmount) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.verifyPaymentURL);
     final headers = {
       'Content-Type': 'application/json',
@@ -177,32 +197,35 @@ class API {
     return response;
   }
 
-  Future<Response> calculateTime(String uMobile, String cCharge) async {
-    final uri = Uri.parse(APIConstants.baseURL + APIConstants.calculateTime);
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, dynamic> body = {
-      "u_mobile": uMobile,
-      "c_charge": cCharge,
-    };
-    String jsonBody = json.encode(body);
-    final encoding = Encoding.getByName('utf-8');
-
-    Response response = await post(
-      uri,
-      headers: headers,
-      body: jsonBody,
-      encoding: encoding,
-    );
-    return response;
-  }
+  // Future<Response> calculateTime(String uMobile, String cCharge) async {
+  //   final uri = Uri.parse(APIConstants.baseURL + APIConstants.calculateTime);
+  //   final headers = {
+  //     'Content-Type': 'application/json',
+  //   };
+  //   Map<String, dynamic> body = {
+  //     "u_mobile": uMobile,
+  //     "c_charge": cCharge,
+  //   };
+  //   String jsonBody = json.encode(body);
+  //   final encoding = Encoding.getByName('utf-8');
+  //
+  //   Response response = await post(
+  //     uri,
+  //     headers: headers,
+  //     body: jsonBody,
+  //     encoding: encoding,
+  //   );
+  //   return response;
+  // }
 
   Future<Response> registerUser(
     String name,
     String email,
     String photoURL,
     String fcmToken,
+    String age,
+    String gender,
+    String mobile,
   ) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.registerUser);
     final headers = {
@@ -216,9 +239,9 @@ class API {
       "isMember": false,
       "isActive": true,
       "available": "yes",
-      // "age": "",
-      // "sex" :"",
-      // "mobile" :"",
+      "age": age,
+      "sex" :gender,
+      "mobile" :mobile,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -321,13 +344,34 @@ class API {
     return response;
   }
 
-  Future<Response> startVideoCallAPI() async {
+  Future<Response> startVideoCallAPI(String cCharge) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.startVideoCall);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
       "id": CommonConstants.userID,
-      "c_charge": 50,
+      "c_charge": cCharge,
       "memberId": CommonConstants.receiverIdforSendNotification,
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
+
+  Future<Response> createCallLog(int userID,String callType,bool isMember,int receiverID) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.createCallLog);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "userId":userID,
+      "memberId":receiverID,
+      "call_type" : callType,
+      "isMember": isMember
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
