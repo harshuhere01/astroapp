@@ -13,7 +13,7 @@ class CommonConstants {
   static var socketID = '';
 
   static bool listened = false;
-  static String CallDone = '';
+
   static late int receiverIdforSendNotification ;
   static late int receiverId ;
   static late int callerId ;
@@ -24,8 +24,9 @@ class CommonConstants {
   static String joiningAppId = '';
   static bool caller = false;
 
+
   ///user details
-  static late int userID;
+  static late int userID ;
   static var userPhoto = '';
   static var userName = '';
   static var userEmail = '';
@@ -39,4 +40,10 @@ class CommonConstants {
   static bool userIsMember = false;
 
   static String calljoinername = '';
+  static String callType = '';
+  static late int callerCallLogId;
+  static late int memberCallLogId;
+  static late double memberCallCharge ;
+  static late double userCallCharge ;
+  static bool isCallConnected = false;
 }

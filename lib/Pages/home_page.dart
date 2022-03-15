@@ -15,12 +15,86 @@ import 'package:astro/Widgets/tab_button.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:socket_io_client/src/darty.dart';
+
+// late FlutterLocalNotificationsPlugin fltNotification;
+//
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   print("Handling a background message: ${message.messageId}");
+//   // var androidInit =
+//   // const AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
+//   // var iosInit = const IOSInitializationSettings();
+//   // var initSetting =
+//   // InitializationSettings(android: androidInit, iOS: iosInit);
+//   // fltNotification = FlutterLocalNotificationsPlugin();
+//   // fltNotification.initialize(initSetting);
+//   //
+//   // var androidDetails = const AndroidNotificationDetails(
+//   //   "1",
+//   //   "basic_channel",
+//   //   importance: Importance.max,
+//   //   priority: Priority.max,
+//   //   playSound: true,
+//   //   fullScreenIntent: true,
+//   //   enableVibration: true,
+//   //   autoCancel: false,
+//   // );
+//   // var iosDetails = const IOSNotificationDetails();
+//   // var generalNotificationDetails =
+//   // NotificationDetails(android: androidDetails, iOS: iosDetails);
+//   //
+//   // RemoteNotification? notification = message.notification;
+//   // try{
+//   //   fltNotification.show(notification.hashCode, message.data['username'],
+//   //       message.data['username'], generalNotificationDetails);
+//   // }
+//   // catch(e)
+//   // {
+//   //   print("error on background notification :- $e");
+//   // }
+//
+//   // RemoteNotification? notification = message.notification;
+//   // AndroidNotification? android = message.notification?.android;
+//
+//   // if (notification != null && android != null) {
+//
+//   AwesomeNotifications().createNotification(
+//     actionButtons: [
+//       NotificationActionButton(
+//         key: "CANCEL",
+//         label: "CANCEL",
+//         buttonType: ActionButtonType.Default,
+//       ),
+//       NotificationActionButton(
+//         key: "ACCEPT",
+//         label: "ACCEPT",
+//         buttonType: ActionButtonType.Default,
+//       )
+//     ],
+//     // schedule: NotificationInterval(
+//     //     interval: 45, timeZone: localTimeZone, repeats: true),
+//     content: NotificationContent(
+//         fullScreenIntent: true,
+//         wakeUpScreen: true,
+//         locked: true,
+//         category: NotificationCategory.Call,
+//         displayOnBackground: true,
+//         displayOnForeground: true,
+//         autoDismissible: false,
+//         id: 1,
+//         channelKey: 'basic_channel',
+//         title: "Incoming call",
+//         body: "Incoming call from ${message.data['username']}",
+//         summary: "Hello"),
+//   );
+//
+// }
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -33,17 +107,20 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin<HomePage> {
   @override
   bool get wantKeepAlive => true;
+
   /// for Page View
   int _selectedPage = 0;
   bool isPageSelected = false;
   PageController _pageController = PageController(
     keepPage: true,
   );
+
   /// others
   String? userName;
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
   late FlutterLocalNotificationsPlugin fltNotification;
   List<dynamic>? userList;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   void _changePage(int pageNum) {
     setState(() {
@@ -61,12 +138,12 @@ class _HomePageState extends State<HomePage>
     _pageController = PageController();
     initMessaging();
     getdisplayName();
+
     CommonConstants.socket.on('change_status', (data) {
-      print(
-          "change_status :-----------------------------------------------$data");
+      print("change_status :------------------------$data");
       getAllMember();
     });
-
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     super.initState();
   }
 
@@ -87,7 +164,9 @@ class _HomePageState extends State<HomePage>
     print(res.toString());
 
     if (statusCode == 200) {
-      // Fluttertoast.showToast(msg: "createCallLog :- $res");
+      setState(() {
+        CommonConstants.memberCallLogId = res['data']['id'] ?? 0;
+      });
     } else {
       Fluttertoast.showToast(
           msg: "createCallLog API :- ${response.statusCode} :- $res");
@@ -95,7 +174,6 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> getAllMember() async {
-    await socketConnectToServer();
     var response = await API().getAllMember(CommonConstants.userID);
     int statusCode = response.statusCode;
     String responseBody = response.body;
@@ -122,13 +200,13 @@ class _HomePageState extends State<HomePage>
         print("Socket Connection :-:" +
             CommonConstants.socket.connected.toString());
       });
-
     } catch (e) {
       print("socket_error:" + e.toString());
     }
   }
 
   Future<void> getdisplayName() async {
+    await socketConnectToServer();
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('name') ?? '';
@@ -139,7 +217,6 @@ class _HomePageState extends State<HomePage>
       CommonConstants.userGender = prefs.getString('sex') ?? '';
       CommonConstants.userMobilenumber = prefs.getString('mobile') ?? '';
       CommonConstants.userPhoto = prefs.getString('photo') ?? '';
-      CommonConstants.userIsMember = prefs.getBool('isMember') ?? false;
     });
     await getAllMember();
   }
@@ -148,15 +225,14 @@ class _HomePageState extends State<HomePage>
     AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
       if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
         homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
-        await createCallLog(
-            CommonConstants.userID,
-            CommonConstants.incomingCall,
-            CommonConstants.userIsMember,
-            CommonConstants.callerId);
-        print("Call Accepted");
+
+        print("Call Accepted from home page");
       } else if (receivedNotifiction.buttonKeyPressed == "CANCEL") {
-        CommonConstants.socket.emit('call_rejection', { "socketId" : CommonConstants.callerSocketId});
-        print("Call Rejected");
+        CommonConstants.socket.emit(
+            'call_rejection', {"socketId": CommonConstants.callerSocketId});
+
+        Fluttertoast.showToast(msg: "Call rejected");
+        print("Call Rejected from home page");
       }
     });
   }
@@ -168,7 +244,7 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  void initMessaging() {
+  Future<void> initMessaging() async {
     var androidInit =
         const AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
     var iosInit = const IOSInitializationSettings();
@@ -179,8 +255,8 @@ class _HomePageState extends State<HomePage>
     var androidDetails = const AndroidNotificationDetails(
       "1",
       "basic_channel",
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       playSound: true,
       fullScreenIntent: true,
       enableVibration: true,
@@ -195,35 +271,49 @@ class _HomePageState extends State<HomePage>
       AndroidNotification? android = message.notification?.android;
 
       print('FirebaseMessaging.onMessage.listen' + message.data.toString());
-
+      await createCallLog(CommonConstants.userID, CommonConstants.incomingCall,
+          CommonConstants.userIsMember, int.parse(message.data['callerId'] ?? 0));
       if (notification != null && android != null) {
+        try {
+          CommonConstants.socket
+              .emit('join_room', int.parse(message.data['receiverId'] ?? 0));
+        } catch (e) {
+          Fluttertoast.showToast(msg: "Error while emit join_room :- $e");
+        }
+
         setState(() {
           CommonConstants.receiverId =
               int.parse(message.data['receiverId'] ?? 0);
           CommonConstants.callerId = int.parse(message.data['callerId'] ?? 0);
           CommonConstants.callerSocketId = message.data['socketId'] ?? '';
           CommonConstants.room = int.parse(message.data['receiverId'] ?? 0);
-            CommonConstants.calljoinername = message.data['username']??'';
+          CommonConstants.calljoinername = message.data['username'] ?? '';
+          CommonConstants.callerCallLogId =
+              int.parse(message.data['callLogId'] ?? 0);
           CommonConstants.joiningchannelName =
               message.data['channelName'] ?? '';
           Agora.Token = message.data['agoraToken'] ?? '';
           Agora.APP_ID = message.data['app_id'] ?? '';
         });
+
+        ///
         await notify(message);
 
         ///Awesome Notification
-        print(
-            "Incoming Notification :-Title - ${notification.title}, Body - ${notification.body}, BodyLocARGS - ${notification.bodyLocArgs}");
+        // print(
+        //     "Incoming Notification :-Title - ${notification.title}, Body - ${notification.body}, BodyLocARGS - ${notification.bodyLocArgs}");
 
         /// Normal Notification
-        // fltNotification.show(notification.hashCode, notification.title,
-        //     notification.body, generalNotificationDetails);
+        // fltNotification.show(notification.hashCode, message.data['username'],
+        //     message.data['username'], generalNotificationDetails);
 
+        CommonConstants.socket.once("call_cancel", (data) async {
+          await flutterLocalNotificationsPlugin.cancel(1);
+          Fluttertoast.showToast(
+              msg: "Call canceled by ${message.data['username']}");
+        });
       }
     });
-    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    //   print("onMessageOpenedApp");
-    // });
   }
 
   Future<void> notify(message) async {
@@ -258,279 +348,298 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context, HomeNotifier homeNotifier, child) {
-      if (CommonConstants.listened == false) {
-        handleNotificationEvents(homeNotifier);
-        CommonConstants.listened = true;
-      }
-      return Scaffold(
-        backgroundColor: Colors.grey[200],
-        drawer: SizedBox(
-          child: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  padding: EdgeInsets.fromLTRB(
+    return WillPopScope(
+      onWillPop: () async {
+        _showMyDialog(context);
+        return false;
+      },
+      child: Consumer(builder: (context, HomeNotifier homeNotifier, child) {
+        if (CommonConstants.listened == false) {
+          handleNotificationEvents(homeNotifier);
+          CommonConstants.listened = true;
+        }
+        return Scaffold(
+          backgroundColor: Colors.grey[200],
+          drawer: SizedBox(
+            child: Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    padding: EdgeInsets.fromLTRB(
                       CommonConstants.device_height * 0.028,
                       CommonConstants.device_height * 0.10,
                       0.0,
-                      CommonConstants.device_height * 0.01,),
-                  decoration: BoxDecoration(
-                    color: Colors.yellow[600],
-                  ),
-                  child: Row(
-                    mainAxisAlignment : MainAxisAlignment.start ,
-                    children: [
-                      Container(
-                        // decoration: BoxDecoration(
-                        //   border: Border.all(
-                        //     color: Colors.black,
-                        //   ),
-                        //   shape: BoxShape.circle,
-                        // ),
-                        child: ClipOval(
-                          child: FadeInImage(
-                            fit: BoxFit.cover,
-                            width: CommonConstants.device_width / 7.5,
-                            height: CommonConstants.device_width / 7.5,
-                            placeholder: const AssetImage("asset/placeholder.png"),
-                            image: NetworkImage(CommonConstants.userPhoto),
+                      CommonConstants.device_height * 0.01,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.yellow[600],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width : 0.5,
+                              color: Colors.black,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: ClipOval(
+                            child: FadeInImage(
+                              fit: BoxFit.cover,
+                              width: CommonConstants.device_width / 7.5,
+                              height: CommonConstants.device_width / 7.5,
+                              placeholder:
+                                  const AssetImage("asset/placeholder.png"),
+                              image: NetworkImage(CommonConstants.userPhoto),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10,),
-                      Text(
-                        "$userName",
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "$userName",
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.person, size: 28),
-                  title: const Text(
-                    'Profile',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfilePage(),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.account_balance_wallet, size: 28),
-                  title: const Text(
-                    'Wallet',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
+                  ListTile(
+                    leading: const Icon(Icons.person, size: 28),
+                    title: const Text(
+                      'Profile',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const AddMoneyPage()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.history, size: 28),
-                  title: const Text(
-                    'History',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400),
+                          builder: (context) => ProfilePage(),
+                        ),
+                      );
+                    },
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CallHistoryPage(),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.logout, size: 28),
-                  title: const Text(
-                    'Log Out',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400),
+                  ListTile(
+                    leading: const Icon(Icons.account_balance_wallet, size: 28),
+                    title: const Text(
+                      'Wallet',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AddMoneyPage()));
+                    },
                   ),
-                  onTap: () async {
-                    await AuthClass().signOut();
-                    Navigator.pop(context);
-                    Navigator.pushAndRemoveUntil(
+                  ListTile(
+                    leading: const Icon(Icons.history, size: 28),
+                    title: const Text(
+                      'History',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (builder) => const LogInPage()),
-                        (route) => false);
+                          builder: (context) => const CallHistoryPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.logout, size: 28),
+                    title: const Text(
+                      'Log Out',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    onTap: () async {
+                      changeAvailabilty(CommonConstants.userID,"no");
+                      await AuthClass().signOut();
+                      Navigator.pop(context);
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => const LogInPage()),
+                          (route) => false);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          appBar: AppBar(
+            iconTheme: const IconThemeData(color: Colors.black),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Tapped Search")));
                   },
+                  icon: const Icon(
+                    Icons.search,
+                    color: Colors.black,
+                  )),
+              IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Tapped Settings")));
+                  },
+                  icon: const Icon(
+                    Icons.settings,
+                    color: Colors.black,
+                  )),
+            ],
+            backgroundColor: Colors.yellow[600],
+            title: const Text("Call with Astrologer"),
+            titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+          ),
+          body: Column(
+            verticalDirection: VerticalDirection.down,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                height: 80,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TabButton(
+                          selectedPage: _selectedPage,
+                          pageNumber: 0,
+                          text: "Call",
+                          onPressed: () {
+                            _changePage(0);
+                          }),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: TabButton(
+                          selectedPage: _selectedPage,
+                          pageNumber: 1,
+                          text: "Chat",
+                          onPressed: () {
+                            _changePage(1);
+                          }),
+                    ),
+                  ],
                 ),
+              ),
+              Expanded(
+                child: PageView(
+                  onPageChanged: (int page) {
+                    setState(() {
+                      _selectedPage = page;
+                    });
+                  },
+                  controller: _pageController,
+                  children: [
+                    userList == null
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                            ),
+                          )
+                        : userList!.isEmpty
+                            ? const Center(
+                                child: Text(
+                                "No members record found !!!",
+                                style: TextStyle(color: Colors.black),
+                              ))
+                            : CallPage(
+                                userList: userList,
+                              ),
+                    // userList!.isEmpty
+                    //    ? const Center(
+                    //        child: CircularProgressIndicator(
+                    //          color: Colors.black,
+                    //        ),
+                    //      )
+                    //    :
+                    const ChatPage(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  void _showMyDialog(context) async {
+    showDialog<bool>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (
+        BuildContext context,
+      ) {
+        return AlertDialog(
+          title: const Text('Exit app'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('Are you sure ?'),
               ],
             ),
           ),
-        ),
-        appBar: AppBar(
-          iconTheme: const IconThemeData(color: Colors.black),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).clearSnackBars();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Tapped Search")));
-                },
-                icon: const Icon(
-                  Icons.search,
-                  color: Colors.black,
-                )),
-            IconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).clearSnackBars();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Tapped Settings")));
-                },
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                )),
-          ],
-          backgroundColor: Colors.yellow[600],
-          title: const Text("Call with Astrologer"),
-          titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
-        ),
-        body: Column(
-          verticalDirection: VerticalDirection.down,
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: 80,
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TabButton(
-                        selectedPage: _selectedPage,
-                        pageNumber: 0,
-                        text: "Call",
-                        onPressed: () {
-                          _changePage(0);
-                        }),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: TabButton(
-                        selectedPage: _selectedPage,
-                        pageNumber: 1,
-                        text: "Chat",
-                        onPressed: () {
-                          _changePage(1);
-                        }),
-                  ),
-                ],
-              ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                CommonConstants.socket.dispose();
+                SystemNavigator.pop();
+              },
             ),
-            Expanded(
-              child: PageView(
-                onPageChanged: (int page) {
-                  setState(() {
-                    _selectedPage = page;
-                  });
-                },
-                controller: _pageController,
-                children: [
-                  userList == null
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.black,
-                          ),
-                        )
-                      : userList!.isEmpty
-                          ? const Center(
-                              child: Text(
-                              "No members record found !!!",
-                              style: TextStyle(color: Colors.black),
-                            ))
-                          : CallPage(
-                              userList: userList,
-                            ),
-                  // userList!.isEmpty
-                  //    ? const Center(
-                  //        child: CircularProgressIndicator(
-                  //          color: Colors.black,
-                  //        ),
-                  //      )
-                  //    :
-                  const ChatPage(),
-                ],
-              ),
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
             ),
           ],
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
-  /// check wallet balance button
-//   Column(
-//   children: [
-//   Container(
-//   margin: const EdgeInsets.all(10),
-//   width: 200,
-//   height: 40,
-//   alignment: Alignment.center,
-//   decoration: BoxDecoration(
-//   color: Colors.yellow[600],
-//   borderRadius: const BorderRadius.all(Radius.circular(10)),
-//   border: Border.all(color: Colors.black87.withOpacity(0.1)),
-//   ),
-//   padding: const EdgeInsets.all(2),
-//   child: TextButton(
-//   onPressed: () async {
-//   // CommonConstants.socket.emit(
-//   //     'socket_connected_frontend', {"id": CommonConstants.socket.id});
-//   await getWalletBalance();
-// },
-// child: Text(
-// buttonName,
-// style: const TextStyle(
-// fontSize: 15,
-// color: Colors.black,
-// fontWeight: FontWeight.w300),
-// ),
-// ),
-// ),
-// walletBalance == null || walletBalance == ""
-// ? Container()
-//     : Text(
-// "Your wallet Balance is : ₹ $walletBalance",
-// style: const TextStyle(
-// fontSize: 15,
-// color: Colors.black,
-// fontWeight: FontWeight.w300),
-// ),
-// ],
-// ),
-
+  Future<void> changeAvailabilty(int userID, String status) async {
+    var response = await API().changeAvailabilty(userID, status);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      // Fluttertoast.showToast(msg: res['message']);
+    } else {
+      Fluttertoast.showToast(
+          msg: "changeAvailabilty API :- ${response.statusCode} :- $res");
+    }
+  }
 }

@@ -131,13 +131,14 @@ class _CallHistoryPageState extends State<CallHistoryPage>
                 ),
               ],
             )
-          : callLogList == null
-              ? const Center(child: Text("No data found !!!"))
-              : isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                      color: Colors.black,
-                    ))
+          : isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.black,
+                  ),
+                )
+              : callLogList == null
+                  ? const Center(child: Text("No calls yet !!!"))
                   : ListView.builder(
                       padding: const EdgeInsets.all(8),
                       itemCount: callLogList!.length,
@@ -146,20 +147,24 @@ class _CallHistoryPageState extends State<CallHistoryPage>
                         return CallLodCard(
                           calltypeIcon: callLogList![index]['call_type'] ==
                                   CommonConstants.outgoingCall
-                              ? const Icon(
+                              ?  Icon(
                                   Icons.call_made,
-                                  color: Colors.green,
+                                  color: callLogList![index]['duration'] == null
+                                      ? Colors.red
+                                      : Colors.green,
                                   size: 17,
                                 )
-                              : const Icon(
+                              :  Icon(
                                   Icons.call_received,
-                                  color: Colors.green,
+                                  color: callLogList![index]['duration'] == null
+                                      ? Colors.red
+                                      : Colors.green,
                                   size: 17,
                                 ),
                           callerName:
                               callLogList![index]['members']['name'] ?? '',
                           // calltimeStamp: callDateTime,
-
+                          callDuration: callLogList![index]['duration'] ?? '',
                           calltimeStamp: callDateTime,
                           profileURL: callLogList![index]['members']['photo'],
                         );
@@ -174,14 +179,12 @@ class _CallHistoryPageState extends State<CallHistoryPage>
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      if (res['message'] != "No logs found") {
-        setState(() {
-          callLogList = res['data'];
-          isLoading = false;
-        });
-        if (isMember) {
-          await sortIncomingCallLog();
-        }
+      setState(() {
+        callLogList = res['data'];
+        isLoading = false;
+      });
+      if (isMember) {
+        await sortIncomingCallLog();
       }
     } else {
       Fluttertoast.showToast(
@@ -191,11 +194,10 @@ class _CallHistoryPageState extends State<CallHistoryPage>
 
   formatCallTime(date) {
     DateTime parseDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(date);
-    var inputDate = DateTime.parse(parseDate.toString());
-    var inputdatewithOffset =
-        inputDate.add(const Duration(hours: 5, minutes: 30));
+    var inputDate = DateTime.parse(parseDate.toString())
+        .add(const Duration(hours: 5, minutes: 30));
     var outputFormat = DateFormat('d MMMM hh:mm a');
-    var outputDate = outputFormat.format(inputdatewithOffset.toLocal());
+    var outputDate = outputFormat.format(inputDate.toLocal());
 
     callDateTime = outputDate;
   }

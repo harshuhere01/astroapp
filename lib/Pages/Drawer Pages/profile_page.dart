@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({
@@ -54,7 +55,11 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       isLoading = true;
     });
-    getSingelUser();
+    getSingelUser().whenComplete(() {
+      setState(() {
+        isLoading = false;
+      });
+    });
     super.initState();
   }
 
@@ -440,8 +445,9 @@ class _ProfilePageState extends State<ProfilePage> {
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       setState(() {
-        togglebtn = res['data']['isMemberRequested']??'';
-        isMemberRequested = res['data']['isMemberRequested']??'';
+        isLoading = false;
+        togglebtn = res['data']['isMemberRequested']??false;
+        isMemberRequested = res['data']['isMemberRequested']??false;
         isMember = res['data']['isMember']??false;
         photo = res['data']['photo']??'';
         _nameController.text = res['data']['name']??'';
@@ -453,7 +459,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _achievementsController.text = res['data']['achievements']?? '';
         _socialmediaLinkController.text = res['data']['social_media_link']?? '';
         _aboutmeController.text = res['data']['about_me']?? '';
-        isLoading = false;
+        CommonConstants.userIsMember = res['data']['isMember']??false;
+        CommonConstants.userCallCharge =double.parse(res['data']['call_rate']??0.00) ;
+
       });
     } else {
       Fluttertoast.showToast(
@@ -487,7 +495,15 @@ class _ProfilePageState extends State<ProfilePage> {
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      Fluttertoast.showToast(msg: "updateUSER :- ${res['message']}");
+      Fluttertoast.showToast(msg: "Successfully updated!!!");
+      if(isMember) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setDouble('memberCallCharge',
+            double.parse(_callRateController.text));
+        setState(() {
+          CommonConstants.userCallCharge = double.parse(_callRateController.text);
+        });
+      }
     } else {
       Fluttertoast.showToast(
           msg: "Fetchuser API error :- ${response.statusCode.toString()}");
@@ -508,7 +524,10 @@ class _ProfilePageState extends State<ProfilePage> {
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      Fluttertoast.showToast(msg: "createMember :- ${res['message']}");
+      Fluttertoast.showToast(msg: "Successfully requested!!!");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setDouble('memberCallCharge',
+          double.parse(_callRateController.text));
     } else {
       Fluttertoast.showToast(
           msg: "Fetchuser API error :- ${response.statusCode.toString()}");

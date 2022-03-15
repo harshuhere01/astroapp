@@ -1,14 +1,15 @@
+import 'dart:convert';
+
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:astro/Agora%20Functions/Video%20Call/screens/base_widget.dart';
 import 'package:astro/Agora%20Functions/Video%20Call/screens/call/call_model.dart';
 import 'package:astro/Constant/CommonConstant.dart';
-import 'package:astro/Pages/home_page.dart';
+import 'package:astro/Model/API_Model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-
-import 'package:socket_io_client/socket_io_client.dart';
 
 class CallScreen extends StatefulWidget {
   final String? channelName;
@@ -24,6 +25,8 @@ class _CallScreenState extends State<CallScreen> {
   bool manually1 = false;
   bool manually2 = false;
   bool callRejected = false;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   /// Helper function to get list of native views
   List<Widget> _getRenderViews(CallNotifier model) {
@@ -118,7 +121,7 @@ class _CallScreenState extends State<CallScreen> {
             padding: const EdgeInsets.all(12.0),
           ),
           RawMaterialButton(
-            onPressed: () => _onCallEnd(),
+            onPressed: () => _onCallEnd(notifier),
             child: const Icon(
               Icons.call_end,
               color: Colors.white,
@@ -154,7 +157,7 @@ class _CallScreenState extends State<CallScreen> {
       child: FractionallySizedBox(
         heightFactor: 0.5,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 48),
+          padding: const EdgeInsets.symmetric(vertical: 55),
           child: ListView.builder(
             reverse: true,
             itemCount: notifier.infoStrings.length,
@@ -198,21 +201,34 @@ class _CallScreenState extends State<CallScreen> {
     );
   }
 
-  void _onCallEnd() {
-    CommonConstants.socket.emit('call-disconnected', {
-      "id": CommonConstants.socketID,
-      "room": CommonConstants.room,
-    });
-    CommonConstants.CallDone = "";
+  Future<void> _onCallEnd(notifier) async {
+    if (CommonConstants.isCallConnected) {
+      CommonConstants.socket.emit('call-disconnected', {
+        "id": CommonConstants.socketID,
+        "room": CommonConstants.room,
+        "isCallNotConnected": false,
+      });
+      setState(() {
+        CommonConstants.isCallConnected = false;
+      });
+
+    } else {
+      CommonConstants.socket.emit('call-disconnected', {
+        "id": CommonConstants.socketID,
+        "room": CommonConstants.room,
+        "isCallNotConnected": true,
+      });
+      await notifier.endCall(context);
+      Fluttertoast.showToast(msg: "Call Ended");
+      Get.back();
+    }
   }
 
-  void _onCallRejected() {
-      callRejected = true;
-    CommonConstants.socket.emit('call-disconnected', {
-      "id": CommonConstants.socketID,
-      "room": CommonConstants.room,
-    });
-    CommonConstants.CallDone = "";
+  Future<void> _onCallRejected(notifier) async {
+    callRejected = true;
+    await notifier.endCall(context);
+    Get.back();
+    CommonConstants.socket.emit('leave_room', CommonConstants.room);
     Fluttertoast.showToast(
         msg: "Call rejected by ${CommonConstants.calljoinername}");
   }
@@ -230,9 +246,7 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     manually1 = false;
     manually2 = false;
-    CommonConstants.socket.once('call_rejected', (data) {
-      _onCallRejected();
-    });
+
     super.initState();
   }
 
@@ -242,28 +256,45 @@ class _CallScreenState extends State<CallScreen> {
       model: CallNotifier(),
       onModelReady: (model) => model.init("${widget.channelName}", context),
       builder: (context, notifier, child) {
+        ///
         CommonConstants.socket.once("call_disconnected_manually", (data) async {
           if (manually1 == false) {
             manually1 = true;
+            CommonConstants.isCallConnected = false;
             await notifier.endCall(context);
-            if(!callRejected) {
+            if (!callRejected) {
               Fluttertoast.showToast(msg: "Call Ended");
             }
             Get.back();
+            // await flutterLocalNotificationsPlugin.cancel(1);
             CommonConstants.socket.emit('leave_room', CommonConstants.room);
+            await updateDuration(CommonConstants.memberCallLogId, data ?? '');
             print("========== on call_disconnected_manually ====");
+
           }
         });
+
+        ///
         CommonConstants.socket.once("balance_not_ok", (data) async {
           if (manually2 == false) {
             manually2 = true;
+            CommonConstants.isCallConnected = false;
             await notifier.endCall(context);
             Fluttertoast.showToast(msg: "Call Ended");
             Get.back();
             CommonConstants.socket.emit('leave_room', CommonConstants.room);
+            await updateDuration(CommonConstants.memberCallLogId, data ?? '');
             print("========== on balance_not_ok ====");
+
           }
         });
+
+        ///
+        CommonConstants.socket.once('call_rejected', (data) {
+          _onCallRejected(notifier);
+        });
+
+        ///
         return Scaffold(
           // key: _scaffoldKey,
           appBar: AppBar(
@@ -283,5 +314,17 @@ class _CallScreenState extends State<CallScreen> {
         );
       },
     );
+  }
+
+  Future<void> updateDuration(int calllogid, String duration) async {
+    var response = await API().updateDuration(calllogid, duration);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+    } else {
+      Fluttertoast.showToast(
+          msg: "updateDuration API :- ${response.statusCode} :- $res");
+    }
   }
 }

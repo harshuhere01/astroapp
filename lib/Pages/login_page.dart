@@ -201,7 +201,7 @@ class _LogInPageState extends State<LogInPage> {
     if (statusCode == 200) {
       setState(() {
         gbtnprogress = false;
-        CommonConstants.userID = res['data']['id'];
+        CommonConstants.userID = res['data']['id']??0;
       });
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('id', res['data']['id']);
@@ -220,6 +220,7 @@ class _LogInPageState extends State<LogInPage> {
         Fluttertoast.showToast(msg: "Registered Successfully!!!");
       } else {
         Fluttertoast.showToast(msg: "Logged In Successfully!!!");
+        await changeAvailabilty(res['data']['id']??0,"yes");
       }
 
       Navigator.pushAndRemoveUntil(
@@ -242,6 +243,19 @@ class _LogInPageState extends State<LogInPage> {
     } else {
       Fluttertoast.showToast(
           msg: "updateFCMToken API :- ${response.statusCode} :- $res");
+    }
+  }
+
+  Future<void> changeAvailabilty(int userID, String status) async {
+    var response = await API().changeAvailabilty(userID, status);
+    int statusCode = response.statusCode;
+    String responseBody = response.body;
+    var res = jsonDecode(responseBody);
+    if (statusCode == 200) {
+      // Fluttertoast.showToast(msg: res['message']);
+    } else {
+      Fluttertoast.showToast(
+          msg: "changeAvailabilty API :- ${response.statusCode} :- $res");
     }
   }
 }

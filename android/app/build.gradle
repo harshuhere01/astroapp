@@ -71,5 +71,8 @@ dependencies {
     implementation "com.google.firebase:firebase-inappmessaging-display:19.1.5"
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    implementation 'com.google.firebase:firebase-iid:'
 }
+apply plugin: 'com.google.gms.google-services'
 

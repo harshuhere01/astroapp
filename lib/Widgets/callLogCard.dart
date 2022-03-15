@@ -7,11 +7,13 @@ class CallLodCard extends StatelessWidget {
     this.callerName,
     this.calltimeStamp,
     this.profileURL,
+    this.callDuration,
     required this.calltypeIcon,
   }) : super(key: key);
   String? callerName;
   String? calltimeStamp;
   String? profileURL;
+  String? callDuration;
   Icon calltypeIcon;
 
   @override
@@ -24,11 +26,11 @@ class CallLodCard extends StatelessWidget {
       // ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 InkWell(
@@ -72,7 +74,9 @@ class CallLodCard extends StatelessWidget {
                             fontSize: 17,
                             fontWeight: FontWeight.w500),
                       ),
-                      const SizedBox(height: 1,),
+                      const SizedBox(
+                        height: 1,
+                      ),
                       Row(
                         children: [
                           calltypeIcon,
@@ -89,6 +93,20 @@ class CallLodCard extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+
+                  Text(
+                    "$callDuration",
+                    style: const TextStyle(
+                        color: Colors.black45,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400),
+                  )
+                ],
+              ))
         ],
       ),
     );

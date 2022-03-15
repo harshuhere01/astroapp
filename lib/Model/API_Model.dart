@@ -11,78 +11,52 @@ class API {
     final headers = {
       'Content-Type': 'application/json',
     };
-    // final encoding = Encoding.getByName('utf-8');
     Response response = await get(
       uri,
       headers: headers,
-      // encoding: encoding,
     );
     return response;
   }
 
   Future<Response> getAllMember(id) async {
     final uri =
-        Uri.parse(APIConstants.baseURL + APIConstants.getAllMember + "/$id");
+    Uri.parse(APIConstants.baseURL + APIConstants.getAllMember + "/$id");
     final headers = {
       'Content-Type': 'application/json',
     };
-    // final encoding = Encoding.getByName('utf-8');
     Response response = await get(
       uri,
       headers: headers,
-      // encoding: encoding,
     );
     return response;
   }
 
   Future<Response> getSingelUser(id) async {
     final uri =
-        Uri.parse(APIConstants.baseURL + APIConstants.getSingelUser + "/$id");
+    Uri.parse(APIConstants.baseURL + APIConstants.getSingelUser + "/$id");
     final headers = {
       'Content-Type': 'application/json',
     };
-    // final encoding = Encoding.getByName('utf-8');
+
     Response response = await get(
       uri,
       headers: headers,
-      // encoding: encoding,
     );
     return response;
   }
 
   Future<Response> getBalance(id) async {
     final uri =
-        Uri.parse(APIConstants.baseURL + APIConstants.getBalance + "/$id");
+    Uri.parse(APIConstants.baseURL + APIConstants.getBalance + "/$id");
     final headers = {
       'Content-Type': 'application/json',
     };
-    // final encoding = Encoding.getByName('utf-8');
     Response response = await get(
       uri,
       headers: headers,
-      // encoding: encoding,
     );
     return response;
   }
-
-  // Future<Response> getWalletBalance() async {
-  //   final uri =
-  //   Uri.parse(APIConstants.baseURL + APIConstants.getWalletAmountURL);
-  //   final headers = {
-  //     'Content-Type': 'application/json',
-  //   };
-  //   Map<String, dynamic> body = {"u_mobile": "9601603611"};
-  //   String jsonBody = json.encode(body);
-  //   // final encoding = Encoding.getByName('utf-8');
-  //
-  //   Response response = await post(
-  //     uri,
-  //     headers: headers,
-  //     body: jsonBody,
-  //     // encoding: encoding,
-  //   );
-  //   return response;
-  // }
 
   Future<Response> createToken(String userID) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.createToken);
@@ -104,13 +78,11 @@ class API {
     );
     return response;
   }
-  Future<Response> getCallLogs(int userID,bool isMember) async {
+
+  Future<Response> getCallLogs(int userID, bool isMember) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.getCallLogs);
     final headers = {'Content-Type': 'application/json'};
-    Map<String, dynamic> body = {
-      "userId":userID,
-      "isMember" : isMember
-    };
+    Map<String, dynamic> body = {"userId": userID, "isMember": isMember};
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
 
@@ -133,20 +105,18 @@ class API {
       "fcm_token": CommonConstants.receiverFCMToken,
       "channelName": Agora.Channel_name,
       "agora_token": Agora.Token,
-      "receiverId": CommonConstants.  receiverIdforSendNotification,
+      "receiverId": CommonConstants.receiverIdforSendNotification,
       "app_id": Agora.APP_ID,
       "callerId": CommonConstants.userID,
       "socketId": CommonConstants.socketID,
-
+      "callLogId": CommonConstants.callerCallLogId,
     };
     String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
 
     Response response = await post(
       uri,
       headers: headers,
       body: jsonBody,
-      // encoding: encoding,
     );
     return response;
   }
@@ -161,19 +131,17 @@ class API {
       "amount": apiAmount
     };
     String jsonBody = json.encode(body);
-    // final encoding = Encoding.getByName('utf-8');
 
     Response response = await post(
       uri,
       headers: headers,
       body: jsonBody,
-      // encoding: encoding,
     );
     return response;
   }
 
-  Future<Response> verifyPayment(
-      String orderID, String paymentID, String signature, double apiAmount) async {
+  Future<Response> verifyPayment(String orderID, String paymentID,
+      String signature, double apiAmount) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.verifyPaymentURL);
     final headers = {
       'Content-Type': 'application/json',
@@ -218,15 +186,13 @@ class API {
   //   return response;
   // }
 
-  Future<Response> registerUser(
-    String name,
-    String email,
-    String photoURL,
-    String fcmToken,
-    String age,
-    String gender,
-    String mobile,
-  ) async {
+  Future<Response> registerUser(String name,
+      String email,
+      String photoURL,
+      String fcmToken,
+      String age,
+      String gender,
+      String mobile,) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.registerUser);
     final headers = {
       'Content-Type': 'application/json',
@@ -240,8 +206,8 @@ class API {
       "isActive": true,
       "available": "yes",
       "age": age,
-      "sex" :gender,
-      "mobile" :mobile,
+      "sex": gender,
+      "mobile": mobile,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -274,17 +240,15 @@ class API {
     return response;
   }
 
-  Future<Response> updateUser(
-    String name,
-    String age,
-    String gender,
-    String mobile,
-    String available,
-    String callRate,
-    String achievements,
-    String socialmediaLink,
-    String aboutMe,
-  ) async {
+  Future<Response> updateUser(String name,
+      String age,
+      String gender,
+      String mobile,
+      String available,
+      String callRate,
+      String achievements,
+      String socialmediaLink,
+      String aboutMe,) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateUser);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
@@ -295,12 +259,11 @@ class API {
       "age": age,
       "sex": gender,
       "mobile": mobile,
-      "available":available ,
+      "available": available,
       "call_rate": callRate,
       "achievements": achievements,
       "social_media_link": socialmediaLink,
       "about_me": aboutMe,
-
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -314,18 +277,16 @@ class API {
     return response;
   }
 
-  Future<Response> createMember(
-    int userId,
-    double callRate,
-    String socialMediaLink,
-    String aboutMe,
-    String achievements,
-    String status,
-  ) async {
+  Future<Response> createMember(int userId,
+      double callRate,
+      String socialMediaLink,
+      String aboutMe,
+      String achievements,
+      String status,) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.createMember);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
-      "userId":userId,
+      "userId": userId,
       "call_rate": callRate,
       "social_media_link": socialMediaLink,
       "about_me": aboutMe,
@@ -364,13 +325,14 @@ class API {
     return response;
   }
 
-  Future<Response> createCallLog(int userID,String callType,bool isMember,int receiverID) async {
+  Future<Response> createCallLog(int userID, String callType, bool isMember,
+      int receiverID) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.createCallLog);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
-      "userId":userID,
-      "memberId":receiverID,
-      "call_type" : callType,
+      "userId": userID,
+      "memberId": receiverID,
+      "call_type": callType,
       "isMember": isMember
     };
     String jsonBody = json.encode(body);
@@ -384,4 +346,44 @@ class API {
     );
     return response;
   }
+
+  Future<Response> updateDuration(int calllogid, String duration) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateDuration);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "id": calllogid,
+      "duration": duration
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
+
+  Future<Response> changeAvailabilty(int userID, String status) async {
+    final uri = Uri.parse(APIConstants.baseURL + APIConstants.changeAvailabilty);
+    final headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> body = {
+      "id": userID,
+      "status": status
+    };
+    String jsonBody = json.encode(body);
+    final encoding = Encoding.getByName('utf-8');
+
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonBody,
+      encoding: encoding,
+    );
+    return response;
+  }
 }
+
+

@@ -26,7 +26,7 @@ class _IncomingCallHistoryState extends State<IncomingCallHistory> {
             ),
           )
         : widget.callLogList!.isEmpty
-            ? const Center(child: Text("No data found !!!"))
+            ? const Center(child: Text("No calls yet !!!"))
             : ListView.builder(
                 padding: const EdgeInsets.all(8),
                 itemCount: widget.callLogList!.length,
@@ -35,16 +35,23 @@ class _IncomingCallHistoryState extends State<IncomingCallHistory> {
                   return CallLodCard(
                     calltypeIcon: widget.callLogList![index]['call_type'] ==
                             CommonConstants.outgoingCall
-                        ? const Icon(
+                        ? Icon(
                             Icons.call_made,
-                            color: Colors.green,
+                            color:
+                                widget.callLogList![index]['duration'] == null
+                                    ? Colors.red
+                                    : Colors.green,
                             size: 17,
                           )
-                        : const Icon(
+                        : Icon(
                             Icons.call_received,
-                            color: Colors.green,
+                            color:
+                                widget.callLogList![index]['duration'] == null
+                                    ? Colors.red
+                                    : Colors.green,
                             size: 17,
                           ),
+                    callDuration: widget.callLogList![index]['duration'] ?? '',
                     callerName:
                         widget.callLogList![index]['members']['name'] ?? '',
                     calltimeStamp: callDateTime,
@@ -56,11 +63,10 @@ class _IncomingCallHistoryState extends State<IncomingCallHistory> {
 
   formatCallTime(date) {
     DateTime parseDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(date);
-    var inputDate = DateTime.parse(parseDate.toString());
-    var inputdatewithOffset =
-        inputDate.add(const Duration(hours: 5, minutes: 30));
+    var inputDate = DateTime.parse(parseDate.toString())
+        .add(const Duration(hours: 5, minutes: 30));
     var outputFormat = DateFormat('d MMMM hh:mm a');
-    var outputDate = outputFormat.format(inputdatewithOffset.toLocal());
+    var outputDate = outputFormat.format(inputDate.toLocal());
 
     callDateTime = outputDate;
   }

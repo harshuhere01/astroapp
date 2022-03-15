@@ -85,27 +85,24 @@ class CallNotifier extends ChangeNotifier {
           infoString('onError: $code');
         },
         joinChannelSuccess: (channel, uid, elapsed) {
-          // Fluttertoast.showToast(msg: "joinChannelSuccess");
-          infoString('onJoinChannel: $channel, uid: $uid');
+          // infoString('onJoinChannel: $channel, uid: $uid');
         },
         leaveChannel: (stats) {
           infoString('onLeaveChannel');
           _users.clear();
         },
-        userJoined: (
-          uid,
-          elapsed,
-        ) async {
-          infoString('userJoined: ${CommonConstants.calljoinername}');
+        userJoined: (uid, elapsed) async {
+          infoString('${CommonConstants.calljoinername} joined');
           addUser(uid);
-
+          CommonConstants.isCallConnected = true;
           ///write logic for emit this event from call joiner side
           if (CommonConstants.receiverId == CommonConstants.userID) {
-            CommonConstants.socket.emit('join_room', CommonConstants.room);
             CommonConstants.socket.emit('call-connected', {
-              "c_charge": 50,
+              "c_charge": CommonConstants.userCallCharge,
               "room": CommonConstants.receiverId,
               "userId": CommonConstants.callerId,
+              "callLogId": CommonConstants.callerCallLogId,
+              "memberCallLogId": CommonConstants.memberCallLogId,
             });
           } else {
             print("Receiver Id Doesn't matched================--------------");
