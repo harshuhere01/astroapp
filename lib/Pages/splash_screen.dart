@@ -26,7 +26,6 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     pushFCMtoken();
-    navigatetoDashBoard();
     checkPermission();
   }
 
@@ -42,23 +41,22 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> navigatetoDashBoard() async {
     final prefs = await SharedPreferences.getInstance();
     final key = prefs.getString('email');
-    CommonConstants.userID = prefs.getInt('id') ?? 0;
     if (key != null && key != "") {
-       await getSingelUser();
-       await changeAvailabilty(CommonConstants.userID,"yes");
-      Future.delayed(const Duration(seconds: 1), () {
+
+
+      // Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (builder) => const HomePage()),
             (route) => false);
-      });
+      // });
     } else {
-      Future.delayed(const Duration(seconds: 1), () {
+      // Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (builder) => const LogInPage()),
             (route) => false);
-      });
+      // });
     }
   }
   Future<void> changeAvailabilty(int userID, String status) async {
@@ -72,24 +70,26 @@ class _SplashScreenState extends State<SplashScreen> {
       Fluttertoast.showToast(
           msg: "changeAvailabilty API :- ${response.statusCode} :- $res");
     }
+    await navigatetoDashBoard();
+  }
+
+  Future<void> getPrefrences()async{
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      CommonConstants.userID = prefs.getInt('id') ?? 0;
+      CommonConstants.userName = prefs.getString('name') ?? '';
+      CommonConstants.userEmail = prefs.getString('email') ?? '';
+      CommonConstants.userAge = prefs.getString('age') ?? '';
+      CommonConstants.userGender = prefs.getString('sex') ?? '';
+      CommonConstants.userMobilenumber = prefs.getString('mobile') ?? '';
+      CommonConstants.userPhoto = prefs.getString('photo') ?? '';
+      CommonConstants.userCallCharge = prefs.getDouble('userCallCharge')??0;
+      CommonConstants.userIsMember = prefs.getBool('isMember')??false;
+    });
+    await changeAvailabilty(CommonConstants.userID,"yes");
   }
 
 
-  Future<void> getSingelUser() async {
-    var response = await API().getSingelUser(CommonConstants.userID);
-    int statusCode = response.statusCode;
-    String responseBody = response.body;
-    var res = jsonDecode(responseBody);
-    if (statusCode == 200) {
-      setState(() {
-        CommonConstants.userIsMember = res['data']['isMember']??false;
-        CommonConstants.userCallCharge = double.parse(res['data']['call_rate'] ?? 0.00);
-             });
-    } else {
-      Fluttertoast.showToast(
-          msg: "Fetchuser API error From Splash Screen :- ${response.statusCode.toString()}");
-    }
-  }
 
   checkPermission() {
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
@@ -106,6 +106,9 @@ class _SplashScreenState extends State<SplashScreen> {
     setState(() {
       CommonConstants.userFCMToken = token;
     });
+    ///
+    await getPrefrences();
+    ///
   }
 
 

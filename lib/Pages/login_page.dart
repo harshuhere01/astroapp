@@ -124,8 +124,6 @@ class _LogInPageState extends State<LogInPage> {
                                     });
                                     print(e);
                                   }
-
-
                                 }
                               } on SocketException catch (_) {
                                 setState(() {
@@ -201,26 +199,40 @@ class _LogInPageState extends State<LogInPage> {
     if (statusCode == 200) {
       setState(() {
         gbtnprogress = false;
-        CommonConstants.userID = res['data']['id']??0;
+        // CommonConstants.userID = res['data']['id']??0;
       });
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('id', res['data']['id']);
-      prefs.setString('name', '${res['data']['name']??''}');
-      prefs.setString('email', '${res['data']['email']??''}');
-      prefs.setString('photo', '${res['data']['photo']??''}');
-      prefs.setString('age', '${res['data']['age']??''}');
-      prefs.setString('sex', '${res['data']['sex']??''}');
-      prefs.setString('mobile', '${res['data']['mobile']??''}');
-      prefs.setString('available', '${res['data']['available']??''}');
-      prefs.setBool('isMember', res['data']['isMember']?? false);
-      prefs.setString('isActive', '${res['data']['isActive']??''}');
-      prefs.setString('fcm_token', '${res['data']['fcm_token']??''}');
+      prefs.setString('name', '${res['data']['name'] ?? ''}');
+      prefs.setString('email', '${res['data']['email'] ?? ''}');
+      prefs.setString('photo', '${res['data']['photo'] ?? ''}');
+      prefs.setString('age', '${res['data']['age'] ?? ''}');
+      prefs.setString('sex', '${res['data']['sex'] ?? ''}');
+      prefs.setString('mobile', '${res['data']['mobile'] ?? ''}');
+      prefs.setString('available', '${res['data']['available'] ?? ''}');
+      prefs.setBool('isMember', res['data']['isMember'] ?? false);
+      prefs.setString('isActive', '${res['data']['isActive'] ?? ''}');
+      prefs.setString('fcm_token', '${res['data']['fcm_token'] ?? ''}');
+      prefs.setDouble(
+          'userCallCharge', double.parse(res['data']['call_rate'] ?? 0.00));
+
+      setState(() {
+        CommonConstants.userID = res['data']['id'] ?? 0;
+        CommonConstants.userName = res['data']['name'] ?? '';
+        CommonConstants.userEmail = res['data']['email'] ?? '';
+        CommonConstants.userAge = res['data']['age'] ?? '';
+        CommonConstants.userGender = res['data']['sex'] ?? '';
+        CommonConstants.userMobilenumber =res['data']['mobile'] ?? '';
+        CommonConstants.userPhoto = res['data']['photo'] ?? '';
+        CommonConstants.userCallCharge =double.parse(res['data']['call_rate']??0.00) ;
+        CommonConstants.userIsMember = res['data']['isMember']??false;
+      });
 
       if (res['message'] == "") {
         Fluttertoast.showToast(msg: "Registered Successfully!!!");
       } else {
         Fluttertoast.showToast(msg: "Logged In Successfully!!!");
-        await changeAvailabilty(res['data']['id']??0,"yes");
+        await changeAvailabilty(res['data']['id'] ?? 0, "yes");
       }
 
       Navigator.pushAndRemoveUntil(

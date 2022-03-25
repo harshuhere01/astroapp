@@ -2,7 +2,6 @@ import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CallNotifier extends ChangeNotifier {
   var _users = <int>[];
@@ -107,91 +106,6 @@ class CallNotifier extends ChangeNotifier {
           } else {
             print("Receiver Id Doesn't matched================--------------");
           }
-          // print("caller 1 :- ${CommonConstants.caller}");
-          // print("Socket connection:::::- ${CommonConstants.socket.connected}");
-          // CommonConstants.socket
-          //     .emit('call-accept', {"id": CommonConstants.socketID, "uid": 1});
-          // CommonConstants.socket.emit('call-connected', {
-          //   "id": CommonConstants.socketID,
-          //   "c_charge": 50,
-          //   "u_mobile": "9601603611",
-          //   "room": "1"
-          // });
-          // CommonConstants.socket.once("balance_ok", (data) {
-          //   print("========== on balance_ok ==== call model");
-          //   Fluttertoast.showToast(msg: "balance_ok :- $data");
-          //   if (data == "1") {
-          //     if (CommonConstants.socket.connected) {
-          //       CommonConstants.socket.emit('call-connected', {
-          //         "id": CommonConstants.socketID,
-          //         "c_charge": 50,
-          //         "u_mobile": "9601603611",
-          //         "room": 1
-          //       });
-          //       CommonConstants.caller = false;
-          //       notifyListeners();
-          //       print("caller 3 :- ${CommonConstants.caller}");
-          //     } else {
-          //       Fluttertoast.showToast(
-          //           msg:
-          //               "On User Join Socket Connection is :- ${CommonConstants.socket.connected}");
-          //     }
-          //   } else {
-          //     print("balance_ok uid not matched :------$data");
-          //   }
-          // });
-          // CommonConstants.socket.emit('join_room', {
-          //   {"room": 1}
-          // });
-
-          /// comment below code for join video call
-          // if (CommonConstants.caller) {
-          //   print("caller 2 :- ${CommonConstants.caller}");
-          //
-          //   if (CommonConstants.socket.connected) {
-          //     CommonConstants.socket.emit('call-connected', {
-          //       "id": CommonConstants.socketID,
-          //       "c_charge": 50,
-          //       "u_mobile": "9601603611",
-          //       "room": 1
-          //     });
-          //     CommonConstants.caller = false;
-          //     notifyListeners();
-          //     print("caller 3 :- ${CommonConstants.caller}");
-          //   } else {
-          //     Fluttertoast.showToast(
-          //         msg:
-          //             "On User Join Socket Connection is :- ${CommonConstants.socket.connected}");
-          //   }
-          // } else {}
-
-          // CommonConstants.socket.once("call_disconnected_manually", (data) async {
-          //   print("========== on call_disconnected_manually ====");
-          //   CommonConstants.CallDone = "";
-          //   endCall(context);
-          //   notifyListeners();
-          //   Navigator.pop(context);
-          // });
-          // CommonConstants.socket.once("balance_not_ok", (data) async {
-          //   print("========== on balance_not_ok ==== call model");
-          //   CommonConstants.CallDone = "";
-          //   notifyListeners();
-          //   endCall(context);
-          //   Fluttertoast.showToast(msg: "balance_not_ok :- $data");
-          //   Navigator.pop(context);
-          //   // CommonConstants.socket.emit('call-disconnected',
-          //   //     {"isManual": false, "id": CommonConstants.socketID, "room": 1});
-          //
-          //   // if(data==true) {
-          //   // print("balance_not_ok - data = $data");
-          //   // Fluttertoast.showToast(msg: "balance_not_ok - data = $data");
-          //   // CommonConstants.socket.emit('call-disconnected',
-          //   //     {"isManual": false, "id": CommonConstants.socketID, "room": 1});
-          //   // }
-          //   // else{
-          //   //
-          //   // }
-          // });
         },
         userOffline: (uid, elapsed) {
           infoString('userOffline: $uid');

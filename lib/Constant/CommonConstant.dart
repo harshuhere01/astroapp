@@ -46,4 +46,7 @@ class CommonConstants {
   static late double memberCallCharge ;
   static late double userCallCharge ;
   static bool isCallConnected = false;
+
+  static var notificationMessage;
+
 }

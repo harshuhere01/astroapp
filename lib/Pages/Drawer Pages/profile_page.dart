@@ -463,6 +463,10 @@ class _ProfilePageState extends State<ProfilePage> {
         CommonConstants.userCallCharge =double.parse(res['data']['call_rate']??0.00) ;
 
       });
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isMember', res['data']['isMember']?? false);
+      prefs.setDouble('userCallCharge',
+          double.parse(res['data']['call_rate']??0.00));
     } else {
       Fluttertoast.showToast(
           msg: "Fetchuser API error :- ${response.statusCode.toString()}");
@@ -498,7 +502,7 @@ class _ProfilePageState extends State<ProfilePage> {
       Fluttertoast.showToast(msg: "Successfully updated!!!");
       if(isMember) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setDouble('memberCallCharge',
+        prefs.setDouble('userCallCharge',
             double.parse(_callRateController.text));
         setState(() {
           CommonConstants.userCallCharge = double.parse(_callRateController.text);
@@ -525,9 +529,9 @@ class _ProfilePageState extends State<ProfilePage> {
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       Fluttertoast.showToast(msg: "Successfully requested!!!");
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setDouble('memberCallCharge',
-          double.parse(_callRateController.text));
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // prefs.setDouble('memberCallCharge',
+      //     double.parse(_callRateController.text));
     } else {
       Fluttertoast.showToast(
           msg: "Fetchuser API error :- ${response.statusCode.toString()}");

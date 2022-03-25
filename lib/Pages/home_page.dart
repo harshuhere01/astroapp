@@ -23,79 +23,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:socket_io_client/src/darty.dart';
 
-// late FlutterLocalNotificationsPlugin fltNotification;
-//
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   print("Handling a background message: ${message.messageId}");
-//   // var androidInit =
-//   // const AndroidInitializationSettings("@mipmap/ic_launcher"); //for logo
-//   // var iosInit = const IOSInitializationSettings();
-//   // var initSetting =
-//   // InitializationSettings(android: androidInit, iOS: iosInit);
-//   // fltNotification = FlutterLocalNotificationsPlugin();
-//   // fltNotification.initialize(initSetting);
-//   //
-//   // var androidDetails = const AndroidNotificationDetails(
-//   //   "1",
-//   //   "basic_channel",
-//   //   importance: Importance.max,
-//   //   priority: Priority.max,
-//   //   playSound: true,
-//   //   fullScreenIntent: true,
-//   //   enableVibration: true,
-//   //   autoCancel: false,
-//   // );
-//   // var iosDetails = const IOSNotificationDetails();
-//   // var generalNotificationDetails =
-//   // NotificationDetails(android: androidDetails, iOS: iosDetails);
-//   //
-//   // RemoteNotification? notification = message.notification;
-//   // try{
-//   //   fltNotification.show(notification.hashCode, message.data['username'],
-//   //       message.data['username'], generalNotificationDetails);
-//   // }
-//   // catch(e)
-//   // {
-//   //   print("error on background notification :- $e");
-//   // }
-//
-//   // RemoteNotification? notification = message.notification;
-//   // AndroidNotification? android = message.notification?.android;
-//
-//   // if (notification != null && android != null) {
-//
-//   AwesomeNotifications().createNotification(
-//     actionButtons: [
-//       NotificationActionButton(
-//         key: "CANCEL",
-//         label: "CANCEL",
-//         buttonType: ActionButtonType.Default,
-//       ),
-//       NotificationActionButton(
-//         key: "ACCEPT",
-//         label: "ACCEPT",
-//         buttonType: ActionButtonType.Default,
-//       )
-//     ],
-//     // schedule: NotificationInterval(
-//     //     interval: 45, timeZone: localTimeZone, repeats: true),
-//     content: NotificationContent(
-//         fullScreenIntent: true,
-//         wakeUpScreen: true,
-//         locked: true,
-//         category: NotificationCategory.Call,
-//         displayOnBackground: true,
-//         displayOnForeground: true,
-//         autoDismissible: false,
-//         id: 1,
-//         channelKey: 'basic_channel',
-//         title: "Incoming call",
-//         body: "Incoming call from ${message.data['username']}",
-//         summary: "Hello"),
-//   );
-//
-// }
-
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -137,8 +64,7 @@ class _HomePageState extends State<HomePage>
   initState() {
     _pageController = PageController();
     initMessaging();
-    getdisplayName();
-
+    socketConnectandGetMembers();
     CommonConstants.socket.on('change_status', (data) {
       print("change_status :------------------------$data");
       getAllMember();
@@ -205,20 +131,19 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  Future<void> getdisplayName() async {
+  Future<void> socketConnectandGetMembers() async {
     await socketConnectToServer();
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('name') ?? '';
-      CommonConstants.userID = prefs.getInt('id') ?? 0;
-      CommonConstants.userName = prefs.getString('name') ?? '';
-      CommonConstants.userEmail = prefs.getString('email') ?? '';
-      CommonConstants.userAge = prefs.getString('age') ?? '';
-      CommonConstants.userGender = prefs.getString('sex') ?? '';
-      CommonConstants.userMobilenumber = prefs.getString('mobile') ?? '';
-      CommonConstants.userPhoto = prefs.getString('photo') ?? '';
-    });
     await getAllMember();
+    print("userID:-${CommonConstants.userID}");
+    print("userName:-${CommonConstants.userName}");
+    print("userEmail:-${CommonConstants.userEmail}");
+    print("userAge:-${CommonConstants.userAge}");
+    print("userGender:-${CommonConstants.userGender}");
+    print("userMobilenumber:-${CommonConstants.userMobilenumber}");
+    print("userPhoto:-${CommonConstants.userPhoto}");
+    print("userCallCharge:-${CommonConstants.userCallCharge}");
+    print("userIsMember:-${CommonConstants.userIsMember}");
+
   }
 
   handleNotificationEvents(homeNotifier) {
@@ -237,12 +162,6 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  Future<void> connectSocket() async {
-    CommonConstants.socket.connect();
-    setState(() {
-      CommonConstants.socketID = "${CommonConstants.socket.id}";
-    });
-  }
 
   Future<void> initMessaging() async {
     var androidInit =
@@ -271,8 +190,11 @@ class _HomePageState extends State<HomePage>
       AndroidNotification? android = message.notification?.android;
 
       print('FirebaseMessaging.onMessage.listen' + message.data.toString());
-      await createCallLog(CommonConstants.userID, CommonConstants.incomingCall,
-          CommonConstants.userIsMember, int.parse(message.data['callerId'] ?? 0));
+      await createCallLog(
+          CommonConstants.userID,
+          CommonConstants.incomingCall,
+          CommonConstants.userIsMember,
+          int.parse(message.data['callerId'] ?? 0));
       if (notification != null && android != null) {
         try {
           CommonConstants.socket
@@ -381,7 +303,7 @@ class _HomePageState extends State<HomePage>
                         Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              width : 0.5,
+                              width: 0.5,
                               color: Colors.black,
                             ),
                             shape: BoxShape.circle,
@@ -401,7 +323,7 @@ class _HomePageState extends State<HomePage>
                           width: 10,
                         ),
                         Text(
-                          "$userName",
+                          CommonConstants.userName,
                           style: const TextStyle(
                               color: Colors.black,
                               fontSize: 18,
@@ -475,7 +397,7 @@ class _HomePageState extends State<HomePage>
                           fontWeight: FontWeight.w400),
                     ),
                     onTap: () async {
-                      changeAvailabilty(CommonConstants.userID,"no");
+                      changeAvailabilty(CommonConstants.userID, "no");
                       await AuthClass().signOut();
                       Navigator.pop(context);
                       Navigator.pushAndRemoveUntil(

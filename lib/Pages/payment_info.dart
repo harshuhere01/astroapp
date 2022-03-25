@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/payment_variables.dart';
 import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Widgets/simple_button.dart';
@@ -308,7 +309,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       'order_id': OrderID,
       "theme.color": "#1B4670",
       "currency": "INR",
-      // "prefill": {"contact": "9601603600", "email": "harshbavishii@gmail.com"},
+      "prefill": {"contact": "", "email": CommonConstants.userEmail},
       "external": {
         "wallets": ["paytm"]
       }

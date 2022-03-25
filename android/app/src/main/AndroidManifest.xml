@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.astro">
+    package="com.example.folo">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -32,9 +32,9 @@
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
 
-            <meta-data
-                android:name="com.razorpay.ApiKey"
-                android:value="rzp_test_He4GbelHZ5l3RD" />
+<!--            <meta-data-->
+<!--                android:name="com.razorpay.ApiKey"-->
+<!--                android:value="rzp_test_He4GbelHZ5l3RD" />-->
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"

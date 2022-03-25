@@ -1,3 +1,5 @@
+// ignore_for_file: library_prefixes
+
 import 'dart:convert';
 
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
@@ -58,25 +60,22 @@ class _CallScreenState extends State<CallScreen> {
     final views = _getRenderViews(notifier);
     switch (views.length) {
       case 1:
-        return Container(
-            child: Column(
+        return Column(
           children: <Widget>[_videoView(views[0])],
-        ));
+        );
       case 2:
-        return Container(
-          child: Stack(
-            children: <Widget>[
-              _expandedVideoRow([views[1]]),
-              Positioned(
-                bottom: 120,
-                right: 20,
-                child: SizedBox(
-                    height: 180,
-                    width: 100,
-                    child: _expandedVideoRow([views[0]])),
-              )
-            ],
-          ),
+        return Stack(
+          children: <Widget>[
+            _expandedVideoRow([views[1]]),
+            Positioned(
+              bottom: 120,
+              right: 20,
+              child: SizedBox(
+                  height: 180,
+                  width: 100,
+                  child: _expandedVideoRow([views[0]])),
+            )
+          ],
         );
       case 3:
         return Expanded(
