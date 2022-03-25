@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "136889738710",
+    "project_id": "the-foloapp",
+    "storage_bucket": "the-foloapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136889738710:android:f83892f1b44a31cbdc7077",
+        "android_client_info": {
+          "package_name": "com.example.folo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "136889738710-7s40ntcnk1f764m19k8s0tka6gn5h055.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.folo",
+            "certificate_hash": "1e0129d6c24ba9deefca06a9581e0123abcd5e11"
+          }
+        },
+        {
+          "client_id": "136889738710-bdhf443s1vs7p5djl7dt9n7omda1cjdc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.folo",
+            "certificate_hash": "3a664638fe9307e74e8dd79fddb7d973bdd4af0b"
+          }
+        },
+        {
+          "client_id": "136889738710-r7e5cq0gm9ct6jfgs26r2g6kdtji6is9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJv0u82mo6mXYRJL2GypyFAE2vU1dlq3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "136889738710-r7e5cq0gm9ct6jfgs26r2g6kdtji6is9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
