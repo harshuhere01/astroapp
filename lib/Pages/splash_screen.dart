@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
@@ -10,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,14 +19,48 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  late AnimationController animationlogo;
+  late Animation<double> animlogo;
+  late AnimationController animationname;
+  late Animation<double> animname;
 
   @override
   void initState() {
     super.initState();
     pushFCMtoken();
     checkPermission();
+    animationlogo = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+    animlogo = CurvedAnimation(parent: animationlogo, curve: Curves.linear);
+
+    animationname = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+    animname = CurvedAnimation(parent: animationlogo, curve: Curves.linear);
+
+    animationlogo.forward();
+    animationlogo.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animationname.forward();
+      } else if (status == AnimationStatus.dismissed) {
+
+      }
+    });
+
+    animationname.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(Duration(milliseconds: 800), () {
+        animationname.reverse();
+        animationlogo.reverse();
+        });
+      } else if (status == AnimationStatus.dismissed) {
+
+          navigatetoDashBoard();
+
+      }
+    });
   }
 
   // Future<void> generateRandomUIDforVideoCall() async {
@@ -42,23 +76,22 @@ class _SplashScreenState extends State<SplashScreen> {
     final prefs = await SharedPreferences.getInstance();
     final key = prefs.getString('email');
     if (key != null && key != "") {
-
-
       // Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (builder) => const HomePage()),
-            (route) => false);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (builder) => const HomePage()),
+          (route) => false);
       // });
     } else {
       // Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (builder) => const LogInPage()),
-            (route) => false);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (builder) => const LogInPage()),
+          (route) => false);
       // });
     }
   }
+
   Future<void> changeAvailabilty(int userID, String status) async {
     var response = await API().changeAvailabilty(userID, status);
     int statusCode = response.statusCode;
@@ -70,10 +103,10 @@ class _SplashScreenState extends State<SplashScreen> {
       Fluttertoast.showToast(
           msg: "changeAvailabilty API :- ${response.statusCode} :- $res");
     }
-    await navigatetoDashBoard();
+    // await navigatetoDashBoard();
   }
 
-  Future<void> getPrefrences()async{
+  Future<void> getPrefrences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       CommonConstants.userID = prefs.getInt('id') ?? 0;
@@ -83,13 +116,11 @@ class _SplashScreenState extends State<SplashScreen> {
       CommonConstants.userGender = prefs.getString('sex') ?? '';
       CommonConstants.userMobilenumber = prefs.getString('mobile') ?? '';
       CommonConstants.userPhoto = prefs.getString('photo') ?? '';
-      CommonConstants.userCallCharge = prefs.getDouble('userCallCharge')??0;
-      CommonConstants.userIsMember = prefs.getBool('isMember')??false;
+      CommonConstants.userCallCharge = prefs.getDouble('userCallCharge') ?? 0;
+      CommonConstants.userIsMember = prefs.getBool('isMember') ?? false;
     });
-    await changeAvailabilty(CommonConstants.userID,"yes");
+    await changeAvailabilty(CommonConstants.userID, "yes");
   }
-
-
 
   checkPermission() {
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
@@ -106,32 +137,69 @@ class _SplashScreenState extends State<SplashScreen> {
     setState(() {
       CommonConstants.userFCMToken = token;
     });
+
     ///
     await getPrefrences();
+
     ///
   }
-
 
   @override
   Widget build(BuildContext context) {
     CommonConstants.device_width = MediaQuery.of(context).size.width;
     CommonConstants.device_height = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          SpinKitSquareCircle(
-            color: Colors.black,
-            size: 100.00,
+      backgroundColor: CommonConstants.appcolor,
+      body: Stack(
+        children: [
+          // Opacity(
+          //   opacity: 0.5,
+          //   child: SizedBox(
+          //     height: CommonConstants.device_height,
+          //     width: CommonConstants.device_width,
+          //     child: Image.asset(
+          //       'asset/splash_screen_bg.jpg',
+          //       fit: BoxFit.cover,
+          //     ),
+          //   ),
+          // ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ScaleTransition(
+                  scale: animationlogo,
+                  child: Container(
+                      height: CommonConstants.device_height / 5,
+                      width: CommonConstants.device_height / 5,
+                      // decoration: const BoxDecoration(
+                      //   borderRadius: BorderRadius.all(Radius.circular(100)),
+                      //   color: Colors.yellow,
+                      // ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Image.asset(
+                          'asset/app_logo.png',
+                          color: Colors.black,
+                        ),
+                      )),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                ScaleTransition(
+                  scale: animationname,
+                  child: Text(
+                    "FOLO",
+                    style:
+                    GoogleFonts.muli(color: Colors.black, fontSize: 30),
+                  ),
+                )
+              ],
+            ),
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            "Welcome!!!",
-            style: TextStyle(
-                color: Colors.black, fontWeight: FontWeight.w300, fontSize: 30),
-          )
         ],
       ),
     );

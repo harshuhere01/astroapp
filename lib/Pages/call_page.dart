@@ -9,6 +9,7 @@ import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Widgets/user_listtile_design.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class CallPage extends StatefulWidget {
@@ -126,12 +127,12 @@ class _CallPageState extends State<CallPage> {
             child: ListBody(
               children: [
                 Center(
-                  child: Text(dialoguetext),
+                  child: Text(dialoguetext,style: GoogleFonts.muli(),),
                 ),
               ],
             ),
           ),
-          contentTextStyle: const TextStyle(
+          contentTextStyle: GoogleFonts.muli(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
           actionsPadding: const EdgeInsets.all(10),
           actionsAlignment: MainAxisAlignment.spaceEvenly,
@@ -395,7 +396,7 @@ class _CallPageState extends State<CallPage> {
       width: CommonConstants.device_width * 0.20,
       child: ElevatedButton(
           child: Text(btnname,
-              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w300)),
+              style: GoogleFonts.muli(fontSize: 9, fontWeight: FontWeight.w300)),
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             backgroundColor: MaterialStateProperty.all<Color>(color),

@@ -1,6 +1,7 @@
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Widgets/rating_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UserListTile extends StatelessWidget {
   UserListTile(
@@ -88,7 +89,7 @@ class UserListTile extends StatelessWidget {
                     ),
                     Text(
                       "$totalnum " "total",
-                      style: const TextStyle(color: Colors.black, fontSize: 10),
+                      style: GoogleFonts.openSans(color: Colors.black, fontSize: 10),
                     ),
                   ],
                 )
@@ -107,21 +108,21 @@ class UserListTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("$userName",
-                          style: const TextStyle(
+                          style: GoogleFonts.openSans(
                               color: Colors.black,
                               fontSize: 15,
                               fontWeight: FontWeight.w500)),
                       Text("$designation",
-                          style: const TextStyle(
+                          style: GoogleFonts.openSans(
                               color: Colors.black45, fontSize: 10)),
                       Text("$languages",
-                          style: const TextStyle(
+                          style: GoogleFonts.openSans(
                               color: Colors.black45, fontSize: 10)),
                       Text("$experience",
-                          style: const TextStyle(
+                          style: GoogleFonts.openSans(
                               color: Colors.black45, fontSize: 10)),
                       Text("$charge",
-                          style: const TextStyle(
+                          style: GoogleFonts.openSans(
                               color: Colors.black87, fontSize: 12)),
                     ],
                   ),
@@ -151,8 +152,8 @@ class UserListTile extends StatelessWidget {
                             height: CommonConstants.device_height/20,
                             width: CommonConstants.device_width/5,
                             child: TextButton(
-                              child: const Text("Call",
-                                  style: TextStyle(fontSize: 14)),
+                              child:  Text("Call",
+                                  style: GoogleFonts.openSans(fontSize: 14)),
                               style: ButtonStyle(
                                   padding:
                                       MaterialStateProperty.all<EdgeInsets>(
@@ -173,7 +174,7 @@ class UserListTile extends StatelessWidget {
                           ),
                           Text(
                             "$waitingstatus",
-                            style: const TextStyle(
+                            style: GoogleFonts.openSans(
                                 color: Colors.red, fontSize: 10),
                           )
                         ],

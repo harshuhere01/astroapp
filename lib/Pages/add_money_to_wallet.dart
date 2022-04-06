@@ -6,6 +6,7 @@ import 'package:astro/Pages/payment_info.dart';
 import 'package:astro/Widgets/custom_gridview.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddMoneyPage extends StatefulWidget {
@@ -71,7 +72,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
       appBar: AppBar(
         title: const Text("Add money to wallet"),
         backgroundColor: Colors.yellow[600],
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+        titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
         iconTheme: const IconThemeData(
           color: Colors.black,
         ),
@@ -87,7 +88,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                   )
                 : Text(
                     "Available Balance: ₹ $balance",
-                    style: const TextStyle(
+                    style: GoogleFonts.muli(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                         color: Colors.black),
@@ -103,7 +104,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                 },
                 controller: _balancefieldcontroller,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(
+                style: GoogleFonts.muli(
                     fontWeight: FontWeight.w300, fontSize: 18),
                 validator: (valuee) {
                   if (valuee == null || valuee.isEmpty) {
@@ -141,10 +142,10 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                             color: Color(0xFFFdd835), //  Colors.yellow[600]
                             borderRadius:
                                 BorderRadius.all(Radius.circular(8))),
-                        child: const Center(
+                        child:  Center(
                           child: Text(
                             'Proceed',
-                            style: TextStyle(
+                            style: GoogleFonts.muli(
                                 color: Colors.black,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500),
@@ -201,7 +202,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                                 child: Center(
                                   child: Text(
                                     " ₹ ${itemlist[index].toString()}",
-                                    style: const TextStyle(
+                                    style: GoogleFonts.muli(
                                         color: Colors.black,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w400),
@@ -237,7 +238,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                               child: Center(
                                 child: Text(
                                   " ₹ ${itemlist[index].toString()}",
-                                  style: const TextStyle(
+                                  style: GoogleFonts.muli(
                                       color: Colors.black,
                                       fontSize: 17,
                                       fontWeight: FontWeight.w400),

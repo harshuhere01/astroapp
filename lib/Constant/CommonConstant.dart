@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class CommonConstants {
+
+  ///colors
+
+  static Color? appcolor = Colors.yellow[600];
+
   static double device_width = 0;
   static double device_height = 0;
   static String userFCMToken = '';

@@ -1,6 +1,7 @@
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Widgets/callLogCard.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class IncomingCallHistory extends StatefulWidget {
@@ -26,7 +27,7 @@ class _IncomingCallHistoryState extends State<IncomingCallHistory> {
             ),
           )
         : widget.callLogList!.isEmpty
-            ? const Center(child: Text("No calls yet !!!"))
+            ?  Center(child: Text("No calls yet !!!",style: GoogleFonts.muli(),))
             : ListView.builder(
                 padding: const EdgeInsets.all(8),
                 itemCount: widget.callLogList!.length,

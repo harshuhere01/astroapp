@@ -1,5 +1,6 @@
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CallLodCard extends StatelessWidget {
   CallLodCard({
@@ -69,7 +70,7 @@ class CallLodCard extends StatelessWidget {
                     children: [
                       Text(
                         "$callerName",
-                        style: const TextStyle(
+                        style: GoogleFonts.muli(
                             color: Colors.black,
                             fontSize: 17,
                             fontWeight: FontWeight.w500),
@@ -82,7 +83,7 @@ class CallLodCard extends StatelessWidget {
                           calltypeIcon,
                           Text(
                             "$calltimeStamp",
-                            style: const TextStyle(
+                            style: GoogleFonts.muli(
                                 color: Colors.black45, fontSize: 12),
                           ),
                         ],
@@ -100,7 +101,7 @@ class CallLodCard extends StatelessWidget {
 
                   Text(
                     "$callDuration",
-                    style: const TextStyle(
+                    style: GoogleFonts.muli(
                         color: Colors.black45,
                         fontSize: 12,
                         fontWeight: FontWeight.w400),

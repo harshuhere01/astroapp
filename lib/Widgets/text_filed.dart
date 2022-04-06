@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextField extends StatefulWidget {
   CustomTextField(
@@ -53,6 +54,7 @@ class CustomTextFieldState extends State<CustomTextField> {
                 ),
           ),
           child: TextFormField(
+            style: GoogleFonts.openSans(),
             readOnly: widget.readOnly,
             onTap: widget.hint == "DOB"
                 ? () {
@@ -80,7 +82,7 @@ class CustomTextFieldState extends State<CustomTextField> {
               ),
               errorMaxLines: 4,
               labelText: widget.hint,
-              labelStyle: const TextStyle(fontSize: 16.0, color: Colors.grey),
+              labelStyle: GoogleFonts.openSans(fontSize: 16.0, color: Colors.grey),
               suffixIcon: widget.controller.text.isEmpty
                   ? Container(width: 0)
                   : widget.readOnly == true

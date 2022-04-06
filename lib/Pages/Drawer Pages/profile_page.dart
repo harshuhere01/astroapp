@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -69,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text("Profile"),
         backgroundColor: Colors.yellow[600],
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+        titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
         iconTheme: const IconThemeData(
           color: Colors.black,
         ),
@@ -88,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children:  [
                         CircularProgressIndicator(
                           color: Colors.black,
                         ),
@@ -97,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         Text(
                           "Please wait!!!",
-                          style: TextStyle(
+                          style: GoogleFonts.muli(
                               color: Colors.black,
                               fontWeight: FontWeight.w400,
                               fontSize: 18),
@@ -156,20 +157,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             child: isMemberRequested || isMember
                                 ? isMemberRequested && !isMember
-                                    ? const Center(
+                                    ?  Center(
                                         child: Text(
-                                            "Become member request pending !"),
+                                            "Become member request pending !",style: GoogleFonts.muli(),),
                                       )
-                                    : const Center(
-                                        child: Text("You're member !"),
+                                    :  Center(
+                                        child: Text("You're member !",style:GoogleFonts.muli()),
                                       )
                                 : Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      const Text(
+                                       Text(
                                         "Become a Member ?",
-                                        style: TextStyle(
+                                        style: GoogleFonts.muli(
                                             color: Colors.black,
                                             fontSize: 15,
                                             fontWeight: FontWeight.w400),

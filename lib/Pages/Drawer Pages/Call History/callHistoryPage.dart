@@ -8,6 +8,7 @@ import 'package:astro/Widgets/callLogCard.dart';
 import 'package:astro/Widgets/tab_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class CallHistoryPage extends StatefulWidget {
@@ -71,7 +72,7 @@ class _CallHistoryPageState extends State<CallHistoryPage>
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.yellow[600],
         title: const Text("Call logs"),
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+        titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
       ),
       body: CommonConstants.userIsMember
           ? Column(
@@ -138,7 +139,7 @@ class _CallHistoryPageState extends State<CallHistoryPage>
                   ),
                 )
               : callLogList == null
-                  ? const Center(child: Text("No calls yet !!!"))
+                  ?  Center(child: Text("No calls yet !!!",style: GoogleFonts.muli(),))
                   : ListView.builder(
                       padding: const EdgeInsets.all(8),
                       itemCount: callLogList!.length,

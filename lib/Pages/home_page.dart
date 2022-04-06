@@ -6,6 +6,7 @@ import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Firebase%20Services/firebase_auth_service.dart';
 import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/Drawer%20Pages/Call%20History/callHistoryPage.dart';
+import 'package:astro/Pages/Drawer%20Pages/member_profile_page.dart';
 import 'package:astro/Pages/Drawer%20Pages/profile_page.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -324,7 +326,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         Text(
                           CommonConstants.userName,
-                          style: const TextStyle(
+                          style: GoogleFonts.muli(
                               color: Colors.black,
                               fontSize: 18,
                               fontWeight: FontWeight.w500),
@@ -334,9 +336,9 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.person, size: 28),
-                    title: const Text(
+                    title:  Text(
                       'Profile',
-                      style: TextStyle(
+                      style: GoogleFonts.muli(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.w400),
@@ -353,9 +355,9 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.account_balance_wallet, size: 28),
-                    title: const Text(
+                    title:  Text(
                       'Wallet',
-                      style: TextStyle(
+                      style: GoogleFonts.muli(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.w400),
@@ -370,9 +372,9 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.history, size: 28),
-                    title: const Text(
+                    title:  Text(
                       'History',
-                      style: TextStyle(
+                      style: GoogleFonts.muli(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.w400),
@@ -382,16 +384,16 @@ class _HomePageState extends State<HomePage>
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CallHistoryPage(),
+                          builder: (context) => const MemberProfilePage(),
                         ),
                       );
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.logout, size: 28),
-                    title: const Text(
+                    title:  Text(
                       'Log Out',
-                      style: TextStyle(
+                      style: GoogleFonts.muli(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.w400),
@@ -435,9 +437,9 @@ class _HomePageState extends State<HomePage>
                     color: Colors.black,
                   )),
             ],
-            backgroundColor: Colors.yellow[600],
+            backgroundColor: CommonConstants.appcolor,
             title: const Text("Call with Astrologer"),
-            titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+            titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
           ),
           body: Column(
             verticalDirection: VerticalDirection.down,
@@ -490,10 +492,10 @@ class _HomePageState extends State<HomePage>
                             ),
                           )
                         : userList!.isEmpty
-                            ? const Center(
+                            ?  Center(
                                 child: Text(
                                 "No members record found !!!",
-                                style: TextStyle(color: Colors.black),
+                                style:GoogleFonts.muli(color: Colors.black),
                               ))
                             : CallPage(
                                 userList: userList,
@@ -525,23 +527,24 @@ class _HomePageState extends State<HomePage>
       ) {
         return AlertDialog(
           title: const Text('Exit app'),
+          titleTextStyle: GoogleFonts.muli(),
           content: SingleChildScrollView(
             child: ListBody(
-              children: const <Widget>[
-                Text('Are you sure ?'),
+              children:  <Widget>[
+                Text('Are you sure ?',style: GoogleFonts.muli(),),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Yes'),
+              child:  Text('Yes',style: GoogleFonts.muli(),),
               onPressed: () {
                 CommonConstants.socket.dispose();
                 SystemNavigator.pop();
               },
             ),
             TextButton(
-              child: const Text('No'),
+              child:  Text('No',style: GoogleFonts.muli()),
               onPressed: () {
                 Navigator.pop(context, false);
               },

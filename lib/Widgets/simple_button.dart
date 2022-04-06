@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BtnWidget extends StatefulWidget {
   BtnWidget({Key? key, this.ontap, this.lable,this.height,this.width}) : super(key: key);
@@ -30,7 +31,7 @@ class _BtnWidgetState extends State<BtnWidget> {
         padding: const EdgeInsets.all(10),
         child: Text(
           "${widget.lable}",
-          style: const TextStyle(
+          style: GoogleFonts.openSans(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
         ),
       ),

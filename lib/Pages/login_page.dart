@@ -8,6 +8,7 @@ import 'package:astro/Pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LogInPage extends StatefulWidget {
@@ -36,9 +37,9 @@ class _LogInPageState extends State<LogInPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const Text(
+                   Text(
                     "Welcome",
-                    style: TextStyle(
+                    style: GoogleFonts.muli(
                         color: Colors.black,
                         fontSize: 25,
                         fontWeight: FontWeight.w400),
@@ -47,10 +48,10 @@ class _LogInPageState extends State<LogInPage> {
                     height: 5,
                   ),
                   Row(
-                    children: const [
+                    children:  [
                       Text(
                         "Login to continue",
-                        style: TextStyle(
+                        style: GoogleFonts.muli(
                             color: Color(0xFF616161),
                             fontSize: 22,
                             fontWeight: FontWeight.w400),
@@ -158,11 +159,11 @@ class _LogInPageState extends State<LogInPage> {
                                           height: 30,
                                           width: 30,
                                         ),
-                                        const Padding(
+                                         Padding(
                                           padding: EdgeInsets.only(left: 5),
                                           child: Text(
                                             'Continue with google',
-                                            style: TextStyle(
+                                            style: GoogleFonts.muli(
                                                 color: Colors.black87,
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w300),

@@ -7,6 +7,7 @@ import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Widgets/simple_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
@@ -75,7 +76,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
         appBar: AppBar(
           title: const Text("Payment Information"),
           backgroundColor: Colors.yellow[600],
-          titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+          titleTextStyle: GoogleFonts.openSans(color: Colors.black, fontSize: 18),
           iconTheme: const IconThemeData(
             color: Colors.black,
           ),
@@ -93,9 +94,9 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                     Text(
                       "Payment Details",
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                           color: Colors.black45,
                           fontSize: 16,
                           fontWeight: FontWeight.bold),
@@ -137,16 +138,16 @@ class _PaymentInfoState extends State<PaymentInfo> {
                   ),
                   onPressed: () {},
                 ),
-                title: const Text(
+                title:  Text(
                   "5% EXTRA",
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 17),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   "₹ 25.0 cashback in wallet after recharge",
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                       color: Colors.green,
                       fontWeight: FontWeight.w500,
                       fontSize: 13),
@@ -197,12 +198,12 @@ class _PaymentInfoState extends State<PaymentInfo> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.openSans(
               color: textcolor, fontSize: 17, fontWeight: textfontweight),
         ),
         Text(
           "₹ $discription",
-          style: TextStyle(
+          style: GoogleFonts.openSans(
               color: textcolor, fontSize: 17, fontWeight: textfontweight),
         )
       ],
