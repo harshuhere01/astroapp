@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Model/API_Model.dart';
+import 'package:astro/Pages/Drawer%20Pages/login_screen.dart';
 import 'package:astro/Pages/home_page.dart';
 import 'package:astro/Pages/login_page.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/src/darty.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -26,10 +28,12 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> animlogo;
   late AnimationController animationname;
   late Animation<double> animname;
+  bool called = false;
 
   @override
   void initState() {
     super.initState();
+    called = false;
     pushFCMtoken();
     checkPermission();
     animationlogo = AnimationController(
@@ -71,6 +75,21 @@ class _SplashScreenState extends State<SplashScreen>
   //     Agora.UUID = v4;
   //   });
   // }
+  Future<void> socketConnectToServer() async {
+    try {
+      print("socket connection process started");
+      CommonConstants.socket.connect();
+      CommonConstants.socket.onConnect((data) {
+        setState(() {
+          CommonConstants.socketID = "${CommonConstants.socket.id}";
+        });
+        print("Socket Connection :-:" +
+            CommonConstants.socket.connected.toString());
+      });
+    } catch (e) {
+      print("socket_error:" + e.toString());
+    }
+  }
 
   Future<void> navigatetoDashBoard() async {
     final prefs = await SharedPreferences.getInstance();
@@ -86,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
       // Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (builder) => const LogInPage()),
+          MaterialPageRoute(builder: (builder) => const LoginScreen()),
           (route) => false);
       // });
     }
@@ -110,6 +129,7 @@ class _SplashScreenState extends State<SplashScreen>
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       CommonConstants.userID = prefs.getInt('id') ?? 0;
+      CommonConstants.callerIdforStatusChange = prefs.getInt('id') ?? 0;
       CommonConstants.userName = prefs.getString('name') ?? '';
       CommonConstants.userEmail = prefs.getString('email') ?? '';
       CommonConstants.userAge = prefs.getString('age') ?? '';
@@ -132,6 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void pushFCMtoken() async {
+
     String? token = await messaging.getToken();
     print("FCM Token Is:-" + token!);
     setState(() {
@@ -148,6 +169,10 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     CommonConstants.device_width = MediaQuery.of(context).size.width;
     CommonConstants.device_height = MediaQuery.of(context).size.height;
+   if(called == false){
+     called = true;
+     socketConnectToServer();
+   }
     return Scaffold(
       backgroundColor: CommonConstants.appcolor,
       body: Stack(
@@ -176,13 +201,12 @@ class _SplashScreenState extends State<SplashScreen>
                       width: CommonConstants.device_height / 5,
                       // decoration: const BoxDecoration(
                       //   borderRadius: BorderRadius.all(Radius.circular(100)),
-                      //   color: Colors.yellow,
+                      //   color: CommonConstants.appcolor,
                       // ),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Image.asset(
                           'asset/app_logo.png',
-                          color: Colors.black,
                         ),
                       )),
                 ),

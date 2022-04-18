@@ -59,10 +59,15 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
       setState(() {
-        balance = res['data'] != null ? res['data']["wallet_amount"] : "0.00";
+        balance = res['data'] != null
+            ? res['data']['wallet_amount'] != null
+                ? res['data']["wallet_amount"]
+                : "0.00"
+            : "0.00";
       });
     } else {
-      Fluttertoast.showToast(msg: "GetBalance API error :- ${response.statusCode.toString()}");
+      Fluttertoast.showToast(
+          msg: "GetBalance API error :- ${response.statusCode.toString()}");
     }
   }
 
@@ -71,7 +76,7 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add money to wallet"),
-        backgroundColor: Colors.yellow[600],
+        backgroundColor: CommonConstants.appcolor,
         titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
         iconTheme: const IconThemeData(
           color: Colors.black,
@@ -104,8 +109,8 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                 },
                 controller: _balancefieldcontroller,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.muli(
-                    fontWeight: FontWeight.w300, fontSize: 18),
+                style:
+                    GoogleFonts.muli(fontWeight: FontWeight.w300, fontSize: 18),
                 validator: (valuee) {
                   if (valuee == null || valuee.isEmpty) {
                     return "*Enter money";
@@ -138,11 +143,10 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                       child: Container(
                         margin: const EdgeInsets.all(5),
                         width: MediaQuery.of(context).size.width / 4.5,
-                        decoration: const BoxDecoration(
-                            color: Color(0xFFFdd835), //  Colors.yellow[600]
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8))),
-                        child:  Center(
+                        decoration: BoxDecoration(
+                            color: CommonConstants.appcolor,
+                            borderRadius: BorderRadius.all(Radius.circular(8))),
+                        child: Center(
                           child: Text(
                             'Proceed',
                             style: GoogleFonts.muli(
@@ -230,10 +234,10 @@ class _AddMoneyPageState extends State<AddMoneyPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.rectangle,
                                 color: const Color(0xFFfeecd4),
-                                border: Border.all(
-                                    color: Colors.black87, width: 1),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(8)),
+                                border:
+                                    Border.all(color: Colors.black87, width: 1),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
                               ),
                               child: Center(
                                 child: Text(

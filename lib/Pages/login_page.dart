@@ -20,13 +20,12 @@ class LogInPage extends StatefulWidget {
 
 class _LogInPageState extends State<LogInPage> {
   bool gbtnprogress = false;
-  List<dynamic>? userList;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.yellow[600],
+      backgroundColor:CommonConstants.appcolor,
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
@@ -96,44 +95,44 @@ class _LogInPageState extends State<LogInPage> {
                         Center(
                           child: InkWell(
                             onTap: () async {
-                              setState(() {
-                                gbtnprogress = true;
-                              });
-                              try {
-                                final result =
-                                    await InternetAddress.lookup('example.com');
-                                if (result.isNotEmpty &&
-                                    result[0].rawAddress.isNotEmpty) {
-                                  print('connected');
-                                  try {
-                                    UserCredential? userCredential =
-                                        await AuthClass()
-                                            .googleSignin(context)
-                                            .onError((error, stackTrace) {
-                                      setState(() {
-                                        gbtnprogress = false;
-                                      });
-                                      return null;
-                                    });
-                                    await registerUser(userCredential)
-                                        .whenComplete(() {
-                                      updateFCMToken();
-                                    });
-                                  } catch (e) {
-                                    setState(() {
-                                      gbtnprogress = false;
-                                    });
-                                    print(e);
-                                  }
-                                }
-                              } on SocketException catch (_) {
-                                setState(() {
-                                  gbtnprogress = false;
-                                });
-                                Fluttertoast.showToast(
-                                    msg:
-                                        "There is no internet connection , please check your internet.");
-                              }
+                              // setState(() {
+                              //   gbtnprogress = true;
+                              // });
+                              // try {
+                              //   final result =
+                              //       await InternetAddress.lookup('example.com');
+                              //   if (result.isNotEmpty &&
+                              //       result[0].rawAddress.isNotEmpty) {
+                              //     print('connected');
+                              //     try {
+                              //       UserCredential? userCredential =
+                              //           await AuthClass()
+                              //               .googleSignin(context)
+                              //               .onError((error, stackTrace) {
+                              //         setState(() {
+                              //           gbtnprogress = false;
+                              //         });
+                              //         return null;
+                              //       });
+                              //       await registerUser(userCredential)
+                              //           .whenComplete(() {
+                              //         updateFCMToken();
+                              //       });
+                              //     } catch (e) {
+                              //       setState(() {
+                              //         gbtnprogress = false;
+                              //       });
+                              //       print(e);
+                              //     }
+                              //   }
+                              // } on SocketException catch (_) {
+                              //   setState(() {
+                              //     gbtnprogress = false;
+                              //   });
+                              //   Fluttertoast.showToast(
+                              //       msg:
+                              //           "There is no internet connection , please check your internet.");
+                              // }
                             },
                             child: Container(
                               height: 45,

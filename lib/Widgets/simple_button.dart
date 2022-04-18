@@ -1,3 +1,4 @@
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,20 +20,26 @@ class _BtnWidgetState extends State<BtnWidget> {
       onTap: () {
         widget.ontap!();
       },
-      child: Container(
-        height: widget.height,
-        width: widget.width,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.yellow[600],
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: Border.all(color: Colors.black87.withOpacity(0.1)),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
         ),
-        padding: const EdgeInsets.all(10),
-        child: Text(
-          "${widget.lable}",
-          style: GoogleFonts.openSans(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
+        child: Container(
+          height: widget.height,
+          width: widget.width,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: CommonConstants.appcolor,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            border: Border.all(color: Colors.black87.withOpacity(0.1)),
+          ),
+          padding: const EdgeInsets.all(10),
+          child: Text(
+            "${widget.lable}",
+            style: GoogleFonts.openSans(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w400),
+          ),
         ),
       ),
     );

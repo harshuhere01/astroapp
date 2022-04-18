@@ -6,7 +6,7 @@ import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Firebase%20Services/firebase_auth_service.dart';
 import 'package:astro/Model/API_Model.dart';
 import 'package:astro/Pages/Drawer%20Pages/Call%20History/callHistoryPage.dart';
-import 'package:astro/Pages/Drawer%20Pages/member_profile_page.dart';
+import 'package:astro/Pages/Drawer%20Pages/login_screen.dart';
 import 'package:astro/Pages/Drawer%20Pages/profile_page.dart';
 import 'package:astro/Pages/add_money_to_wallet.dart';
 import 'package:astro/Pages/call_page.dart';
@@ -21,7 +21,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:socket_io_client/src/darty.dart';
 
@@ -68,7 +67,11 @@ class _HomePageState extends State<HomePage>
     initMessaging();
     socketConnectandGetMembers();
     CommonConstants.socket.on('change_status', (data) {
-      print("change_status :------------------------$data");
+      print("change_status :--------home page1----------$data");
+      getAllMember();
+    });
+    CommonConstants.socket.on('refresh_list', (data) {
+      print("change_status :-----------home page2---------$data");
       getAllMember();
     });
     // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -77,8 +80,9 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    if(mounted){
     CommonConstants.listened = true;
-    _pageController.dispose();
+    _pageController.dispose();}
     super.dispose();
   }
 
@@ -107,9 +111,11 @@ class _HomePageState extends State<HomePage>
     String responseBody = response.body;
     var res = jsonDecode(responseBody);
     if (statusCode == 200) {
-      setState(() {
-        userList = res['data'];
-      });
+      if(mounted) {
+        setState(() {
+          userList = res['data'];
+        });
+      }
       print(userList.toString());
     } else {
       Fluttertoast.showToast(
@@ -117,24 +123,26 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  Future<void> socketConnectToServer() async {
-    try {
-      print("socket connection process started");
-      CommonConstants.socket.connect();
-      CommonConstants.socket.onConnect((data) {
-        setState(() {
-          CommonConstants.socketID = "${CommonConstants.socket.id}";
-        });
-        print("Socket Connection :-:" +
-            CommonConstants.socket.connected.toString());
-      });
-    } catch (e) {
-      print("socket_error:" + e.toString());
-    }
-  }
+  /// ------------------------------- commented on 12-04-
+  // Future<void> socketConnectToServer() async {
+  //   try {
+  //     print("socket connection process started");
+  //     CommonConstants.socket.connect();
+  //     CommonConstants.socket.onConnect((data) {
+  //       setState(() {
+  //         CommonConstants.socketID = "${CommonConstants.socket.id}";
+  //       });
+  //       print("Socket Connection :-:" +
+  //           CommonConstants.socket.connected.toString());
+  //     });
+  //   } catch (e) {
+  //     print("socket_error:" + e.toString());
+  //   }
+  // }
 
   Future<void> socketConnectandGetMembers() async {
-    await socketConnectToServer();
+    /// ------------------------------- commented on 12-04-
+    // await socketConnectToServer();
     await getAllMember();
     print("userID:-${CommonConstants.userID}");
     print("userName:-${CommonConstants.userName}");
@@ -145,10 +153,10 @@ class _HomePageState extends State<HomePage>
     print("userPhoto:-${CommonConstants.userPhoto}");
     print("userCallCharge:-${CommonConstants.userCallCharge}");
     print("userIsMember:-${CommonConstants.userIsMember}");
-
   }
 
   handleNotificationEvents(homeNotifier) {
+    if(mounted){
     AwesomeNotifications().actionStream.listen((receivedNotifiction) async {
       if (receivedNotifiction.buttonKeyPressed == "ACCEPT") {
         homeNotifier.onJoin(context, CommonConstants.joiningchannelName);
@@ -162,8 +170,7 @@ class _HomePageState extends State<HomePage>
         print("Call Rejected from home page");
       }
     });
-  }
-
+  }}
 
   Future<void> initMessaging() async {
     var androidInit =
@@ -209,6 +216,7 @@ class _HomePageState extends State<HomePage>
           CommonConstants.receiverId =
               int.parse(message.data['receiverId'] ?? 0);
           CommonConstants.callerId = int.parse(message.data['callerId'] ?? 0);
+          CommonConstants.callerIdforStatusChange = int.parse(message.data['callerId'] ?? 0);
           CommonConstants.callerSocketId = message.data['socketId'] ?? '';
           CommonConstants.room = int.parse(message.data['receiverId'] ?? 0);
           CommonConstants.calljoinername = message.data['username'] ?? '';
@@ -297,7 +305,7 @@ class _HomePageState extends State<HomePage>
                       CommonConstants.device_height * 0.01,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.yellow[600],
+                      color: CommonConstants.appcolor,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -336,7 +344,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.person, size: 28),
-                    title:  Text(
+                    title: Text(
                       'Profile',
                       style: GoogleFonts.muli(
                           color: Colors.black,
@@ -355,7 +363,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.account_balance_wallet, size: 28),
-                    title:  Text(
+                    title: Text(
                       'Wallet',
                       style: GoogleFonts.muli(
                           color: Colors.black,
@@ -372,7 +380,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   ListTile(
                     leading: const Icon(Icons.history, size: 28),
-                    title:  Text(
+                    title: Text(
                       'History',
                       style: GoogleFonts.muli(
                           color: Colors.black,
@@ -384,14 +392,14 @@ class _HomePageState extends State<HomePage>
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MemberProfilePage(),
+                          builder: (context) => const CallHistoryPage(),
                         ),
                       );
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.logout, size: 28),
-                    title:  Text(
+                    title: Text(
                       'Log Out',
                       style: GoogleFonts.muli(
                           color: Colors.black,
@@ -400,12 +408,13 @@ class _HomePageState extends State<HomePage>
                     ),
                     onTap: () async {
                       changeAvailabilty(CommonConstants.userID, "no");
+                      CommonConstants.socket.emit('user_login_logout');
                       await AuthClass().signOut();
                       Navigator.pop(context);
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (builder) => const LogInPage()),
+                              builder: (builder) => const LoginScreen()),
                           (route) => false);
                     },
                   ),
@@ -418,9 +427,12 @@ class _HomePageState extends State<HomePage>
             actions: [
               IconButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Tapped Search")));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (builder) => const LogInPage(),
+                      ),
+                    );
                   },
                   icon: const Icon(
                     Icons.search,
@@ -428,9 +440,12 @@ class _HomePageState extends State<HomePage>
                   )),
               IconButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Tapped Settings")));
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const MemberProfilePage(),
+                    //   ),
+                    // );
                   },
                   icon: const Icon(
                     Icons.settings,
@@ -492,10 +507,10 @@ class _HomePageState extends State<HomePage>
                             ),
                           )
                         : userList!.isEmpty
-                            ?  Center(
+                            ? Center(
                                 child: Text(
                                 "No members record found !!!",
-                                style:GoogleFonts.muli(color: Colors.black),
+                                style: GoogleFonts.muli(color: Colors.black),
                               ))
                             : CallPage(
                                 userList: userList,
@@ -526,32 +541,69 @@ class _HomePageState extends State<HomePage>
         BuildContext context,
       ) {
         return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
           title: const Text('Exit app'),
           titleTextStyle: GoogleFonts.muli(),
           content: SingleChildScrollView(
             child: ListBody(
-              children:  <Widget>[
-                Text('Are you sure ?',style: GoogleFonts.muli(),),
+              children: <Widget>[
+                Text(
+                  'Do you want to exit?',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.muli(),
+                ),
+                SizedBox(height: CommonConstants.device_height/50,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _build_btn_of_dialogue(
+                      "Yes",
+                      Colors.black,
+                          () {
+                        CommonConstants.socket.dispose();
+                        SystemNavigator.pop();
+                      },
+                    ),
+                    _build_btn_of_dialogue(
+                      "No",
+                      Colors.black,
+                          () {
+                        Navigator.pop(context, false);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: CommonConstants.device_height/50,),
               ],
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child:  Text('Yes',style: GoogleFonts.muli(),),
-              onPressed: () {
-                CommonConstants.socket.dispose();
-                SystemNavigator.pop();
-              },
-            ),
-            TextButton(
-              child:  Text('No',style: GoogleFonts.muli()),
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-            ),
-          ],
+
         );
       },
+    );
+  }
+
+  SizedBox _build_btn_of_dialogue(String btnname, Color color, Function ontap) {
+    return SizedBox(
+      height: CommonConstants.device_height /25,
+      width: CommonConstants.device_width /6,
+      child: ElevatedButton(
+          child: Text(btnname,
+              style:
+                  GoogleFonts.muli(fontSize: CommonConstants.device_height/60, fontWeight: FontWeight.w300)),
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            backgroundColor: MaterialStateProperty.all<Color>(color),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          onPressed: () {
+            ontap();
+          }),
     );
   }
 

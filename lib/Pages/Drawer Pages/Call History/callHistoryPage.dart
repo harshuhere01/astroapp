@@ -70,7 +70,7 @@ class _CallHistoryPageState extends State<CallHistoryPage>
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.yellow[600],
+        backgroundColor:CommonConstants.appcolor,
         title: const Text("Call logs"),
         titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
       ),

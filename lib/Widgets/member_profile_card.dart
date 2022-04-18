@@ -1,47 +1,44 @@
 import 'package:astro/Constant/CommonConstant.dart';
-import 'package:astro/Widgets/rating_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MemberProfileCard extends StatelessWidget {
-  MemberProfileCard(
-      {Key? key,
-      this.imageURL,
-      this.userName,
-      this.designation,
-      this.languages,
-      this.onTapImage,
-      this.experience,
-      this.charge,
-      this.callbtnclick,
-      this.onTapOfTile})
+  MemberProfileCard({Key? key,
+    required this.imageURL,
+    required this.userName,
+    required this.designation,
+    required this.languages,
+    required this.onTapImage,
+    required this.experience,
+    required this.charge,
+    required this.chatMins,
+    required this.callMins,
+    required this.callbtnclick,
+    })
       : super(key: key);
-  String? imageURL;
-  String? userName;
-  String? designation;
-  String? totalnum;
-  String? charge;
-  String? languages;
-  String? experience;
-  Function? onTapImage;
-  Function? onTapOfTile;
-  Function? callbtnclick;
+  String imageURL;
+  String userName;
+  String designation;
+  String charge;
+  String languages;
+  String experience;
+  String chatMins;
+  String callMins;
+  Function onTapImage;
+
+  Function callbtnclick;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
-      child: Container(
+      child: SizedBox(
         height: CommonConstants.device_height / 4,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-        ),
         child: Column(
-         mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Expanded(
-              flex: 3,
+              flex: 5,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,46 +48,40 @@ class MemberProfileCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            onTapImage!();
-                          },
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: ClipOval(
-                              child: FadeInImage(
-                                fit: BoxFit.cover,
-                                width: CommonConstants.device_width / 5.5,
-                                height: CommonConstants.device_width / 5.5,
-                                placeholder:
-                                    const AssetImage("asset/placeholder.png"),
-                                image: NetworkImage("$imageURL"),
-                              ),
+                        Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: ClipOval(
+                            child: FadeInImage(
+                              fit: BoxFit.cover,
+                              width: CommonConstants.device_width / 5.5,
+                              height: CommonConstants.device_width / 5.5,
+                              placeholder:
+                              const AssetImage("asset/placeholder.png"),
+                              image: NetworkImage("$imageURL"),
                             ),
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: CommonConstants.device_width / 28,
+                              horizontal: CommonConstants.device_width / 20,
                               vertical: CommonConstants.device_width / 60),
                           child: InkWell(
                             onTap: () {},
                             child: Container(
                               height: CommonConstants.device_width / 17,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xFFFdd835),
-                                  //  Colors.yellow[600]
+                              decoration:  BoxDecoration(
+                                  color: CommonConstants.appcolor,
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(8))),
+                                  BorderRadius.all(Radius.circular(8))),
                               child: Center(
                                 child: Text(
                                   'Follow',
                                   style: GoogleFonts.muli(
                                       color: Colors.black,
                                       fontSize:
-                                          CommonConstants.device_width / 38,
+                                      CommonConstants.device_width / 38,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -103,7 +94,8 @@ class MemberProfileCard extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: Padding(
-                      padding:  EdgeInsets.only(left: CommonConstants.device_width/100),
+                      padding: EdgeInsets.only(
+                          left: CommonConstants.device_width / 100),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,20 +107,20 @@ class MemberProfileCard extends StatelessWidget {
                               Text("$userName",
                                   style: GoogleFonts.openSans(
                                       color: Colors.black,
-                                      fontSize: 15,
+                                      fontSize: CommonConstants.device_height/50,
                                       fontWeight: FontWeight.bold)),
                               Text("$designation",
                                   style: GoogleFonts.openSans(
-                                      color: Colors.black, fontSize: 10)),
+                                      color: Colors.black, fontSize: CommonConstants.device_height/70)),
                               Text("$languages",
                                   style: GoogleFonts.openSans(
-                                      color: Colors.black, fontSize: 10)),
-                              Text("$experience",
+                                      color: Colors.black, fontSize: CommonConstants.device_height/70)),
+                              Text("Exp. $experience",
                                   style: GoogleFonts.openSans(
-                                      color: Colors.black, fontSize: 10)),
+                                      color: Colors.black, fontSize: CommonConstants.device_height/70)),
                               Text("$charge",
                                   style: GoogleFonts.openSans(
-                                      color: Colors.black87, fontSize: 12)),
+                                      color: Colors.black87, fontSize: CommonConstants.device_height/60)),
                             ],
                           ),
                           Row(
@@ -146,6 +138,7 @@ class MemberProfileCard extends StatelessWidget {
                                 size: 25,
                                 color: Colors.green,
                               ),
+                              SizedBox(width: CommonConstants.device_width/30,)
                             ],
                           )
                         ],
@@ -160,54 +153,56 @@ class MemberProfileCard extends StatelessWidget {
               thickness: 1,
             ),
             Expanded(
-
+                flex:2,
                 child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const Icon(Icons.question_answer_outlined),
-                    Row(
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '19K',
-                          style: GoogleFonts.muli(fontWeight: FontWeight.bold),
-                        ),
-                         SizedBox(
-                          width: CommonConstants.device_width/100,
-                        ),
-                        Text(
-                          'mins',
-                          style: GoogleFonts.muli(),
-                        ),
+                        const Icon(Icons.question_answer_outlined),
+                        Row(
+                          children: [
+                            Text(
+                              chatMins,
+                              style: GoogleFonts.muli(fontWeight: FontWeight
+                                  .bold),
+                            ),
+                            SizedBox(
+                              width: CommonConstants.device_width / 100,
+                            ),
+                            Text(
+                              'mins',
+                              style: GoogleFonts.muli(),
+                            ),
+                          ],
+                        )
                       ],
-                    )
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.call),
-                    Row(
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '18',
-                          style: GoogleFonts.muli(fontWeight: FontWeight.bold),
-                        ),
-                         SizedBox(
-                          width: CommonConstants.device_width/100,
-                        ),
-                        Text(
-                          'mins',
-                          style: GoogleFonts.muli(),
-                        ),
+                        const Icon(Icons.call),
+                        Row(
+                          children: [
+                            Text(
+                              callMins,
+                              style: GoogleFonts.muli(fontWeight: FontWeight
+                                  .bold),
+                            ),
+                            SizedBox(
+                              width: CommonConstants.device_width / 100,
+                            ),
+                            Text(
+                              'mins',
+                              style: GoogleFonts.muli(),
+                            ),
+                          ],
+                        )
                       ],
-                    )
+                    ),
                   ],
-                ),
-              ],
-            )),
+                )),
           ],
         ),
       ),

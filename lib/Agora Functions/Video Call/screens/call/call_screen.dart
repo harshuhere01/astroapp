@@ -181,7 +181,7 @@ class _CallScreenState extends State<CallScreen> {
                           horizontal: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.yellowAccent,
+                          color:CommonConstants.appcolor,
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Text(
@@ -205,11 +205,13 @@ class _CallScreenState extends State<CallScreen> {
       CommonConstants.socket.emit('call-disconnected', {
         "id": CommonConstants.socketID,
         "room": CommonConstants.room,
+        "userId": CommonConstants.callerIdforStatusChange,
         "isCallNotConnected": false,
       });
       setState(() {
         CommonConstants.isCallConnected = false;
       });
+      print('userID:::::::::: :- ${CommonConstants.callerIdforStatusChange}');
 
     } else {
       CommonConstants.socket.emit('call-disconnected', {
@@ -269,7 +271,7 @@ class _CallScreenState extends State<CallScreen> {
             CommonConstants.socket.emit('leave_room', CommonConstants.room);
             await updateDuration(CommonConstants.memberCallLogId, data ?? '');
             print("========== on call_disconnected_manually ====");
-
+            print('userID:::::::::: :- ${CommonConstants.callerIdforStatusChange}');
           }
         });
 
@@ -284,7 +286,7 @@ class _CallScreenState extends State<CallScreen> {
             CommonConstants.socket.emit('leave_room', CommonConstants.room);
             await updateDuration(CommonConstants.memberCallLogId, data ?? '');
             print("========== on balance_not_ok ====");
-
+            print('userID:::::::::: :- ${CommonConstants.callerIdforStatusChange}');
           }
         });
 

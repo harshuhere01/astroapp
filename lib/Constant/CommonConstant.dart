@@ -5,7 +5,8 @@ class CommonConstants {
 
   ///colors
 
-  static Color? appcolor = Colors.yellow[600];
+  static Color appcolor = Color(0xFFFFEA00);
+  // static Color? appcolor1 = Colors.yellowAccent;
 
   static double device_width = 0;
   static double device_height = 0;
@@ -22,6 +23,7 @@ class CommonConstants {
   static late int receiverIdforSendNotification ;
   static late int receiverId ;
   static late int callerId ;
+  static late int callerIdforStatusChange ;
   static String callerSocketId ='' ;
   static late int room ;
   static String joiningchannelName = '';

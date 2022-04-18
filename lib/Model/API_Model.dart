@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/agora_variables.dart';
 import 'package:astro/Constant/api_constant.dart';
+import 'package:astro/Model/get_single_user_api_model.dart';
 import 'package:http/http.dart';
 
 class API {
@@ -31,7 +32,7 @@ class API {
     return response;
   }
 
-  Future<Response> getSingelUser(id) async {
+  Future<GetSingleUserDetailsModel> getSingelUser(id) async {
     final uri =
     Uri.parse(APIConstants.baseURL + APIConstants.getSingelUser + "/$id");
     final headers = {
@@ -42,7 +43,7 @@ class API {
       uri,
       headers: headers,
     );
-    return response;
+    return GetSingleUserDetailsModel.fromJson(jsonDecode(response.body));
   }
 
   Future<Response> getBalance(id) async {
@@ -248,7 +249,9 @@ class API {
       String callRate,
       String achievements,
       String socialmediaLink,
-      String aboutMe,) async {
+      String aboutMe,
+      String languages,
+      String experience,) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.updateUser);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
@@ -264,6 +267,8 @@ class API {
       "achievements": achievements,
       "social_media_link": socialmediaLink,
       "about_me": aboutMe,
+      "languages": languages,
+      "experience": experience,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');
@@ -282,7 +287,10 @@ class API {
       String socialMediaLink,
       String aboutMe,
       String achievements,
-      String status,) async {
+      String status,
+      String languages,
+      String experience,
+      ) async {
     final uri = Uri.parse(APIConstants.baseURL + APIConstants.createMember);
     final headers = {'Content-Type': 'application/json'};
     Map<String, dynamic> body = {
@@ -291,7 +299,9 @@ class API {
       "social_media_link": socialMediaLink,
       "about_me": aboutMe,
       "achievements": achievements,
-      "status": status
+      "status": status,
+      "languages" : languages,
+      "experience" : experience,
     };
     String jsonBody = json.encode(body);
     final encoding = Encoding.getByName('utf-8');

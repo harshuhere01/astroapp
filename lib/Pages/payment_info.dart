@@ -75,7 +75,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Payment Information"),
-          backgroundColor: Colors.yellow[600],
+          backgroundColor:CommonConstants.appcolor,
           titleTextStyle: GoogleFonts.openSans(color: Colors.black, fontSize: 18),
           iconTheme: const IconThemeData(
             color: Colors.black,

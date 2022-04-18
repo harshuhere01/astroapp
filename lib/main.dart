@@ -4,6 +4,7 @@ import 'package:astro/Pages/splash_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -52,7 +53,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: HomeNotifier()),
         ChangeNotifierProvider.value(value: CallNotifier()),
       ],
-      child: MaterialApp(
+      child: GetMaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
@@ -62,3 +63,8 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// flutter_icons:
+// image_path: "asset/app_logo1.png"
+// android: true
+// ios: true

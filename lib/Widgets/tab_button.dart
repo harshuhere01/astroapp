@@ -1,3 +1,4 @@
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -34,7 +35,7 @@ class TabButton extends StatelessWidget {
                 color:
                     selectedPage == pageNumber ? Colors.black12 : Colors.white),
             color:
-                selectedPage == pageNumber ? Colors.yellow[600] : Colors.white,
+                selectedPage == pageNumber ? CommonConstants.appcolor : Colors.white,
             borderRadius: const BorderRadius.all(Radius.circular(2)),
           ),
           child: Text(

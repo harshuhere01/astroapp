@@ -1,15 +1,12 @@
-import 'package:astro/main.dart';
+import 'package:astro/Constant/CommonConstant.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AboutMe extends StatelessWidget {
-   AboutMe({Key? key}) : super(key: key);
+  AboutMe({Key? key,required this.aboutMe}) : super(key: key);
 
-  String aboutMe =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
-
+  String aboutMe ;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +19,21 @@ class AboutMe extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(aboutMe, maxLines: 3, style: GoogleFonts.muli()),
+                  Center(
+                    child: Text(
+                      "About me",
+                      softWrap: true,
+                      style: GoogleFonts.muli(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                          fontSize: CommonConstants.device_height / 45),
+                    ),
+                  ),
+                  Text(aboutMe,
+                      maxLines: 3,
+                      style: GoogleFonts.muli(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600])),
                 ],
               ),
             ),
@@ -34,10 +45,23 @@ class AboutMe extends StatelessWidget {
         padding: EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children:  [
+          children: [
+            Center(
+              child: Text(
+                "About me",
+                softWrap: true,
+                style: GoogleFonts.muli(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: CommonConstants.device_height / 45),
+              ),
+            ),
             Text(
               aboutMe,
               softWrap: true,
+                style: GoogleFonts.muli(
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey[600])
             ),
           ],
         ),
@@ -46,42 +70,65 @@ class AboutMe extends StatelessWidget {
 
     return ExpandableNotifier(
         child: ScrollOnExpand(
-          child: Card(
-            elevation: 5,
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Card(
+        elevation: 5,
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expandable(
+              collapsed: buildCollapsed1(),
+              expanded: buildExpanded1(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Expandable(
-                  collapsed: buildCollapsed1(),
-                  expanded: buildExpanded1(),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Builder(
-                      builder: (context) {
-                        var controller =
+                Builder(
+                  builder: (context) {
+                    var controller =
                         ExpandableController.of(context, required: true)!;
-                        return TextButton(
-                          child: Text(
-                            controller.expanded ? "COLLAPSE" : "EXPAND",
-                            style: Theme.of(context)
-                                .textTheme
-                                .button!
-                                .copyWith(color: Colors.deepPurple),
+                    return controller.expanded ? const SizedBox() : Padding(
+                      padding: EdgeInsets.only(
+                          bottom: CommonConstants.device_height / 100),
+                      child: InkWell(
+                        onTap: () {
+                          controller.toggle();
+                        },
+                        child: Container(
+                          height: CommonConstants.device_height / 32,
+                          width: CommonConstants.device_width / 4,
+                          decoration: BoxDecoration(
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                blurRadius: 1,
+                              ),
+                            ],
+                            color: Colors.white,
+                            border:
+                                Border.all(color: Colors.black45, width: 0.5),
+                            borderRadius: BorderRadius.all(Radius.circular(
+                                CommonConstants.device_width / 8)),
                           ),
-                          onPressed: () {
-                            controller.toggle();
-                          },
-                        );
-                      },
-                    ),
-                  ],
+                          child: Center(
+                            child: Text(
+                                controller.expanded ? "COLLAPSE" : "Read More",
+                                style: GoogleFonts.muli(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize:
+                                        CommonConstants.device_width / 30)),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    ));
   }
 }

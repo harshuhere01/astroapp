@@ -76,6 +76,7 @@ class UserListTile extends StatelessWidget {
                     // ),
                     ),
                 StarRating(
+                  alignStart: false,
                   color: Colors.black,
                   rating: 5,
                   starCount: 5,
@@ -133,15 +134,15 @@ class UserListTile extends StatelessWidget {
                         children: [
                           IconButton(
                             onPressed: () {},
-                            icon: const Icon(
+                            icon:  Icon(
                               Icons.notifications,
-                              size: 25,
+                              size: CommonConstants.device_height/35,
                               color: Colors.grey,
                             ),
                           ),
-                          const Icon(
+                           Icon(
                             Icons.verified,
-                            size: 25,
+                            size: CommonConstants.device_height/35,
                             color: Colors.green,
                           ),
                         ],
@@ -153,18 +154,15 @@ class UserListTile extends StatelessWidget {
                             width: CommonConstants.device_width/5,
                             child: TextButton(
                               child:  Text("Call",
-                                  style: GoogleFonts.openSans(fontSize: 14)),
+                                  style: GoogleFonts.openSans(fontSize: CommonConstants.device_height/52)),
                               style: ButtonStyle(
-                                  padding:
-                                      MaterialStateProperty.all<EdgeInsets>(
-                                          const EdgeInsets.all(10)),
                                   foregroundColor:
                                       btncolor,
                                   shape: MaterialStateProperty.all<
                                           RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(10.0),
+                                              BorderRadius.circular(CommonConstants.device_height/80),
                                           side:  BorderSide(
                                               color: btnbordercolor)))),
                               onPressed: () {
@@ -175,7 +173,7 @@ class UserListTile extends StatelessWidget {
                           Text(
                             "$waitingstatus",
                             style: GoogleFonts.openSans(
-                                color: Colors.red, fontSize: 10),
+                                color: Colors.red, fontSize: CommonConstants.device_height/80),
                           )
                         ],
                       )

@@ -1,6 +1,5 @@
 import 'package:astro/Constant/CommonConstant.dart';
 import 'package:astro/Constant/review_list.dart';
-import 'package:astro/Model/get_single_user_api_model.dart';
 import 'package:astro/Widgets/expandable_container.dart';
 import 'package:astro/Widgets/member_profile_card.dart';
 import 'package:astro/Widgets/rating_bar.dart';
@@ -10,39 +9,104 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-class MemberProfilePage extends StatefulWidget {
-  MemberProfilePage({
-    Key? key,
-    required this.detailModel,
-    // required this.callRate,
-    // required this.userName,
-    // required this.designation,
-    // required this.experience,
-    // required this.imageURL,
-    // required this.aboutme,
-    // required this.callMins,
-    // required this.chatMins,
-    // required this.languages,
-  }) : super(key: key);
-  // String callRate;
-  // String imageURL;
-  // String userName;
-  // String languages;
-  // String experience;
-  // String designation;
-  // String aboutme;
-  // String callMins;
-  // String chatMins;
-  GetSingleUserDetailsModel detailModel;
+class SHowOnlyMemberProfilePage extends StatefulWidget {
+  SHowOnlyMemberProfilePage(
+      {Key? key,
+        required this.callRate,
+        required this.userName,
+        required this.designation,
+        required this.experience,
+        required this.imageURL,
+        required this.aboutme,
+        required this.callMins,
+        required this.chatMins,
+        required this.languages})
+      : super(key: key);
+  String callRate;
+  String imageURL;
+  String userName;
+  String languages;
+  String experience;
+  String designation;
+  String aboutme;
+  String callMins;
+  String chatMins;
 
   @override
-  State<MemberProfilePage> createState() => _MemberProfilePageState();
+  State<SHowOnlyMemberProfilePage> createState() => _SHowOnlyMemberProfilePageState();
 }
 
-class _MemberProfilePageState extends State<MemberProfilePage> {
+class _SHowOnlyMemberProfilePageState extends State<SHowOnlyMemberProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: CommonConstants.appcolor,
+        title: const Text("Profile"),
+        titleTextStyle: GoogleFonts.muli(color: Colors.black, fontSize: 18),
+        actions: [
+          InkWell(
+            onTap: () {},
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                  vertical: CommonConstants.device_height / 55),
+              padding: EdgeInsets.symmetric(
+                  horizontal: CommonConstants.device_width / 30),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(CommonConstants.device_height / 100),
+                ),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Icon(
+                      Icons.whatsapp_rounded,
+                      color: Colors.green,
+                      size: 17,
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      'Share',
+                      style: GoogleFonts.muli(
+                          color: Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          PopupMenuButton(
+              icon: const Icon(Icons.more_vert, color: Colors.black),
+              // add this line
+              itemBuilder: (_) => [
+                PopupMenuItem(
+
+                    child: SizedBox(
+                      height: 20,
+                      child: Text(
+                        "Report and Block",
+                        style: GoogleFonts.muli(color: Colors.black),
+                      ),
+                    ),
+                    value: 'Report and Block'),
+              ],
+              onSelected: (index) async {
+                switch (index) {
+                  case 'Report and Block':
+                    Fluttertoast.showToast(msg: 'Reported');
+                    break;
+                }
+              })
+        ],
+      ),
       bottomNavigationBar: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: CommonConstants.device_width / 200),
@@ -66,7 +130,7 @@ class _MemberProfilePageState extends State<MemberProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    'Chat with ${widget.detailModel.data!.name??''}',
+                    'Chat with ${widget.userName}',
                     style: GoogleFonts.muli(
                       color: Colors.black,
                       fontWeight: FontWeight.w700,
@@ -77,7 +141,7 @@ class _MemberProfilePageState extends State<MemberProfilePage> {
                     width: CommonConstants.device_width / 50,
                   ),
                   Text(
-                    "₹ ${widget.detailModel.data!.callRate??'0'}/min",
+                    "₹ ${widget.callRate}/min",
                     style: GoogleFonts.muli(
                       color: Colors.black,
                       fontWeight: FontWeight.w300,
@@ -94,14 +158,14 @@ class _MemberProfilePageState extends State<MemberProfilePage> {
                   _buildButton(
                     'Chat',
                     Icons.question_answer_outlined,
-                    () {},
+                        () {},
                     Colors.green,
                     Colors.green,
                   ),
                   _buildButton(
                     'Call',
                     Icons.call,
-                    () {},
+                        () {},
                     Colors.grey[600],
                     Colors.grey[600],
                   )
@@ -135,22 +199,22 @@ class _MemberProfilePageState extends State<MemberProfilePage> {
               height: CommonConstants.device_height / 200,
             ),
             MemberProfileCard(
-              callMins: widget.detailModel.data!.totalCallMinute??'0',
-              chatMins: widget.detailModel.data!.totalChatMinute??'0',
-              imageURL: widget.detailModel.data!.photo??'',
-              userName: widget.detailModel.data!.name??'',
-              charge: "₹ ${widget.detailModel.data!.callRate??'0'}/min",
-              experience: widget.detailModel.data!.experience??'0',
-              languages: widget.detailModel.data!.languages??'',
-              designation: 'Astrologer',
-              callbtnclick: () {},
-              onTapImage: () {},
+              callMins: widget.callMins,
+              chatMins: widget.chatMins,
+              imageURL: widget.imageURL,
+              userName: widget.userName,
+              charge: "₹ ${widget.callRate}/min",
+              experience: widget.experience,
+              languages: widget.languages,
+              designation: widget.designation,
+              callbtnclick: (){},
+              onTapImage: (){},
             ),
             ListView(
               shrinkWrap: true,
               physics: const BouncingScrollPhysics(),
               children: [
-                AboutMe(aboutMe: widget.detailModel.data!.aboutMe??''),
+                AboutMe(aboutMe: widget.aboutme),
               ],
             ),
             _buildAvailabilityContainer(() {
@@ -365,25 +429,25 @@ class _MemberProfilePageState extends State<MemberProfilePage> {
 
   text(
       {required String value,
-      required double textSize,
-      required Color textColor,
-      required FontWeight fontWeight,
-      FontStyle fontStyle = FontStyle.normal}) {
+        required double textSize,
+        required Color textColor,
+        required FontWeight fontWeight,
+        FontStyle fontStyle = FontStyle.normal}) {
     return Container(
         child: Text(
-      value,
-      style: GoogleFonts.muli(
-          fontSize: textSize,
-          color: textColor,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle),
-    ));
+          value,
+          style: GoogleFonts.muli(
+              fontSize: textSize,
+              color: textColor,
+              fontWeight: fontWeight,
+              fontStyle: fontStyle),
+        ));
   }
 
   rating(String value, Color? color, double percentage) {
     return Padding(
       padding:
-          EdgeInsets.symmetric(vertical: CommonConstants.device_height / 200),
+      EdgeInsets.symmetric(vertical: CommonConstants.device_height / 200),
       child: LinearPercentIndicator(
         leading: text(
             value: value,
